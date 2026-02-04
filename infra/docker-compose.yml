@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: familytask-postgres
+    environment:
+      POSTGRES_DB: familytask
+      POSTGRES_USER: familytask_user
+      POSTGRES_PASSWORD: Cenfo2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
