@@ -26,7 +26,7 @@ public class UserService {
     }
 
     /**
-     * Lista todos los usuarios del sistema.
+     * Lista todos los users
      */
     public List<LoginResponse.UserInfo> getAllUsers() {
         return userRepository.findAll().stream()
@@ -36,13 +36,12 @@ public class UserService {
 
     /**
      * Mapea la entidad User al DTO UserInfo.
-     * Método privado reutilizable — evita exponer datos internos.
      */
     private LoginResponse.UserInfo mapToUserInfo(User user) {
         return LoginResponse.UserInfo.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .name(user.getName())
+                .displayName(user.getDisplayName())
                 .pictureUrl(user.getPictureUrl())
                 .role(user.getRole().getName().name())
                 .build();
