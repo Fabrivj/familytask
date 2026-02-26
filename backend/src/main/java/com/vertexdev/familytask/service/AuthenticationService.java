@@ -90,7 +90,7 @@ public class AuthenticationService {
             User user = userRepository.findByGoogleId(googleId)
                     .map(existingUser -> {
                         // Usuario existe → actualizar datos
-                        existingUser.setName(userName);
+                        existingUser.setDisplayName(userName);
                         existingUser.setPictureUrl(pictureUrl);
                         existingUser.setLastLogin(LocalDateTime.now());
                         log.info("Usuario existente actualizado: {}", email);
@@ -106,7 +106,7 @@ public class AuthenticationService {
                         User newUser = User.builder()
                                 .googleId(googleId)
                                 .email(email)
-                                .name(userName)
+                                .displayName(userName)
                                 .pictureUrl(pictureUrl)
                                 .role(parentRole)
                                 .lastLogin(LocalDateTime.now())
@@ -126,7 +126,7 @@ public class AuthenticationService {
                     .user(LoginResponse.UserInfo.builder()
                             .id(user.getId())
                             .email(user.getEmail())
-                            .name(user.getName())
+                            .displayName(user.getDisplayName())
                             .pictureUrl(user.getPictureUrl())
                             .role(user.getRole().getName().name())
                             .build())

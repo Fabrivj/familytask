@@ -1,6 +1,5 @@
 package com.vertexdev.familytask.model;
 
-import com.vertexdev.familytask.model.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,7 +31,7 @@ public class User implements UserDetails {
     private String email;
 
     @Column(nullable = false)
-    private String name;
+    private String displayName;
 
     @Column(name = "picture_url")
     private String pictureUrl;
@@ -55,6 +54,12 @@ public class User implements UserDetails {
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
