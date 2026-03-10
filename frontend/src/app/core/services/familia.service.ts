@@ -3,22 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export interface CrearFamiliaRequest {
-  nombre: string;
+export interface CreateFamilyRequest {
+  name: string;
 }
 
-export interface FamiliaResponse {
+export interface FamilyResponse {
   id: number;
-  nombre: string;
-  rol: string;
+  name: string;
+  role: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class FamiliaService {
   constructor(private http: HttpClient) {}
 
-  crear(request: CrearFamiliaRequest): Observable<FamiliaResponse> {
-    return this.http.post<FamiliaResponse>(
+  crear(request: CreateFamilyRequest): Observable<FamilyResponse> {
+    return this.http.post<FamilyResponse>(
       `${environment.apiUrl}/familias`,
       request
     );

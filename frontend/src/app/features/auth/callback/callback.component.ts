@@ -87,14 +87,14 @@ export class CallbackComponent implements OnInit {
   }
 
   private redirigirPorContexto(authResponse: any): void {
-    const familias = authResponse.familias ?? [];
+    const families = authResponse.families ?? [];
 
-    if (familias.length === 0) {
+    if (families.length === 0) {
       // Sin familia → pantalla de creación/espera
       this.router.navigate(['/familia/nueva']);
-    } else if (familias.length === 1) {
+    } else if (families.length === 1) {
       // Una sola familia → ir al dashboard directamente
-      this.authService.setFamiliaActiva(familias[0].familiaId);
+      this.authService.setFamiliaActiva(families[0].familyId);
       this.router.navigate(['/dashboard']);
     } else {
       // Varias familias → selección

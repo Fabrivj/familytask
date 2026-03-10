@@ -1,6 +1,6 @@
 package com.vertexdev.familytask.model;
 
-import com.vertexdev.familytask.model.enums.Rol;
+import com.vertexdev.familytask.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -9,13 +9,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "invitaciones")
+@Table(name = "invitations")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Invitacion {
+public class Invitation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,23 +24,23 @@ public class Invitacion {
     @Column(nullable = false, unique = true)
     private UUID token;
 
-    @Column(name = "email_invitado", nullable = false)
-    private String emailInvitado;
+    @Column(name = "invited_email", nullable = false)
+    private String invitedEmail;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Rol rol;
+    private Role role;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "familia_id", nullable = false)
-    private Familia familia;
+    @JoinColumn(name = "family_group_id", nullable = false)
+    private FamilyGroup familyGroup;
 
-    @Column(name = "fecha_expiracion", nullable = false)
-    private LocalDateTime fechaExpiracion;
+    @Column(name = "expirationDate", nullable = false)
+    private LocalDateTime expirationDate;
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean usado = false;
+    private Boolean isUsed = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

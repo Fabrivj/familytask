@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CrearInvitacionRequest,
-  InvitacionResponse,
-  ProcesarInvitacionRequest,
+  CreateInviteRequest,
+  InviteResponse,
+  ProcessInviteRequest,
 } from '../models/invitacion.model';
 
 @Injectable({ providedIn: 'root' })
@@ -15,14 +15,14 @@ export class InvitacionService {
 
   constructor(private http: HttpClient) {}
 
-  crear(request: CrearInvitacionRequest): Observable<InvitacionResponse> {
-    return this.http.post<InvitacionResponse>(
+  crear(request: CreateInviteRequest): Observable<InviteResponse> {
+    return this.http.post<InviteResponse>(
       `${environment.apiUrl}/invitaciones`,
       request
     );
   }
 
-  procesar(request: ProcesarInvitacionRequest): Observable<void> {
+  procesar(request: ProcessInviteRequest): Observable<void> {
     return this.http.post<void>(
       `${environment.apiUrl}/invitaciones/procesar`,
       request

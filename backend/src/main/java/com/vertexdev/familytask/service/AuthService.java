@@ -2,9 +2,9 @@ package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.config.JwtUtil;
 import com.vertexdev.familytask.dto.auth.AuthResponse;
-import com.vertexdev.familytask.model.Usuario;
-import com.vertexdev.familytask.repository.FamiliaMiembroRepository;
-import com.vertexdev.familytask.repository.UsuarioRepository;
+import com.vertexdev.familytask.model.User;
+import com.vertexdev.familytask.repository.FamilyMemberRepository;
+import com.vertexdev.familytask.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,8 +19,8 @@ import java.util.Map;
 public class AuthService {
 
     private final GoogleAuthService googleAuthService;
-    private final UsuarioRepository usuarioRepository;
-    private final FamiliaMiembroRepository familiaMiembroRepository;
+    private final UserRepository userRepository;
+    private final FamilyMemberRepository familyMemberRepository;
     private final JwtUtil jwtUtil;
 
     /**
@@ -41,49 +41,49 @@ public class AuthService {
             throw new RuntimeException("No se pudo obtener el correo desde Google");
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(email).orElseGet(() -> {
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
             log.info("Nuevo usuario registrado: {}", email);
-            return usuarioRepository.save(
-                    Usuario.builder()
+            return userRepository.save(
+                    User.builder()
                             .googleId(googleId)
                             .email(email)
-                            .nombre(nombre)
-                            .fotoPerfil(foto)
+                            .name(nombre)
+                            .pictureUrl(foto)
                             .build()
             );
         });
 
-        if (!googleId.equals(usuario.getGoogleId())) {
-            usuario.setGoogleId(googleId);
-            usuarioRepository.save(usuario);
+        if (!googleId.equals(user.getGoogleId())) {
+            user.setGoogleId(googleId);
+            userRepository.save(user);
         }
 
-        String jwt = jwtUtil.generateToken(usuario.getEmail(), usuario.getId());
+        String jwt = jwtUtil.generateToken(user.getEmail(), user.getId());
 
-        return buildAuthResponse(usuario, jwt);
+        return buildAuthResponse(user, jwt);
     }
 
-    public AuthResponse getMe(Usuario usuario) {
-        return buildAuthResponse(usuario, null);
+    public AuthResponse getMe(User user) {
+        return buildAuthResponse(user, null);
     }
 
-    private AuthResponse buildAuthResponse(Usuario usuario, String token) {
-        List<AuthResponse.FamiliaResumen> familias = familiaMiembroRepository
-                .findByUsuarioIdAndActivoTrue(usuario.getId())
+    private AuthResponse buildAuthResponse(User user, String token) {
+        List<AuthResponse.FamilySummary> families = familyMemberRepository
+                .findByUserIdAndIsActiveTrue(user.getId())
                 .stream()
-                .map(m -> AuthResponse.FamiliaResumen.builder()
-                        .familiaId(m.getFamilia().getId())
-                        .familiaNombre(m.getFamilia().getNombre())
-                        .rol(m.getRol().name())
+                .map(m -> AuthResponse.FamilySummary.builder()
+                        .familyId(m.getFamilyGroup().getId())
+                        .familyName(m.getFamilyGroup().getNombre())
+                        .role(m.getRole().name())
                         .build())
                 .toList();
 
         return AuthResponse.builder()
                 .token(token)
-                .email(usuario.getEmail())
-                .nombre(usuario.getNombre())
-                .fotoPerfil(usuario.getFotoPerfil())
-                .familias(familias)
+                .email(user.getEmail())
+                .name(user.getName())
+                .pictureUrl(user.getPictureUrl())
+                . families(families)
                 .build();
     }
 }

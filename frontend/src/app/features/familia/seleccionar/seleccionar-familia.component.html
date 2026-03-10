@@ -5,11 +5,11 @@
     <p>Perteneces a más de una familia. ¿Con cuál quieres trabajar hoy?</p>
 
     <div class="familias-list">
-      @for (familia of familias(); track familia.familiaId) {
-        <button class="familia-item" (click)="seleccionar(familia.familiaId)">
+      @for (familia of familias(); track familia.familyId) {
+        <button class="familia-item" (click)="seleccionar(familia.familyId)">
           <div class="familia-info">
-            <strong>{{ familia.familiaNombre }}</strong>
-            <span>{{ familia.rol === 'PADRE_TUTOR' ? '👑 Padre/Tutor' : '👦 Hijo' }}</span>
+            <strong>{{ familia.familyName }}</strong>
+            <span>{{ familia.role === 'PARENT' ? '👑 Padre/Tutor' : '👦 Hijo' }}</span>
           </div>
           <span class="arrow">→</span>
         </button>

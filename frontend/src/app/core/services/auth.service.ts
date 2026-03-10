@@ -2,7 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, UsuarioSesion, FamiliaResumen } from '../models/auth.model';
+import { AuthResponse, UserSession, FamilySummary } from '../models/auth.model';
 import { Observable, tap, map } from 'rxjs';
 
 const SESSION_KEY = 'ft_session';
@@ -10,12 +10,12 @@ const SESSION_KEY = 'ft_session';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private readonly _sesion = signal<UsuarioSesion | null>(this.cargarSesionGuardada());
+  private readonly _sesion = signal<UserSession | null>(this.cargarSesionGuardada());
 
   // Signal público de solo lectura
   readonly sesion = this._sesion.asReadonly();
   readonly estaAutenticado = computed(() => this._sesion() !== null);
-  readonly familias = computed(() => this._sesion()?.familias ?? []);
+  readonly families = computed(() => this._sesion()?.families ?? []);
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -50,14 +50,14 @@ export class AuthService {
   }
 
   getFamiliaActivaId(): number | null {
-    return this._sesion()?.familiaActivaId ?? null;
+    return this._sesion()?.activeFamilyId ?? null;
   }
 
   setFamiliaActiva(familiaId: number): void {
     const sesionActual = this._sesion();
     if (!sesionActual) return;
 
-    const actualizada: UsuarioSesion = { ...sesionActual, familiaActivaId: familiaId };
+    const actualizada: UserSession = { ...sesionActual, activeFamilyId: familiaId };
     this._sesion.set(actualizada);
     localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
   }
@@ -71,18 +71,18 @@ export class AuthService {
 
   // ─── Internos ────────────────────────────────────────────────────────────────
   private guardarSesion(response: AuthResponse): void {
-    const sesion: UsuarioSesion = { ...response };
+    const sesion: UserSession = { ...response };
     this._sesion.set(sesion);
     localStorage.setItem(SESSION_KEY, JSON.stringify(sesion));
   }
 
-  agregarFamilia(familia: FamiliaResumen): void {
+  agregarFamilia(familia: FamilySummary): void {
     const sesionActual = this._sesion();
     if (!sesionActual) return;
 
-    const actualizada: UsuarioSesion = {
+    const actualizada: UserSession = {
       ...sesionActual,
-      familias: [...sesionActual.familias, familia],
+      families: [...sesionActual.families, familia],
     };
     this._sesion.set(actualizada);
     localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
@@ -93,9 +93,9 @@ export class AuthService {
       tap(response => {
         const sesionActual = this._sesion();
         if (!sesionActual) return;
-        const actualizada: UsuarioSesion = {
+        const actualizada: UserSession = {
           ...sesionActual,
-          familias: response.familias,
+          families: response.families,
         };
         this._sesion.set(actualizada);
         localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
@@ -104,7 +104,7 @@ export class AuthService {
     );
   }
 
-  private cargarSesionGuardada(): UsuarioSesion | null {
+  private cargarSesionGuardada(): UserSession | null {
     try {
       const raw = localStorage.getItem(SESSION_KEY);
       return raw ? JSON.parse(raw) : null;

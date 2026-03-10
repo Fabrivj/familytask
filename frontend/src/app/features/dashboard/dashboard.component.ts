@@ -15,7 +15,7 @@ export class DashboardComponent {
 
   // Formulario de invitación
   emailInvitado = '';
-  rolSeleccionado: 'PADRE_TUTOR' | 'HIJO' = 'HIJO';
+  rolSeleccionado: 'PARENT' | 'CHILD' = 'CHILD';
   readonly cargandoInvitacion = signal(false);
   readonly linkGenerado = signal('');
   readonly errorInvitacion = signal('');
@@ -48,12 +48,12 @@ export class DashboardComponent {
     this.errorInvitacion.set('');
 
     this.invitacionService.crear({
-      emailInvitado: this.emailInvitado.trim(),
-      rol: this.rolSeleccionado,
-      familiaId,
+      invitedEmail: this.emailInvitado.trim(),
+      role: this.rolSeleccionado,
+      familyId: familiaId,
     }).subscribe({
       next: (response) => {
-        this.linkGenerado.set(response.linkInvitacion);
+        this.linkGenerado.set(response.inviteLink);
         this.cargandoInvitacion.set(false);
       },
       error: (err) => {

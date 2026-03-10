@@ -1,22 +1,22 @@
-export interface FamiliaResumen {
-  familiaId: number;
-  familiaNombre: string;
-  rol: 'PADRE_TUTOR' | 'HIJO';
+export interface FamilySummary {
+  familyId: number;
+  familyName: string;
+  role: 'PARENT' | 'CHILD';
 }
 
 export interface AuthResponse {
   token: string;
   email: string;
-  nombre: string;
-  fotoPerfil: string;
-  familias: FamiliaResumen[];
+  name: string;
+  pictureUrl: string;
+  families: FamilySummary[];
 }
 
-export interface UsuarioSesion {
+export interface UserSession {
   token: string;
   email: string;
-  nombre: string;
-  fotoPerfil: string;
-  familias: FamiliaResumen[];
-  familiaActivaId?: number;
+  name: string;
+  pictureUrl: string;
+  families: FamilySummary[];
+  activeFamilyId?: number;
 }

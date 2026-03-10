@@ -2,11 +2,11 @@
   @if (sesion(); as s) {
     <header class="dash-header">
       <div class="user-info">
-        @if (s.fotoPerfil) {
-          <img [src]="s.fotoPerfil" [alt]="s.nombre" class="avatar" />
+        @if (s.pictureUrl) {
+          <img [src]="s.pictureUrl" [alt]="s.name" class="avatar" />
         }
         <div>
-          <strong>{{ s.nombre }}</strong>
+          <strong>{{ s.name }}</strong>
           <span>{{ s.email }}</span>
         </div>
       </div>
@@ -14,24 +14,24 @@
     </header>
 
     <main>
-      <h1>Bienvenido, {{ s.nombre.split(' ')[0] }} 👋</h1>
+      <h1>Bienvenido, {{ s.name.split(' ')[0] }} 👋</h1>
 
       <!-- Familias -->
-      @if (s.familias.length > 0) {
+      @if (s.families.length > 0) {
         <section class="section">
           <h3>Tus familias</h3>
           <div class="chips">
-            @for (familia of s.familias; track familia.familiaId) {
+            @for (familia of s.families; track familia.familyId) {
               <div class="chip">
-                <strong>{{ familia.familiaNombre }}</strong>
-                <span>{{ familia.rol === 'PADRE_TUTOR' ? '👑 Padre/Tutor' : '👦 Hijo' }}</span>
+                <strong>{{ familia.familyName }}</strong>
+                <span>{{ familia.role === 'PARENT' ? '👑 Padre/Tutor' : '👦 Hijo' }}</span>
               </div>
             }
           </div>
         </section>
 
-        <!-- Generar invitación — solo visible si eres PADRE_TUTOR -->
-        @if (s.familias[0].rol === 'PADRE_TUTOR') {
+        <!-- Generar invitación — solo visible si eres PARENT -->
+        @if (s.families[0].role === 'PARENT') {
           <section class="section">
             <h3>Invitar miembro</h3>
             <div class="invite-form">
@@ -42,8 +42,8 @@
                 [disabled]="cargandoInvitacion()"
               />
               <select [(ngModel)]="rolSeleccionado" [disabled]="cargandoInvitacion()">
-                <option value="HIJO">Hijo</option>
-                <option value="PADRE_TUTOR">Padre/Tutor</option>
+                <option value="CHILD">Hijo</option>
+                <option value="PARENT">Padre/Tutor</option>
               </select>
               <button (click)="generarInvitacion()" [disabled]="cargandoInvitacion()">
                 {{ cargandoInvitacion() ? 'Generando...' : 'Generar link' }}

@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "familias")
+@Table(name = "family_groups")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Familia {
+public class FamilyGroup {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,11 +28,11 @@ public class Familia {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "familia", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "familyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<FamiliaMiembro> miembros = new ArrayList<>();
+    private List<FamilyMember> members = new ArrayList<>();
 
-    @OneToMany(mappedBy = "familia", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "familyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Invitacion> invitaciones = new ArrayList<>();
+    private List<Invitation> invitations = new ArrayList<>();
 }

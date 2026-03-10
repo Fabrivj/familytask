@@ -1,10 +1,10 @@
 package com.vertexdev.familytask.controller;
 
-import com.vertexdev.familytask.dto.invitacion.CrearInvitacionRequest;
-import com.vertexdev.familytask.dto.invitacion.InvitacionResponse;
-import com.vertexdev.familytask.dto.invitacion.ProcesarInvitacionRequest;
-import com.vertexdev.familytask.model.Usuario;
-import com.vertexdev.familytask.service.InvitacionService;
+import com.vertexdev.familytask.dto.invitacion.CreateInviteRequest;
+import com.vertexdev.familytask.dto.invitacion.InviteResponse;
+import com.vertexdev.familytask.dto.invitacion.ProcessInviteRequest;
+import com.vertexdev.familytask.model.User;
+import com.vertexdev.familytask.service.InvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/invitaciones")
 @RequiredArgsConstructor
-public class InvitacionController {
+public class InviteController {
 
-    private final InvitacionService invitacionService;
+    private final InvitationService invitationService;
 
     /**
      * El Padre/Tutor genera la invitación.
@@ -29,11 +29,11 @@ public class InvitacionController {
      * Body: { "emailInvitado": "...", "rol": "HIJO", "familiaId": 1 }
      */
     @PostMapping
-    public ResponseEntity<InvitacionResponse> crearInvitacion(
-            @Valid @RequestBody CrearInvitacionRequest request,
-            @AuthenticationPrincipal Usuario usuarioAutenticado) {
+    public ResponseEntity<InviteResponse> crearInvitacion(
+            @Valid @RequestBody CreateInviteRequest request,
+            @AuthenticationPrincipal User userAutenticado) {
 
-        InvitacionResponse response = invitacionService.crearInvitacion(request, usuarioAutenticado);
+        InviteResponse response = invitationService.crearInvitacion(request, userAutenticado);
         return ResponseEntity.ok(response);
     }
 
@@ -46,10 +46,10 @@ public class InvitacionController {
      */
     @PostMapping("/procesar")
     public ResponseEntity<Void> procesarInvitacion(
-            @Valid @RequestBody ProcesarInvitacionRequest request,
-            @AuthenticationPrincipal Usuario usuarioAutenticado) {
+            @Valid @RequestBody ProcessInviteRequest request,
+            @AuthenticationPrincipal User userAutenticado) {
 
-        invitacionService.procesarInvitacion(request, usuarioAutenticado);
+        invitationService.procesarInvitacion(request, userAutenticado);
         return ResponseEntity.ok().build();
     }
 }

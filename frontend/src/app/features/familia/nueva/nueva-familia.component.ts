@@ -1,41 +1,51 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { FamiliaService } from '../../../core/services/familia.service';
 
 @Component({
   selector: 'app-nueva-familia',
-  standalone: true,
-  imports: [FormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './nueva-familia.component.html',
+  styleUrl: './nueva-familia.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NuevaFamiliaComponent {
-  nombre = '';
+  private readonly familiaService = inject(FamiliaService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  readonly nombreCtrl = new FormControl('', { nonNullable: true });
   readonly cargando = signal(false);
   readonly error = signal('');
   readonly mostrarFormulario = signal(false);
 
-  constructor(
-    private familiaService: FamiliaService,
-    private authService: AuthService,
-    private router: Router,
-  ) {}
+  readonly nombreCorto = computed(() => {
+    const nombre = this.authService.sesion()?.name ?? '';
+    return nombre.split(' ')[0];
+  });
+
+  readonly inicialNombre = computed(() => {
+    return (this.authService.sesion()?.name?.[0] ?? '?').toUpperCase();
+  });
 
   crear(): void {
-    if (!this.nombre.trim()) {
+    const nombre = this.nombreCtrl.value.trim();
+    if (!nombre) {
       this.error.set('El nombre es obligatorio.');
       return;
     }
     this.cargando.set(true);
     this.error.set('');
+    this.nombreCtrl.disable();
 
-    this.familiaService.crear({ nombre: this.nombre.trim() }).subscribe({
+    this.familiaService.crear({ name: nombre }).subscribe({
       next: (familia) => {
         this.authService.agregarFamilia({
-          familiaId: familia.id,
-          familiaNombre: familia.nombre,
-          rol: 'PADRE_TUTOR',
+          familyId: familia.id,
+          familyName: familia.name,
+          role: 'PARENT',
         });
         this.authService.setFamiliaActiva(familia.id);
         this.router.navigate(['/dashboard']);
@@ -43,12 +53,14 @@ export class NuevaFamiliaComponent {
       error: (err) => {
         this.error.set(err.error?.message ?? 'No se pudo crear la familia.');
         this.cargando.set(false);
+        this.nombreCtrl.enable();
       },
     });
   }
 
-  esperarInvitacion(): void {
-    // Simplemente va al dashboard, que mostrará el estado de espera
-    this.router.navigate(['/dashboard']);
+  volver(): void {
+    this.nombreCtrl.reset();
+    this.error.set('');
+    this.mostrarFormulario.set(false);
   }
 }

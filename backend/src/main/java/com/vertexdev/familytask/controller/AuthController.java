@@ -2,7 +2,7 @@ package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.auth.AuthResponse;
 import com.vertexdev.familytask.dto.auth.GoogleCallbackRequest;
-import com.vertexdev.familytask.model.Usuario;
+import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<AuthResponse> getMe(@AuthenticationPrincipal Usuario usuario) {
-        return ResponseEntity.ok(authService.getMe(usuario));
+    public ResponseEntity<AuthResponse> getMe(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(authService.getMe(user));
     }
 }

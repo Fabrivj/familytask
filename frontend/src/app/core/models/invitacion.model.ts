@@ -1,16 +1,16 @@
-export interface CrearInvitacionRequest {
-  emailInvitado: string;
-  rol: 'PADRE_TUTOR' | 'HIJO';
-  familiaId: number;
+export interface CreateInviteRequest {
+  invitedEmail: string;
+  role: 'PARENT' | 'CHILD';
+  familyId: number;
 }
 
-export interface InvitacionResponse {
-  emailInvitado: string;
-  rol: string;
-  fechaExpiracion: string;
-  linkInvitacion: string;
+export interface InviteResponse {
+  invitedEmail: string;
+  role: string;
+  expirationDate: string;
+  inviteLink: string;
 }
 
-export interface ProcesarInvitacionRequest {
+export interface ProcessInviteRequest {
   token: string;
 }

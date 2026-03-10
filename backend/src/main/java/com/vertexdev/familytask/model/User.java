@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,16 +28,16 @@ public class Usuario {
     private String email;
 
     @Column(nullable = false)
-    private String nombre;
+    private String name;
 
-    @Column(name = "foto_perfil")
-    private String fotoPerfil;
+    @Column(name = "picture_url")
+    private String pictureUrl;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<FamiliaMiembro> membresias = new ArrayList<>();
+    private List<FamilyMember> memberships = new ArrayList<>();
 }

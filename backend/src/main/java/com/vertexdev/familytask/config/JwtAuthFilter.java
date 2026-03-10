@@ -1,6 +1,6 @@
 package com.vertexdev.familytask.config;
 
-import com.vertexdev.familytask.repository.UsuarioRepository;
+import com.vertexdev.familytask.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +20,7 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final UsuarioRepository usuarioRepository;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -44,7 +44,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String email = jwtUtil.extractEmail(token);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            usuarioRepository.findByEmail(email).ifPresent(usuario -> {
+            userRepository.findByEmail(email).ifPresent(usuario -> {
                 var auth = new UsernamePasswordAuthenticationToken(
                         usuario,
                         null,

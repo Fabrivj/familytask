@@ -10,15 +10,15 @@ import java.util.List;
 public class AuthResponse {
     private String token;
     private String email;
-    private String nombre;
-    private String fotoPerfil;
-    private List<FamiliaResumen> familias;   // para que el front sepa a cuántas familias pertenece
+    private String name;
+    private String pictureUrl;
+    private List<FamilySummary> families;   // para que el front sepa a cuántas familias pertenece
 
     @Data
     @Builder
-    public static class FamiliaResumen {
-        private Long familiaId;
-        private String familiaNombre;
-        private String rol;
+    public static class FamilySummary {
+        private Long familyId;
+        private String familyName;
+        private String role;
     }
 }

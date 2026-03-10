@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class FamiliaResponse {
+public class FamilyResponse {
     private Long id;
-    private String nombre;
-    private String rol;
+    private String name;
+    private String role;
 }

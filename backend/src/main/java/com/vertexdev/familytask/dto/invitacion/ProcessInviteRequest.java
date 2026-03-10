@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class ProcesarInvitacionRequest {
+public class ProcessInviteRequest {
 
     @NotBlank(message = "El token es requerido")
     private String token;

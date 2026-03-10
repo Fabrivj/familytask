@@ -1,9 +1,9 @@
 package com.vertexdev.familytask.controller;
 
-import com.vertexdev.familytask.dto.familia.CrearFamiliaRequest;
-import com.vertexdev.familytask.dto.familia.FamiliaResponse;
-import com.vertexdev.familytask.model.Usuario;
-import com.vertexdev.familytask.service.FamiliaService;
+import com.vertexdev.familytask.dto.familia.CreateFamilyRequest;
+import com.vertexdev.familytask.dto.familia.FamilyResponse;
+import com.vertexdev.familytask.model.User;
+import com.vertexdev.familytask.service.FamilyGroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,16 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/familias")
 @RequiredArgsConstructor
-public class FamiliaController {
+public class FamilyController {
 
-    private final FamiliaService familiaService;
+    private final FamilyGroupService familyGroupService;
 
     @PostMapping
-    public ResponseEntity<FamiliaResponse> crearFamilia(
-            @Valid @RequestBody CrearFamiliaRequest request,
-            @AuthenticationPrincipal Usuario usuarioAutenticado) {
+    public ResponseEntity<FamilyResponse> crearFamilia(
+            @Valid @RequestBody CreateFamilyRequest request,
+            @AuthenticationPrincipal User userAutenticado) {
 
-        FamiliaResponse response = familiaService.crearFamilia(request, usuarioAutenticado);
+        FamilyResponse response = familyGroupService.crearFamilia(request, userAutenticado);
         return ResponseEntity.ok(response);
     }
 }

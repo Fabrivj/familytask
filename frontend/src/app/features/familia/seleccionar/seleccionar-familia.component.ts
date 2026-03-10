@@ -8,12 +8,12 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './seleccionar-familia.component.html',
 })
 export class SeleccionarFamiliaComponent {
-  readonly familias = computed(() => this.authService.sesion()?.familias ?? []);
+  readonly familias = computed(() => this.authService.sesion()?.families ?? []);
 
   constructor(private authService: AuthService, private router: Router) {
     // Si solo tiene una familia, no debería estar aquí
     if (this.familias().length === 1) {
-      this.authService.setFamiliaActiva(this.familias()[0].familiaId);
+      this.authService.setFamiliaActiva(this.familias()[0].familyId);
       this.router.navigate(['/dashboard']);
     }
   }
