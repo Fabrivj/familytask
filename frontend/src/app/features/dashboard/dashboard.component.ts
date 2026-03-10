@@ -2,7 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { InvitacionService } from '../../core/services/invitacion.service';
+import { InvitationService } from '../../core/services/invitation.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,7 +22,7 @@ export class DashboardComponent {
 
   constructor(
     private authService: AuthService,
-    private invitacionService: InvitacionService,
+    private invitationService: InvitationService,
     private router: Router,
   ) {}
 
@@ -47,7 +47,7 @@ export class DashboardComponent {
     this.linkGenerado.set('');
     this.errorInvitacion.set('');
 
-    this.invitacionService.crear({
+    this.invitationService.crear({
       invitedEmail: this.emailInvitado.trim(),
       role: this.rolSeleccionado,
       familyId: familiaId,

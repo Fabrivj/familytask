@@ -6,10 +6,10 @@ import {
   CreateInviteRequest,
   InviteResponse,
   ProcessInviteRequest,
-} from '../models/invitacion.model';
+} from '../models/invitation.model';
 
 @Injectable({ providedIn: 'root' })
-export class InvitacionService {
+export class InvitationService {
 
   private readonly tokenKey = environment.invitationTokenKey;
 

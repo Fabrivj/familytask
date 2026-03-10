@@ -20,16 +20,16 @@ export const routes: Routes = [
   {
     path: 'invitacion',
     loadComponent: () =>
-      import('./features/invitacion/aceptar/aceptar-invitacion.component').then(
-        m => m.AceptarInvitacionComponent
+      import('./features/invitation/accept/accept-invitation.component').then(
+        m => m.AcceptInvitationComponent
       ),
   },
   {
     path: 'familia/nueva',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/familia/nueva/nueva-familia.component').then(
-        m => m.NuevaFamiliaComponent
+      import('./features/family/new/new-family.component').then(
+        m => m.NewFamilyComponent
       ),
   },
   {
@@ -46,8 +46,8 @@ export const routes: Routes = [
     path: 'familia/seleccionar',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/familia/seleccionar/seleccionar-familia.component').then(
-        m => m.SeleccionarFamiliaComponent
+      import('./features/family/select/select-family.component').then(
+        m => m.SelectFamilyComponent
       ),
   },
 ];

@@ -2,17 +2,17 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
-import { FamiliaService } from '../../../core/services/familia.service';
+import { FamilyService } from '../../../core/services/family.service';
 
 @Component({
-  selector: 'app-nueva-familia',
+  selector: 'app-new-family',
   imports: [ReactiveFormsModule],
-  templateUrl: './nueva-familia.component.html',
-  styleUrl: './nueva-familia.component.css',
+  templateUrl: './new-family.component.html',
+  styleUrl: './new-family.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NuevaFamiliaComponent {
-  private readonly familiaService = inject(FamiliaService);
+export class NewFamilyComponent {
+  private readonly familyService = inject(FamilyService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -40,7 +40,7 @@ export class NuevaFamiliaComponent {
     this.error.set('');
     this.nombreCtrl.disable();
 
-    this.familiaService.crear({ name: nombre }).subscribe({
+    this.familyService.crear({ name: nombre }).subscribe({
       next: (familia) => {
         this.authService.agregarFamilia({
           familyId: familia.id,

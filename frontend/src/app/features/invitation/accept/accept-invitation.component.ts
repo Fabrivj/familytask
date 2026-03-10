@@ -1,16 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { InvitacionService } from '../../../core/services/invitacion.service';
+import { InvitationService } from '../../../core/services/invitation.service';
 
 type EstadoPagina = 'cargando' | 'listo' | 'procesando' | 'error';
 
 @Component({
-  selector: 'app-aceptar-invitacion',
+  selector: 'app-accept-invitation',
   standalone: true,
-  templateUrl: './aceptar-invitacion.component.html',
+  templateUrl: './accept-invitation.component.html',
 })
-export class AceptarInvitacionComponent implements OnInit {
+export class AcceptInvitationComponent implements OnInit {
 
   readonly estado = signal<EstadoPagina>('cargando');
   readonly mensajeError = signal('');
@@ -20,7 +20,7 @@ export class AceptarInvitacionComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
-    private invitacionService: InvitacionService,
+    private invitationService: InvitationService,
   ) {}
 
   ngOnInit(): void {
@@ -33,7 +33,7 @@ export class AceptarInvitacionComponent implements OnInit {
 
     this.token = token;
     // Guardar siempre en localStorage por si necesita pasar por Google
-    this.invitacionService.guardarToken(token);
+    this.invitationService.guardarToken(token);
 
     if (this.authService.estaAutenticado()) {
       // Ya tiene sesión → procesar directo sin pasar por Google
@@ -46,9 +46,9 @@ export class AceptarInvitacionComponent implements OnInit {
   }
 
   private procesarDirecto(token: string): void {
-    this.invitacionService.procesar({ token }).subscribe({
+    this.invitationService.procesar({ token }).subscribe({
       next: () => {
-        this.invitacionService.limpiarToken();
+        this.invitationService.limpiarToken();
         // Refrescar sesión para que el dashboard vea la nueva familia
         this.authService.refrescarSesion().subscribe({
           next: () => this.router.navigate(['/dashboard']),
@@ -56,7 +56,7 @@ export class AceptarInvitacionComponent implements OnInit {
         });
       },
       error: (err) => {
-        this.invitacionService.limpiarToken();
+        this.invitationService.limpiarToken();
         const mensaje = err.error?.message ?? 'La invitación no es válida o expiró.';
         this.mostrarError(mensaje);
       },
@@ -69,7 +69,7 @@ export class AceptarInvitacionComponent implements OnInit {
   }
 
   rechazar(): void {
-    this.invitacionService.limpiarToken();
+    this.invitationService.limpiarToken();
     this.router.navigate(['/dashboard']);
   }
 

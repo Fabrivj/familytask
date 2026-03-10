@@ -3,11 +3,11 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-seleccionar-familia',
+  selector: 'app-select-family',
   standalone: true,
-  templateUrl: './seleccionar-familia.component.html',
+  templateUrl: './select-family.component.html',
 })
-export class SeleccionarFamiliaComponent {
+export class SelectFamilyComponent {
   readonly familias = computed(() => this.authService.sesion()?.families ?? []);
 
   constructor(private authService: AuthService, private router: Router) {

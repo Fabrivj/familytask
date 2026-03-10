@@ -14,7 +14,7 @@ export interface FamilyResponse {
 }
 
 @Injectable({ providedIn: 'root' })
-export class FamiliaService {
+export class FamilyService {
   constructor(private http: HttpClient) {}
 
   crear(request: CreateFamilyRequest): Observable<FamilyResponse> {

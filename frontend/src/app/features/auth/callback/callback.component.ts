@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { InvitacionService } from '../../../core/services/invitacion.service';
+import { InvitationService } from '../../../core/services/invitation.service';
 
 type EstadoCallback = 'procesando' | 'error';
 
@@ -20,7 +20,7 @@ export class CallbackComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
-    private invitacionService: InvitacionService,
+    private invitationService: InvitationService,
   ) {}
 
   ngOnInit(): void {
@@ -61,14 +61,14 @@ export class CallbackComponent implements OnInit {
   }
 
   private postAutenticacion(authResponse: any): void {
-    const tokenInvitacion = this.invitacionService.obtenerToken();
+    const tokenInvitacion = this.invitationService.obtenerToken();
 
     if (tokenInvitacion) {
       this.pasoActual.set('Procesando tu invitación...');
 
-      this.invitacionService.procesar({ token: tokenInvitacion }).subscribe({
+      this.invitationService.procesar({ token: tokenInvitacion }).subscribe({
         next: () => {
-          this.invitacionService.limpiarToken();
+          this.invitationService.limpiarToken();
           this.pasoActual.set('Cargando tu familia...');
           this.authService.refrescarSesion().subscribe({
             next: () => this.router.navigate(['/dashboard']),
@@ -76,7 +76,7 @@ export class CallbackComponent implements OnInit {
           });
         },
         error: (err) => {                                          // ← aquí
-          this.invitacionService.limpiarToken();
+          this.invitationService.limpiarToken();
           const mensaje = err.error?.message ?? 'No se pudo completar la incorporación. Intenta de nuevo.';
           this.mostrarError(mensaje);
         },
