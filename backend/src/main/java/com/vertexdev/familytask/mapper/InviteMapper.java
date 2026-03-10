@@ -1,6 +1,6 @@
 package com.vertexdev.familytask.mapper;
 
-import com.vertexdev.familytask.dto.invitacion.InviteResponse;
+import com.vertexdev.familytask.dto.invite.InviteResponse;
 import com.vertexdev.familytask.model.Invitation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

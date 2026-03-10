@@ -1,4 +1,4 @@
-package com.vertexdev.familytask.dto.invitacion;
+package com.vertexdev.familytask.dto.invite;
 
 import com.vertexdev.familytask.model.enums.Role;
 import jakarta.validation.constraints.Email;

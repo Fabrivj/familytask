@@ -1,4 +1,4 @@
-package com.vertexdev.familytask.dto.familia;
+package com.vertexdev.familytask.dto.family;
 
 import lombok.Builder;
 import lombok.Data;

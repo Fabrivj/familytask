@@ -1,4 +1,4 @@
-package com.vertexdev.familytask.dto.invitacion;
+package com.vertexdev.familytask.dto.invite;
 
 import lombok.Builder;
 import lombok.Data;

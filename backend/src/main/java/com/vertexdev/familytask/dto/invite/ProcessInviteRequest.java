@@ -1,4 +1,4 @@
-package com.vertexdev.familytask.dto.invitacion;
+package com.vertexdev.familytask.dto.invite;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

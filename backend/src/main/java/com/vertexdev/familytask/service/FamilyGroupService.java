@@ -1,7 +1,7 @@
 package com.vertexdev.familytask.service;
 
-import com.vertexdev.familytask.dto.familia.CreateFamilyRequest;
-import com.vertexdev.familytask.dto.familia.FamilyResponse;
+import com.vertexdev.familytask.dto.family.CreateFamilyRequest;
+import com.vertexdev.familytask.dto.family.FamilyResponse;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.User;

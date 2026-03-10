@@ -1,7 +1,7 @@
 package com.vertexdev.familytask.controller;
 
-import com.vertexdev.familytask.dto.familia.CreateFamilyRequest;
-import com.vertexdev.familytask.dto.familia.FamilyResponse;
+import com.vertexdev.familytask.dto.family.CreateFamilyRequest;
+import com.vertexdev.familytask.dto.family.FamilyResponse;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.FamilyGroupService;
 import jakarta.validation.Valid;

@@ -1,8 +1,8 @@
 package com.vertexdev.familytask.service;
 
-import com.vertexdev.familytask.dto.invitacion.CreateInviteRequest;
-import com.vertexdev.familytask.dto.invitacion.InviteResponse;
-import com.vertexdev.familytask.dto.invitacion.ProcessInviteRequest;
+import com.vertexdev.familytask.dto.invite.CreateInviteRequest;
+import com.vertexdev.familytask.dto.invite.InviteResponse;
+import com.vertexdev.familytask.dto.invite.ProcessInviteRequest;
 import com.vertexdev.familytask.mapper.InviteMapper;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
