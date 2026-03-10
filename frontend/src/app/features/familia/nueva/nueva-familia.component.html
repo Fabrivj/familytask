@@ -1,0 +1,74 @@
+<div class="page-container">
+  <div class="card">
+    <span class="icon">🏠</span>
+    <h1>Bienvenido a FamilyTask</h1>
+    <p>Aún no perteneces a ninguna familia. Puedes crear una nueva o esperar a que alguien te invite.</p>
+
+    @if (mostrarFormulario()) {
+      <input
+        type="text"
+        placeholder="Nombre de la familia"
+        [(ngModel)]="nombre"
+        [disabled]="cargando()"
+        (keyup.enter)="crear()"
+      />
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+      <button class="btn-primary" (click)="crear()" [disabled]="cargando()">
+        {{ cargando() ? 'Creando...' : 'Crear familia' }}
+      </button>
+      <button class="btn-secondary" (click)="mostrarFormulario.set(false)">
+        Cancelar
+      </button>
+    } @else {
+      <button class="btn-primary" (click)="mostrarFormulario.set(true)">
+        Crear una familia
+      </button>
+      <button class="btn-secondary" (click)="esperarInvitacion()">
+        Esperar una invitación
+      </button>
+    }
+  </div>
+</div>
+
+<style>
+  .page-container {
+    min-height: 100vh; display: flex;
+    align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  .card {
+    background: white; border-radius: 24px;
+    padding: 48px 40px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    max-width: 400px; width: 100%;
+  }
+  .icon { font-size: 52px; display: block; margin-bottom: 16px; }
+  h1 { color: #1a1a2e; margin: 0 0 8px; font-size: 22px; }
+  p { color: #666; margin: 0 0 28px; line-height: 1.6; }
+  input {
+    width: 100%; padding: 14px 16px;
+    border: 2px solid #e0e0e0; border-radius: 12px;
+    font-size: 15px; box-sizing: border-box;
+    margin-bottom: 16px; outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: #4285F4; }
+  .error { color: #d32f2f; font-size: 14px; margin-bottom: 12px; }
+  .btn-primary {
+    display: block; width: 100%; padding: 14px;
+    background: #1a1a2e; color: white; border: none;
+    border-radius: 12px; font-size: 16px; font-weight: 600;
+    cursor: pointer; margin-bottom: 12px; transition: opacity 0.2s;
+  }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary {
+    display: block; width: 100%; padding: 12px;
+    background: transparent; color: #888;
+    border: 2px solid #e0e0e0; border-radius: 12px;
+    font-size: 15px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: #ccc; color: #555; }
+</style>
