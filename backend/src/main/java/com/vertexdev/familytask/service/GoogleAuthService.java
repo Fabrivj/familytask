@@ -1,5 +1,6 @@
 package com.vertexdev.familytask.service;
 
+import com.vertexdev.familytask.exception.AuthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +53,7 @@ public class GoogleAuthService {
         ResponseEntity<Map> response = restTemplate.postForEntity(tokenEndpoint, request, Map.class);
 
         if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("Error al obtener el token de Google");
+            throw new AuthException("INVALID_TOKEN", "Error al obtener el token de Google");
         }
 
         return (String) response.getBody().get("access_token");
@@ -77,7 +78,7 @@ public class GoogleAuthService {
         );
 
         if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("No se pudo obtener el perfil de Google");
+            throw new AuthException("INVALID_TOKEN", "No se pudo obtener el perfil de Google");
         }
 
         return response.getBody();

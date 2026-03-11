@@ -52,9 +52,14 @@ export class CallbackComponent implements OnInit {
     this.authService.procesarGoogleCallback(code).subscribe({
       next: (authResponse) => this.postAutenticacion(authResponse),
       error: (err) => {
-        const mensaje = err.status === 0
-          ? 'Error de red. Verifica tu conexión e intenta de nuevo.'
-          : 'No se pudo validar tu sesión con Google. Intenta de nuevo.';
+        let mensaje: string;
+        if (err.status === 0) {
+          mensaje = 'No se pudo conectar con Google. Intenta de nuevo.';
+        } else if (err.error?.code === 'EMAIL_NOT_FOUND') {
+          mensaje = 'No se pudo obtener tu correo. Reintenta el inicio de sesión.';
+        } else {
+          mensaje = 'No se pudo validar tu sesión con Google. Intenta de nuevo.';
+        }
         this.mostrarError(mensaje);
       },
     });
