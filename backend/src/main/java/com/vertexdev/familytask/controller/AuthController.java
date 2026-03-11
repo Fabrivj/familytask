@@ -1,41 +1,29 @@
 package com.vertexdev.familytask.controller;
 
-import com.vertexdev.familytask.dto.GoogleTokenRequest;
-import com.vertexdev.familytask.dto.LoginResponse;
-import com.vertexdev.familytask.service.AuthenticationService;
+import com.vertexdev.familytask.dto.auth.AuthResponse;
+import com.vertexdev.familytask.dto.auth.GoogleCallbackRequest;
+import com.vertexdev.familytask.model.User;
+import com.vertexdev.familytask.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationService authenticationService;
+    private final AuthService authService;
 
-    /**
-     * POST /auth/google-login
-     *
-     * Recibe un Google ID Token, lo valida, crea/actualiza el usuario
-     * y retorna un JWT propio del sistema.
-     *
-     */
-    @PostMapping("/google-login")
-    public ResponseEntity<LoginResponse> googleLogin(
-            @Valid @RequestBody GoogleTokenRequest request
-    ) {
-        LoginResponse response = authenticationService.authenticateWithGoogle(request);
-        return ResponseEntity.ok(response);
+    @PostMapping("/google/callback")
+    public ResponseEntity<AuthResponse> googleCallback(@Valid @RequestBody GoogleCallbackRequest request) {
+        return ResponseEntity.ok(authService.procesarGoogleCallback(request.getCode()));
     }
 
-    /**
-     * GET /auth/health
-     * Un Healthcheck.
-     */
-    @GetMapping("/health")
-    public ResponseEntity<String> health() {
-        return ResponseEntity.ok("FamilyTask API is running!");
+    @GetMapping("/me")
+    public ResponseEntity<AuthResponse> getMe(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(authService.getMe(user));
     }
 }
