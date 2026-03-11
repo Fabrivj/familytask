@@ -18,7 +18,7 @@ export const routes: Routes = [
       import('./features/auth/callback/callback.component').then(m => m.CallbackComponent),
   },
   {
-    path: 'invitacion',
+    path: 'invitation',
     loadComponent: () =>
       import('./features/invitation/accept/accept-invitation.component').then(
         m => m.AcceptInvitationComponent
@@ -33,6 +33,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'familia/seleccionar',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/family/select/select-family.component').then(
+        m => m.SelectFamilyComponent
+      ),
+  },
+  {
     path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -41,13 +49,5 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: 'dashboard',
-  },
-  {
-    path: 'familia/seleccionar',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/family/select/select-family.component').then(
-        m => m.SelectFamilyComponent
-      ),
   },
 ];
