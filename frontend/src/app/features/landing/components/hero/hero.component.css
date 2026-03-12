@@ -1,0 +1,110 @@
+.hero {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  padding: 80px 0;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(0, 72, 255, 0.08) 0%, transparent 60%),
+    var(--bg);
+}
+
+/* Retro grid floor */
+.hero::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 280px;
+  background-image:
+    linear-gradient(rgba(0, 239, 255, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 239, 255, 0.10) 1px, transparent 1px);
+  background-size: 60px 60px;
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  pointer-events: none;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 28px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.hero-eyebrow {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--border);
+  border: 1.5px solid rgba(0, 239, 255, 0.4);
+  padding: 5px 16px;
+  border-radius: 100px;
+}
+
+.hero-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1.5rem, 5vw, 2.8rem);
+  line-height: 1.5;
+  color: var(--text);
+  text-shadow: 0 0 40px rgba(255, 46, 190, 0.35);
+}
+
+.hero-title .accent  { color: var(--primary); }
+.hero-title .accent2 { color: var(--border); }
+
+.hero-tagline {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--text-sub);
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: center;
+  padding-top: 16px;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero-stat-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.6rem;
+  color: var(--success);
+  line-height: 1;
+}
+
+.hero-stat-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-sub);
+}
+
+@media (max-width: 700px) {
+  .hero { min-height: auto; padding: 60px 0 80px; }
+}

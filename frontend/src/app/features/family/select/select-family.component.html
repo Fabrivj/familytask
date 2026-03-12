@@ -1,0 +1,50 @@
+<div class="page-container">
+  <div class="card">
+    <span class="icon">👨‍👩‍👧‍👦</span>
+    <h1>Selecciona una familia</h1>
+    <p>Perteneces a más de una familia. ¿Con cuál quieres trabajar hoy?</p>
+
+    <div class="familias-list">
+      @for (familia of familias(); track familia.familyId) {
+        <button class="familia-item" (click)="seleccionar(familia.familyId)">
+          <div class="familia-info">
+            <strong>{{ familia.familyName }}</strong>
+            <span>{{ familia.role === 'PARENT' ? '👑 Padre/Tutor' : '👦 Hijo' }}</span>
+          </div>
+          <span class="arrow">→</span>
+        </button>
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+  .page-container {
+    min-height: 100vh; display: flex;
+    align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  .card {
+    background: white; border-radius: 24px;
+    padding: 48px 40px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    max-width: 440px; width: 100%;
+  }
+  .icon { font-size: 52px; display: block; margin-bottom: 16px; }
+  h1 { color: #1a1a2e; margin: 0 0 8px; }
+  p { color: #666; margin: 0 0 28px; }
+  .familias-list { display: flex; flex-direction: column; gap: 12px; }
+  .familia-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; background: #f8f9fa;
+    border: 2px solid #e0e0e0; border-radius: 12px;
+    cursor: pointer; transition: all 0.2s; text-align: left;
+    width: 100%;
+  }
+  .familia-item:hover { border-color: #4285F4; background: #f0f4ff; }
+  .familia-info { display: flex; flex-direction: column; gap: 4px; }
+  .familia-info strong { color: #1a1a2e; font-size: 16px; }
+  .familia-info span { color: #888; font-size: 13px; }
+  .arrow { color: #4285F4; font-size: 18px; }
+</style>
