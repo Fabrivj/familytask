@@ -73,7 +73,7 @@ public class AuthService {
                 .stream()
                 .map(m -> AuthResponse.FamilySummary.builder()
                         .familyId(m.getFamilyGroup().getId())
-                        .familyName(m.getFamilyGroup().getNombre())
+                        .familyName(m.getFamilyGroup().getName())
                         .role(m.getRole().name())
                         .build())
                 .toList();

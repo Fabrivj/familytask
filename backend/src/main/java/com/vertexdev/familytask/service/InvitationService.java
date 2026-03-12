@@ -88,7 +88,7 @@ public class InvitationService {
                 .build();
 
         invitationRepository.save(invitation);
-        log.info("Invitación creada para {} en familia {}", request.getInvitedEmail(), familyGroup.getNombre());
+        log.info("Invitación creada para {} en familia {}", request.getInvitedEmail(), familyGroup.getName());
 
         // Construir la respuesta con el link
         InviteResponse response = invitacionMapper.toResponse(invitation);
@@ -148,7 +148,7 @@ public class InvitationService {
 
         log.info("Usuario {} incorporado a familia {} con rol {}",
                 userAutenticado.getEmail(),
-                invitation.getFamilyGroup().getNombre(),
+                invitation.getFamilyGroup().getName(),
                 invitation.getRole());
     }
 }

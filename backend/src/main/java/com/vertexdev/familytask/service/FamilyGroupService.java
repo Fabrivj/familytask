@@ -24,7 +24,7 @@ public class FamilyGroupService {
     @Transactional
     public FamilyResponse crearFamilia(CreateFamilyRequest request, User creador) {
         FamilyGroup familyGroup = FamilyGroup.builder()
-                .nombre(request.getName())
+                .name(request.getName())
                 .build();
 
         familyGroupRepository.save(familyGroup);
@@ -38,11 +38,11 @@ public class FamilyGroupService {
                 .build();
 
         familyMemberRepository.save(miembro);
-        log.info("Familia '{}' creada por {}", familyGroup.getNombre(), creador.getEmail());
+        log.info("Familia '{}' creada por {}", familyGroup.getName(), creador.getEmail());
 
         return FamilyResponse.builder()
                 .id(familyGroup.getId())
-                .name(familyGroup.getNombre())
+                .name(familyGroup.getName())
                 .role(Role.PARENT.name())
                 .build();
     }
