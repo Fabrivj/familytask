@@ -29,6 +29,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Grant execute permission for mvnw
+        working-directory: backend
         run: chmod +x mvnw
 
       - name: Set up Java 21
