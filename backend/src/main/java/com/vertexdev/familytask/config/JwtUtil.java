@@ -24,10 +24,10 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email, Long usuarioId) {
+    public String generateToken(String email, Long userId) {
         return Jwts.builder()
                 .subject(email)
-                .claim("usuarioId", usuarioId)
+                .claim("userId", userId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey())
@@ -46,8 +46,8 @@ public class JwtUtil {
         return extractClaims(token).getSubject();
     }
 
-    public Long extractUsuarioId(String token) {
-        return extractClaims(token).get("usuarioId", Long.class);
+    public Long extractUserId(String token) {
+        return extractClaims(token).get("userId", Long.class);
     }
 
     public boolean isTokenValid(String token) {
