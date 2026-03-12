@@ -25,7 +25,7 @@ public class FamilyController {
             @Valid @RequestBody CreateFamilyRequest request,
             @AuthenticationPrincipal User authenticatedUser) {
 
-        FamilyResponse response = familyGroupService.crearFamilia(request, authenticatedUser);
+        FamilyResponse response = familyGroupService.createFamily(request, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 }

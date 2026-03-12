@@ -33,7 +33,7 @@ public class InviteController {
             @Valid @RequestBody CreateInviteRequest request,
             @AuthenticationPrincipal User authenticatedUser) {
 
-        InviteResponse response = invitationService.crearInvitacion(request, authenticatedUser);
+        InviteResponse response = invitationService.createInvitation(request, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 
@@ -49,7 +49,7 @@ public class InviteController {
             @Valid @RequestBody ProcessInviteRequest request,
             @AuthenticationPrincipal User authenticatedUser) {
 
-        invitationService.procesarInvitacion(request, authenticatedUser);
+        invitationService.processInvitation(request, authenticatedUser);
         return ResponseEntity.ok().build();
     }
 }
