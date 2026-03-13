@@ -13,6 +13,10 @@ import { InvitationService } from '../../core/services/invitation.service';
 export class DashboardComponent {
   readonly sesion = computed(() => this.authService.sesion());
 
+  // Cierre de sesión
+  readonly mensajeCierre = signal<string | null>(null);
+  readonly errorCierre = signal<string | null>(null);
+
   // Formulario de invitación
   emailInvitado = '';
   rolSeleccionado: 'PARENT' | 'CHILD' = 'CHILD';
@@ -27,7 +31,19 @@ export class DashboardComponent {
   ) {}
 
   cerrarSesion(): void {
-    this.authService.cerrarSesion();
+    this.errorCierre.set(null);
+    this.authService.cerrarSesion().subscribe({
+      next: (response) => {
+        this.mensajeCierre.set(response.message);
+        setTimeout(() => {
+          this.authService.limpiarSesionLocal();
+          this.router.navigate(['/auth/login']);
+        }, 1500);
+      },
+      error: (err) => {
+        this.errorCierre.set(err.error?.message ?? 'No se pudo cerrar sesión. Intenta de nuevo.');
+      },
+    });
   }
 
   generarInvitacion(): void {
