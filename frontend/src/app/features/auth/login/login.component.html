@@ -25,6 +25,11 @@
       <span class="divider-line"></span>
     </div>
 
+    <!-- Mensaje de cierre de sesión -->
+    @if (mensajeCierre()) {
+      <p class="msg-success">{{ mensajeCierre() }}</p>
+    }
+
     <!-- Google button -->
     <button
       class="btn-google"

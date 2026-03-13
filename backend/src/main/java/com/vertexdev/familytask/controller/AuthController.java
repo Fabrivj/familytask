@@ -2,10 +2,10 @@ package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.auth.AuthResponse;
 import com.vertexdev.familytask.dto.auth.GoogleCallbackRequest;
+import com.vertexdev.familytask.dto.auth.LogoutResponse;
 import com.vertexdev.familytask.exception.AuthException;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.AuthService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +27,11 @@ public class AuthController {
             throw new AuthException("INVALID_TOKEN", "No se pudo validar tu sesión con Google. Intenta de nuevo.");
         }
         return ResponseEntity.ok(authService.processGoogleCallback(request.getCode()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponse> logout() {
+        return ResponseEntity.ok(new LogoutResponse("Sesión cerrada exitosamente."));
     }
 
     @GetMapping("/me")

@@ -63,10 +63,13 @@ export class AuthService {
   }
 
   // ─── Cerrar sesión ───────────────────────────────────────────────────────────
-  cerrarSesion(): void {
+  cerrarSesion(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/logout`, {});
+  }
+
+  limpiarSesionLocal(): void {
     this._sesion.set(null);
     localStorage.removeItem(SESSION_KEY);
-    this.router.navigate(['/auth/login']);
   }
 
   // ─── Internos ────────────────────────────────────────────────────────────────

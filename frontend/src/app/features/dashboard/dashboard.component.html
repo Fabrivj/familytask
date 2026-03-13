@@ -10,7 +10,12 @@
           <span>{{ s.email }}</span>
         </div>
       </div>
-      <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesión</button>
+      <div class="logout-area">
+        <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesión</button>
+        @if (errorCierre()) {
+          <p class="error">{{ errorCierre() }}</p>
+        }
+      </div>
     </header>
 
     <main>
@@ -125,6 +130,8 @@
     font-weight: 600; cursor: pointer; transition: opacity 0.2s;
   }
   .invite-form button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .logout-area { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .msg-success { color: #2e7d32; font-size: 13px; margin: 0; }
   .error { color: #d32f2f; font-size: 14px; margin-top: 10px; }
   .link-result { margin-top: 16px; }
   .link-result p { font-size: 14px; color: #555; margin-bottom: 8px; }

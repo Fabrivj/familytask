@@ -1,12 +1,11 @@
 package com.vertexdev.familytask.exception;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 @Builder
 public class ErrorResponse {
-
-    private final String code;
-    private final String message;
+    private String code;
+    private String message;
 }
