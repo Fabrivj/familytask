@@ -14,7 +14,6 @@ export class DashboardComponent {
   readonly sesion = computed(() => this.authService.sesion());
 
   // Cierre de sesión
-  readonly mensajeCierre = signal<string | null>(null);
   readonly errorCierre = signal<string | null>(null);
 
   // Formulario de invitación
@@ -34,11 +33,8 @@ export class DashboardComponent {
     this.errorCierre.set(null);
     this.authService.cerrarSesion().subscribe({
       next: (response) => {
-        this.mensajeCierre.set(response.message);
-        setTimeout(() => {
-          this.authService.limpiarSesionLocal();
-          this.router.navigate(['/auth/login']);
-        }, 1500);
+        this.authService.limpiarSesionLocal();
+        this.router.navigate(['/auth/login'], { state: { message: response.message } });
       },
       error: (err) => {
         this.errorCierre.set(err.error?.message ?? 'No se pudo cerrar sesión. Intenta de nuevo.');

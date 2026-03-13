@@ -12,9 +12,6 @@
       </div>
       <div class="logout-area">
         <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesión</button>
-        @if (mensajeCierre()) {
-          <p class="msg-success">{{ mensajeCierre() }}</p>
-        }
         @if (errorCierre()) {
           <p class="error">{{ errorCierre() }}</p>
         }

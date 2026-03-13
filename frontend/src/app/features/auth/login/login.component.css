@@ -221,6 +221,16 @@
   flex-shrink: 0;
 }
 
+/* ── LOGOUT MESSAGE ── */
+.msg-success {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--success);
+  text-align: center;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
 /* ── TERMS ── */
 .terms {
   margin-top: 16px;
