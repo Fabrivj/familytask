@@ -22,34 +22,34 @@ public class InviteController {
     private final InvitationService invitationService;
 
     /**
-     * El Padre/Tutor genera la invitación.
-     * Requiere JWT en el header Authorization.
+     * The Parent/Guardian generates the invitation.
+     * Requires JWT in the Authorization header.
      *
      * POST /api/invitaciones
-     * Body: { "emailInvitado": "...", "rol": "HIJO", "familiaId": 1 }
+     * Body: { "invitedEmail": "...", "role": "MEMBER", "familyId": 1 }
      */
     @PostMapping
-    public ResponseEntity<InviteResponse> crearInvitacion(
+    public ResponseEntity<InviteResponse> createInvitation(
             @Valid @RequestBody CreateInviteRequest request,
-            @AuthenticationPrincipal User userAutenticado) {
+            @AuthenticationPrincipal User authenticatedUser) {
 
-        InviteResponse response = invitationService.crearInvitacion(request, userAutenticado);
+        InviteResponse response = invitationService.createInvitation(request, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * El invitado, ya autenticado con Google, manda el token guardado en localStorage.
-     * Requiere JWT en el header Authorization.
+     * The invited user, already authenticated with Google, sends the token stored in localStorage.
+     * Requires JWT in the Authorization header.
      *
      * POST /api/invitaciones/procesar
-     * Body: { "token": "uuid-del-token" }
+     * Body: { "token": "uuid-token-value" }
      */
     @PostMapping("/procesar")
-    public ResponseEntity<Void> procesarInvitacion(
+    public ResponseEntity<Void> processInvitation(
             @Valid @RequestBody ProcessInviteRequest request,
-            @AuthenticationPrincipal User userAutenticado) {
+            @AuthenticationPrincipal User authenticatedUser) {
 
-        invitationService.procesarInvitacion(request, userAutenticado);
+        invitationService.processInvitation(request, authenticatedUser);
         return ResponseEntity.ok().build();
     }
 }
