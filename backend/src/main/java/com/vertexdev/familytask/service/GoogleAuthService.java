@@ -1,5 +1,6 @@
 package com.vertexdev.familytask.service;
 
+import com.vertexdev.familytask.exception.AuthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +8,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
@@ -49,13 +51,17 @@ public class GoogleAuthService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(tokenEndpoint, request, Map.class);
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(tokenEndpoint, request, Map.class);
 
-        if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("Error al obtener el token de Google");
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                throw new AuthException("INVALID_TOKEN", "No se pudo validar tu sesión con Google. Intenta de nuevo.");
+            }
+
+            return (String) response.getBody().get("access_token");
+        } catch (RestClientException ex) {
+            throw new AuthException("GOOGLE_CONNECTION_ERROR", "No se pudo conectar con Google. Intenta de nuevo.");
         }
-
-        return (String) response.getBody().get("access_token");
     }
 
     /**
@@ -69,17 +75,21 @@ public class GoogleAuthService {
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(
-                userinfoEndpoint,
-                HttpMethod.GET,
-                request,
-                Map.class
-        );
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    userinfoEndpoint,
+                    HttpMethod.GET,
+                    request,
+                    Map.class
+            );
 
-        if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("No se pudo obtener el perfil de Google");
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                throw new AuthException("INVALID_TOKEN", "No se pudo validar tu sesión con Google. Intenta de nuevo.");
+            }
+
+            return response.getBody();
+        } catch (RestClientException ex) {
+            throw new AuthException("GOOGLE_CONNECTION_ERROR", "No se pudo conectar con Google. Intenta de nuevo.");
         }
-
-        return response.getBody();
     }
 }
