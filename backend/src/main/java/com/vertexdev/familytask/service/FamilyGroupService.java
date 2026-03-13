@@ -22,27 +22,27 @@ public class FamilyGroupService {
     private final FamilyMemberRepository familyMemberRepository;
 
     @Transactional
-    public FamilyResponse crearFamilia(CreateFamilyRequest request, User creador) {
+    public FamilyResponse createFamily(CreateFamilyRequest request, User creator) {
         FamilyGroup familyGroup = FamilyGroup.builder()
-                .nombre(request.getName())
+                .name(request.getName())
                 .build();
 
         familyGroupRepository.save(familyGroup);
 
-        // El creador queda automáticamente como PADRE_TUTOR
-        FamilyMember miembro = FamilyMember.builder()
+        // Creator automatically becomes PARENT
+        FamilyMember member = FamilyMember.builder()
                 .familyGroup(familyGroup)
-                .user(creador)
+                .user(creator)
                 .role(Role.PARENT)
                 .isActive(true)
                 .build();
 
-        familyMemberRepository.save(miembro);
-        log.info("Familia '{}' creada por {}", familyGroup.getNombre(), creador.getEmail());
+        familyMemberRepository.save(member);
+        log.info("Family '{}' created by {}", familyGroup.getName(), creator.getEmail());
 
         return FamilyResponse.builder()
                 .id(familyGroup.getId())
-                .name(familyGroup.getNombre())
+                .name(familyGroup.getName())
                 .role(Role.PARENT.name())
                 .build();
     }

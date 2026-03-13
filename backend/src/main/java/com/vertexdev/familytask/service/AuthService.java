@@ -25,31 +25,31 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     /**
-     * Recibe el authorization code de Google, lo intercambia por el perfil del usuario,
-     * crea o recupera el usuario en la DB, y retorna un JWT junto con el resumen de familias.
+     * Receives the authorization code from Google, exchanges it for the user profile,
+     * creates or retrieves the user in the DB, and returns a JWT with family summary.
      */
     @Transactional
-    public AuthResponse procesarGoogleCallback(String code) {
+    public AuthResponse processGoogleCallback(String code) {
         String accessToken = googleAuthService.exchangeCodeForAccessToken(code);
         Map<String, Object> googleUser = googleAuthService.getUserInfo(accessToken);
 
         String googleId = (String) googleUser.get("id");
         String email    = (String) googleUser.get("email");
-        String nombre   = (String) googleUser.get("name");
-        String foto     = (String) googleUser.get("picture");
+        String name     = (String) googleUser.get("name");
+        String picture  = (String) googleUser.get("picture");
 
         if (email == null) {
             throw new AuthException("EMAIL_NOT_FOUND", "No se pudo obtener el correo desde Google");
         }
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {
-            log.info("Nuevo usuario registrado: {}", email);
+            log.info("New user registered: {}", email);
             return userRepository.save(
                     User.builder()
                             .googleId(googleId)
                             .email(email)
-                            .name(nombre)
-                            .pictureUrl(foto)
+                            .name(name)
+                            .pictureUrl(picture)
                             .build()
             );
         });
@@ -59,9 +59,9 @@ public class AuthService {
             userRepository.save(user);
         }
 
-        String jwt = jwtUtil.generateToken(user.getEmail(), user.getId());
+        String jwtToken = jwtUtil.generateToken(user.getEmail(), user.getId());
 
-        return buildAuthResponse(user, jwt);
+        return buildAuthResponse(user, jwtToken);
     }
 
     public AuthResponse getMe(User user) {
@@ -74,7 +74,7 @@ public class AuthService {
                 .stream()
                 .map(m -> AuthResponse.FamilySummary.builder()
                         .familyId(m.getFamilyGroup().getId())
-                        .familyName(m.getFamilyGroup().getNombre())
+                        .familyName(m.getFamilyGroup().getName())
                         .role(m.getRole().name())
                         .build())
                 .toList();

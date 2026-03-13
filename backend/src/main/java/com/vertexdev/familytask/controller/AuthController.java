@@ -19,7 +19,7 @@ public class AuthController {
 
     @PostMapping("/google/callback")
     public ResponseEntity<AuthResponse> googleCallback(@Valid @RequestBody GoogleCallbackRequest request) {
-        return ResponseEntity.ok(authService.procesarGoogleCallback(request.getCode()));
+        return ResponseEntity.ok(authService.processGoogleCallback(request.getCode()));
     }
 
     @GetMapping("/me")

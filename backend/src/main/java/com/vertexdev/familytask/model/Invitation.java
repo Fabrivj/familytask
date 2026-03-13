@@ -35,7 +35,7 @@ public class Invitation {
     @JoinColumn(name = "family_group_id", nullable = false)
     private FamilyGroup familyGroup;
 
-    @Column(name = "expirationDate", nullable = false)
+    @Column(name = "expiration_date", nullable = false)
     private LocalDateTime expirationDate;
 
     @Column(nullable = false)

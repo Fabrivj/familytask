@@ -21,11 +21,11 @@ public class FamilyController {
     private final FamilyGroupService familyGroupService;
 
     @PostMapping
-    public ResponseEntity<FamilyResponse> crearFamilia(
+    public ResponseEntity<FamilyResponse> createFamily(
             @Valid @RequestBody CreateFamilyRequest request,
-            @AuthenticationPrincipal User userAutenticado) {
+            @AuthenticationPrincipal User authenticatedUser) {
 
-        FamilyResponse response = familyGroupService.crearFamilia(request, userAutenticado);
+        FamilyResponse response = familyGroupService.createFamily(request, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 }
