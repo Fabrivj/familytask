@@ -39,7 +39,7 @@ public class AuthService {
         String picture  = (String) googleUser.get("picture");
 
         if (email == null) {
-            throw new AuthException("EMAIL_NOT_FOUND", "No se pudo obtener el correo desde Google");
+            throw new AuthException("EMAIL_NOT_FOUND", "No se pudo obtener tu correo. Reintenta el inicio de sesión.");
         }
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {

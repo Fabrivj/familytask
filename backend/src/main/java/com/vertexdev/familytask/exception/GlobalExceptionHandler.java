@@ -10,9 +10,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ErrorResponse> handleAuthException(AuthException ex) {
-        HttpStatus status = "EMAIL_NOT_FOUND".equals(ex.getCode())
-                ? HttpStatus.BAD_REQUEST
-                : HttpStatus.UNAUTHORIZED;
+        HttpStatus status = switch (ex.getCode()) {
+            case "EMAIL_NOT_FOUND", "LOGIN_CANCELLED" -> HttpStatus.BAD_REQUEST;
+            case "GOOGLE_CONNECTION_ERROR" -> HttpStatus.BAD_GATEWAY;
+            default -> HttpStatus.UNAUTHORIZED;
+        };
 
         return ResponseEntity.status(status)
                 .body(ErrorResponse.builder()
