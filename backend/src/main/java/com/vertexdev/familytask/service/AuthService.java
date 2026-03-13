@@ -2,6 +2,7 @@ package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.config.JwtUtil;
 import com.vertexdev.familytask.dto.auth.AuthResponse;
+import com.vertexdev.familytask.exception.AuthException;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.UserRepository;
@@ -38,7 +39,7 @@ public class AuthService {
         String picture  = (String) googleUser.get("picture");
 
         if (email == null) {
-            throw new RuntimeException("No se pudo obtener el correo desde Google");
+            throw new AuthException("EMAIL_NOT_FOUND", "No se pudo obtener tu correo. Reintenta el inicio de sesión.");
         }
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {
