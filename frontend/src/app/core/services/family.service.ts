@@ -17,7 +17,7 @@ export interface FamilyResponse {
 export class FamilyService {
   constructor(private http: HttpClient) {}
 
-  crear(request: CreateFamilyRequest): Observable<FamilyResponse> {
+  create(request: CreateFamilyRequest): Observable<FamilyResponse> {
     return this.http.post<FamilyResponse>(
       `${environment.apiUrl}/familias`,
       request

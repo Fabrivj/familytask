@@ -10,17 +10,17 @@ const SESSION_KEY = 'ft_session';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private readonly _sesion = signal<UserSession | null>(this.cargarSesionGuardada());
+  private readonly _session = signal<UserSession | null>(this.loadSavedSession());
 
-  // Signal público de solo lectura
-  readonly sesion = this._sesion.asReadonly();
-  readonly estaAutenticado = computed(() => this._sesion() !== null);
-  readonly families = computed(() => this._sesion()?.families ?? []);
+  // Public read-only signal
+  readonly session = this._session.asReadonly();
+  readonly isAuthenticated = computed(() => this._session() !== null);
+  readonly families = computed(() => this._session()?.families ?? []);
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  // ─── Paso 1: Redirigir al usuario a Google ───────────────────────────────────
-  redirigirAGoogle(): void {
+  // ─── Step 1: Redirect the user to Google ──────────────────────────────────
+  redirectToGoogle(): void {
     const { clientId, redirectUri, scope, authEndpoint } = environment.google;
 
     const params = new URLSearchParams({
@@ -35,79 +35,79 @@ export class AuthService {
     window.location.href = `${authEndpoint}?${params.toString()}`;
   }
 
-  // ─── Paso 2: Enviar el código al backend ─────────────────────────────────────
-  procesarGoogleCallback(code: string): Observable<AuthResponse> {
+  // ─── Step 2: Send the code to the backend ─────────────────────────────────
+  processGoogleCallback(code: string): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${environment.apiUrl}/auth/google/callback`, { code })
       .pipe(
-        tap(response => this.guardarSesion(response))
+        tap(response => this.saveSession(response))
       );
   }
 
-  // ─── Getters de conveniencia ─────────────────────────────────────────────────
+  // ─── Convenience getters ──────────────────────────────────────────────────
   getToken(): string | null {
-    return this._sesion()?.token ?? null;
+    return this._session()?.token ?? null;
   }
 
-  getFamiliaActivaId(): number | null {
-    return this._sesion()?.activeFamilyId ?? null;
+  getActiveFamilyId(): number | null {
+    return this._session()?.activeFamilyId ?? null;
   }
 
-  setFamiliaActiva(familiaId: number): void {
-    const sesionActual = this._sesion();
-    if (!sesionActual) return;
+  setActiveFamily(familyId: number): void {
+    const currentSession = this._session();
+    if (!currentSession) return;
 
-    const actualizada: UserSession = { ...sesionActual, activeFamilyId: familiaId };
-    this._sesion.set(actualizada);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
+    const updated: UserSession = { ...currentSession, activeFamilyId: familyId };
+    this._session.set(updated);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
   }
 
-  // ─── Cerrar sesión ───────────────────────────────────────────────────────────
-  cerrarSesion(): Observable<{ message: string }> {
+  // ─── Logout ───────────────────────────────────────────────────────────────
+  logout(): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/logout`, {});
   }
 
-  limpiarSesionLocal(): void {
-    this._sesion.set(null);
+  clearLocalSession(): void {
+    this._session.set(null);
     localStorage.removeItem(SESSION_KEY);
   }
 
-  // ─── Internos ────────────────────────────────────────────────────────────────
-  private guardarSesion(response: AuthResponse): void {
-    const sesion: UserSession = { ...response };
-    this._sesion.set(sesion);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sesion));
+  // ─── Internal ─────────────────────────────────────────────────────────────
+  private saveSession(response: AuthResponse): void {
+    const session: UserSession = { ...response };
+    this._session.set(session);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   }
 
-  agregarFamilia(familia: FamilySummary): void {
-    const sesionActual = this._sesion();
-    if (!sesionActual) return;
+  addFamily(family: FamilySummary): void {
+    const currentSession = this._session();
+    if (!currentSession) return;
 
-    const actualizada: UserSession = {
-      ...sesionActual,
-      families: [...sesionActual.families, familia],
+    const updated: UserSession = {
+      ...currentSession,
+      families: [...currentSession.families, family],
     };
-    this._sesion.set(actualizada);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
+    this._session.set(updated);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
   }
 
-  refrescarSesion(): Observable<void> {
+  refreshSession(): Observable<void> {
     return this.http.get<AuthResponse>(`${environment.apiUrl}/auth/me`).pipe(
       tap(response => {
-        const sesionActual = this._sesion();
-        if (!sesionActual) return;
-        const actualizada: UserSession = {
-          ...sesionActual,
+        const currentSession = this._session();
+        if (!currentSession) return;
+        const updated: UserSession = {
+          ...currentSession,
           families: response.families,
         };
-        this._sesion.set(actualizada);
-        localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
+        this._session.set(updated);
+        localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
       }),
       map(() => void 0)
     );
   }
 
-  private cargarSesionGuardada(): UserSession | null {
+  private loadSavedSession(): UserSession | null {
     try {
       const raw = localStorage.getItem(SESSION_KEY);
       return raw ? JSON.parse(raw) : null;
