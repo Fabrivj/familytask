@@ -15,33 +15,33 @@ export class InvitationService {
 
   constructor(private http: HttpClient) {}
 
-  crear(request: CreateInviteRequest): Observable<InviteResponse> {
+  create(request: CreateInviteRequest): Observable<InviteResponse> {
     return this.http.post<InviteResponse>(
-      `${environment.apiUrl}/invitaciones`,
+      `${environment.apiUrl}/invitations`,
       request
     );
   }
 
-  procesar(request: ProcessInviteRequest): Observable<void> {
+  process(request: ProcessInviteRequest): Observable<void> {
     return this.http.post<void>(
-      `${environment.apiUrl}/invitaciones/procesar`,
+      `${environment.apiUrl}/invitations/process`,
       request
     );
   }
 
-  guardarToken(token: string): void {
+  saveToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
   }
 
-  obtenerToken(): string | null {
+  getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
 
-  limpiarToken(): void {
+  clearToken(): void {
     localStorage.removeItem(this.tokenKey);
   }
 
-  hayTokenPendiente(): boolean {
-    return !!this.obtenerToken();
+  hasPendingToken(): boolean {
+    return !!this.getToken();
   }
 }

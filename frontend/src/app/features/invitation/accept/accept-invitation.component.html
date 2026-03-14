@@ -1,12 +1,12 @@
 <div class="inv-container">
-  @if (estado() === 'cargando' || estado() === 'procesando') {
+  @if (state() === 'loading' || state() === 'processing') {
     <div class="inv-card">
       <div class="spinner"></div>
-      <p>{{ estado() === 'procesando' ? 'Procesando tu invitación...' : 'Verificando invitación...' }}</p>
+      <p>{{ state() === 'processing' ? 'Procesando tu invitación...' : 'Verificando invitación...' }}</p>
     </div>
   }
 
-  @if (estado() === 'listo') {
+  @if (state() === 'ready') {
     <div class="inv-card">
       <span class="inv-icon">👨‍👩‍👧‍👦</span>
       <h2>Te invitaron a unirte</h2>
@@ -14,21 +14,21 @@
         Para aceptar la invitación necesitas iniciar sesión con tu cuenta de Google.
         Asegúrate de usar el correo al que llegó la invitación.
       </p>
-      <button class="btn-primary" (click)="aceptarInvitacion()">
+      <button class="btn-primary" (click)="acceptInvitation()">
         Aceptar invitación con Google
       </button>
-      <button class="btn-secondary" (click)="rechazar()">
+      <button class="btn-secondary" (click)="decline()">
         Rechazar
       </button>
     </div>
   }
 
-  @if (estado() === 'error') {
+  @if (state() === 'error') {
     <div class="inv-card error">
       <span class="inv-icon">⚠️</span>
       <h2>Invitación inválida</h2>
-      <p>{{ mensajeError() }}</p>
-      <button class="btn-primary" (click)="rechazar()">Ir al dashboard</button>
+      <p>{{ errorMessage() }}</p>
+      <button class="btn-primary" (click)="decline()">Ir al dashboard</button>
     </div>
   }
 </div>
@@ -74,4 +74,3 @@
   .btn-secondary:hover { border-color: #ccc; color: #555; }
   .error h2 { color: #d32f2f; }
 </style>
-

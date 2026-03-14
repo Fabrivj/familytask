@@ -25,7 +25,7 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'familia/nueva',
+    path: 'family/new',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/family/new/new-family.component').then(
@@ -33,7 +33,7 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'familia/seleccionar',
+    path: 'family/select',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/family/select/select-family.component').then(

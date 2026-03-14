@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
 
-type EstadoCallback = 'procesando' | 'error';
+type CallbackState = 'processing' | 'error';
 
 @Component({
   selector: 'app-callback',
@@ -12,9 +12,9 @@ type EstadoCallback = 'procesando' | 'error';
 })
 export class CallbackComponent implements OnInit {
 
-  readonly estado = signal<EstadoCallback>('procesando');
-  readonly mensajeError = signal<string>('');
-  readonly pasoActual = signal<string>('Verificando sesión con Google...');
+  readonly state = signal<CallbackState>('processing');
+  readonly errorMessage = signal<string>('');
+  readonly currentStep = signal<string>('Verificando sesión con Google...');
 
   constructor(
     private route: ActivatedRoute,
@@ -26,93 +26,93 @@ export class CallbackComponent implements OnInit {
   ngOnInit(): void {
     const error = this.route.snapshot.queryParamMap.get('error');
     if (error === 'access_denied') {
-      this.mostrarError('Inicio de sesión cancelado.');
+      this.showError('Inicio de sesión cancelado.');
       return;
     }
 
     const code = this.route.snapshot.queryParamMap.get('code');
     if (!code) {
-      this.mostrarError('No se recibió el código de autorización de Google.');
+      this.showError('No se recibió el código de autorización de Google.');
       return;
     }
 
-    this.procesarCallback(code);
+    this.processCallback(code);
   }
 
-  private procesarCallback(code: string): void {
-    // Google manda error=access_denied cuando el usuario cancela
+  private processCallback(code: string): void {
+    // Google sends error=access_denied when the user cancels
     const error = this.route.snapshot.queryParamMap.get('error');
     if (error === 'access_denied') {
-      this.mostrarError('Inicio de sesión cancelado.');
+      this.showError('Inicio de sesión cancelado.');
       return;
     }
 
-    this.pasoActual.set('Autenticando con Google...');
+    this.currentStep.set('Autenticando con Google...');
 
-    this.authService.procesarGoogleCallback(code).subscribe({
-      next: (authResponse) => this.postAutenticacion(authResponse),
+    this.authService.processGoogleCallback(code).subscribe({
+      next: (authResponse) => this.postAuthentication(authResponse),
       error: (err) => {
-        let mensaje: string;
+        let message: string;
         if (err.status === 0) {
-          mensaje = 'No se pudo conectar con Google. Intenta de nuevo.';
+          message = 'No se pudo conectar con Google. Intenta de nuevo.';
         } else if (err.error?.code === 'EMAIL_NOT_FOUND') {
-          mensaje = 'No se pudo obtener tu correo. Reintenta el inicio de sesión.';
+          message = 'No se pudo obtener tu correo. Reintenta el inicio de sesión.';
         } else {
-          mensaje = 'No se pudo validar tu sesión con Google. Intenta de nuevo.';
+          message = 'No se pudo validar tu sesión con Google. Intenta de nuevo.';
         }
-        this.mostrarError(mensaje);
+        this.showError(message);
       },
     });
   }
 
-  private postAutenticacion(authResponse: any): void {
-    const tokenInvitacion = this.invitationService.obtenerToken();
+  private postAuthentication(authResponse: any): void {
+    const invitationToken = this.invitationService.getToken();
 
-    if (tokenInvitacion) {
-      this.pasoActual.set('Procesando tu invitación...');
+    if (invitationToken) {
+      this.currentStep.set('Procesando tu invitación...');
 
-      this.invitationService.procesar({ token: tokenInvitacion }).subscribe({
+      this.invitationService.process({ token: invitationToken }).subscribe({
         next: () => {
-          this.invitationService.limpiarToken();
-          this.pasoActual.set('Cargando tu familia...');
-          this.authService.refrescarSesion().subscribe({
+          this.invitationService.clearToken();
+          this.currentStep.set('Cargando tu familia...');
+          this.authService.refreshSession().subscribe({
             next: () => this.router.navigate(['/dashboard']),
             error: () => this.router.navigate(['/dashboard']),
           });
         },
-        error: (err) => {                                          // ← aquí
-          this.invitationService.limpiarToken();
-          const mensaje = err.error?.message ?? 'No se pudo completar la incorporación. Intenta de nuevo.';
-          this.mostrarError(mensaje);
+        error: (err) => {
+          this.invitationService.clearToken();
+          const message = err.error?.message ?? 'No se pudo completar la incorporación. Intenta de nuevo.';
+          this.showError(message);
         },
       });
     } else {
-      this.redirigirPorContexto(authResponse);
+      this.redirectByContext(authResponse);
     }
   }
 
-  private redirigirPorContexto(authResponse: any): void {
+  private redirectByContext(authResponse: any): void {
     const families = authResponse.families ?? [];
 
     if (families.length === 0) {
-      // Sin familia → pantalla de creación/espera
-      this.router.navigate(['/familia/nueva']);
+      // No family → creation/waiting screen
+      this.router.navigate(['/family/new']);
     } else if (families.length === 1) {
-      // Una sola familia → ir al dashboard directamente
-      this.authService.setFamiliaActiva(families[0].familyId);
+      // Single family → go to dashboard directly
+      this.authService.setActiveFamily(families[0].familyId);
       this.router.navigate(['/dashboard']);
     } else {
-      // Varias familias → selección
-      this.router.navigate(['/familia/seleccionar']);
+      // Multiple families → selection
+      this.router.navigate(['/family/select']);
     }
   }
 
-  private mostrarError(mensaje: string): void {
-    this.estado.set('error');
-    this.mensajeError.set(mensaje);
+  private showError(message: string): void {
+    this.state.set('error');
+    this.errorMessage.set(message);
   }
 
-  volverAlLogin(): void {
+  goBackToLogin(): void {
     this.router.navigate(['/auth/login']);
   }
 }

@@ -11,17 +11,17 @@ import { InvitationService } from '../../core/services/invitation.service';
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
-  readonly sesion = computed(() => this.authService.sesion());
+  readonly session = computed(() => this.authService.session());
 
-  // Cierre de sesión
-  readonly errorCierre = signal<string | null>(null);
+  // Logout
+  readonly logoutError = signal<string | null>(null);
 
-  // Formulario de invitación
-  emailInvitado = '';
-  rolSeleccionado: 'PARENT' | 'CHILD' = 'CHILD';
-  readonly cargandoInvitacion = signal(false);
-  readonly linkGenerado = signal('');
-  readonly errorInvitacion = signal('');
+  // Invitation form
+  inviteeEmail = '';
+  selectedRole: 'PARENT' | 'CHILD' = 'CHILD';
+  readonly isLoadingInvitation = signal(false);
+  readonly generatedLink = signal('');
+  readonly invitationError = signal('');
 
   constructor(
     private authService: AuthService,
@@ -29,53 +29,53 @@ export class DashboardComponent {
     private router: Router,
   ) {}
 
-  cerrarSesion(): void {
-    this.errorCierre.set(null);
-    this.authService.cerrarSesion().subscribe({
+  logout(): void {
+    this.logoutError.set(null);
+    this.authService.logout().subscribe({
       next: (response) => {
-        this.authService.limpiarSesionLocal();
+        this.authService.clearLocalSession();
         this.router.navigate(['/auth/login'], { state: { message: response.message } });
       },
       error: (err) => {
-        this.errorCierre.set(err.error?.message ?? 'No se pudo cerrar sesión. Intenta de nuevo.');
+        this.logoutError.set(err.error?.message ?? 'No se pudo cerrar sesión. Intenta de nuevo.');
       },
     });
   }
 
-  generarInvitacion(): void {
-    const familiaId = this.authService.getFamiliaActivaId();
+  generateInvitation(): void {
+    const familyId = this.authService.getActiveFamilyId();
 
-    if (!familiaId) {
-      this.errorInvitacion.set('No hay familia activa seleccionada.');
+    if (!familyId) {
+      this.invitationError.set('No hay familia activa seleccionada.');
       return;
     }
 
-    if (!this.emailInvitado.trim()) {
-      this.errorInvitacion.set('El email es obligatorio.');
+    if (!this.inviteeEmail.trim()) {
+      this.invitationError.set('El email es obligatorio.');
       return;
     }
 
-    this.cargandoInvitacion.set(true);
-    this.linkGenerado.set('');
-    this.errorInvitacion.set('');
+    this.isLoadingInvitation.set(true);
+    this.generatedLink.set('');
+    this.invitationError.set('');
 
-    this.invitationService.crear({
-      invitedEmail: this.emailInvitado.trim(),
-      role: this.rolSeleccionado,
-      familyId: familiaId,
+    this.invitationService.create({
+      invitedEmail: this.inviteeEmail.trim(),
+      role: this.selectedRole,
+      familyId: familyId,
     }).subscribe({
       next: (response) => {
-        this.linkGenerado.set(response.inviteLink);
-        this.cargandoInvitacion.set(false);
+        this.generatedLink.set(response.inviteLink);
+        this.isLoadingInvitation.set(false);
       },
       error: (err) => {
-        this.errorInvitacion.set(err.error?.message ?? 'No se pudo generar la invitación.');
-        this.cargandoInvitacion.set(false);
+        this.invitationError.set(err.error?.message ?? 'No se pudo generar la invitación.');
+        this.isLoadingInvitation.set(false);
       },
     });
   }
 
-  copiarLink(): void {
-    navigator.clipboard.writeText(this.linkGenerado());
+  copyLink(): void {
+    navigator.clipboard.writeText(this.generatedLink());
   }
 }

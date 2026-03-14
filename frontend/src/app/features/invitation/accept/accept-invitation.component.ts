@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
 
-type EstadoPagina = 'cargando' | 'listo' | 'procesando' | 'error';
+type PageState = 'loading' | 'ready' | 'processing' | 'error';
 
 @Component({
   selector: 'app-accept-invitation',
@@ -12,8 +12,8 @@ type EstadoPagina = 'cargando' | 'listo' | 'procesando' | 'error';
 })
 export class AcceptInvitationComponent implements OnInit {
 
-  readonly estado = signal<EstadoPagina>('cargando');
-  readonly mensajeError = signal('');
+  readonly state = signal<PageState>('loading');
+  readonly errorMessage = signal('');
   private token = '';
 
   constructor(
@@ -27,54 +27,54 @@ export class AcceptInvitationComponent implements OnInit {
     const token = this.route.snapshot.queryParamMap.get('token');
 
     if (!token) {
-      this.mostrarError('El enlace de invitación no es válido.');
+      this.showError('El enlace de invitación no es válido.');
       return;
     }
 
     this.token = token;
-    // Guardar siempre en localStorage por si necesita pasar por Google
-    this.invitationService.guardarToken(token);
+    // Always save to localStorage in case it needs to go through Google
+    this.invitationService.saveToken(token);
 
-    if (this.authService.estaAutenticado()) {
-      // Ya tiene sesión → procesar directo sin pasar por Google
-      this.estado.set('procesando');
-      this.procesarDirecto(token);
+    if (this.authService.isAuthenticated()) {
+      // Already has session → process directly without going through Google
+      this.state.set('processing');
+      this.processDirectly(token);
     } else {
-      // Sin sesión → mostrar pantalla de confirmación
-      this.estado.set('listo');
+      // No session → show confirmation screen
+      this.state.set('ready');
     }
   }
 
-  private procesarDirecto(token: string): void {
-    this.invitationService.procesar({ token }).subscribe({
+  private processDirectly(token: string): void {
+    this.invitationService.process({ token }).subscribe({
       next: () => {
-        this.invitationService.limpiarToken();
-        // Refrescar sesión para que el dashboard vea la nueva familia
-        this.authService.refrescarSesion().subscribe({
+        this.invitationService.clearToken();
+        // Refresh session so the dashboard sees the new family
+        this.authService.refreshSession().subscribe({
           next: () => this.router.navigate(['/dashboard']),
           error: () => this.router.navigate(['/dashboard']),
         });
       },
       error: (err) => {
-        this.invitationService.limpiarToken();
-        const mensaje = err.error?.message ?? 'La invitación no es válida o expiró.';
-        this.mostrarError(mensaje);
+        this.invitationService.clearToken();
+        const message = err.error?.message ?? 'La invitación no es válida o expiró.';
+        this.showError(message);
       },
     });
   }
 
-  aceptarInvitacion(): void {
-    // Sin sesión → ir a Google, el callback se encarga del resto
-    this.authService.redirigirAGoogle();
+  acceptInvitation(): void {
+    // No session → go to Google, the callback handles the rest
+    this.authService.redirectToGoogle();
   }
 
-  rechazar(): void {
-    this.invitationService.limpiarToken();
+  decline(): void {
+    this.invitationService.clearToken();
     this.router.navigate(['/dashboard']);
   }
 
-  private mostrarError(mensaje: string): void {
-    this.estado.set('error');
-    this.mensajeError.set(mensaje);
+  private showError(message: string): void {
+    this.state.set('error');
+    this.errorMessage.set(message);
   }
 }

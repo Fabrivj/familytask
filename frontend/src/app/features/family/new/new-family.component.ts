@@ -16,51 +16,51 @@ export class NewFamilyComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly nombreCtrl = new FormControl('', { nonNullable: true });
-  readonly cargando = signal(false);
+  readonly nameCtrl = new FormControl('', { nonNullable: true });
+  readonly isLoading = signal(false);
   readonly error = signal('');
-  readonly mostrarFormulario = signal(false);
+  readonly showForm = signal(false);
 
-  readonly nombreCorto = computed(() => {
-    const nombre = this.authService.sesion()?.name ?? '';
-    return nombre.split(' ')[0];
+  readonly shortName = computed(() => {
+    const name = this.authService.session()?.name ?? '';
+    return name.split(' ')[0];
   });
 
-  readonly inicialNombre = computed(() => {
-    return (this.authService.sesion()?.name?.[0] ?? '?').toUpperCase();
+  readonly nameInitial = computed(() => {
+    return (this.authService.session()?.name?.[0] ?? '?').toUpperCase();
   });
 
-  crear(): void {
-    const nombre = this.nombreCtrl.value.trim();
-    if (!nombre) {
+  create(): void {
+    const name = this.nameCtrl.value.trim();
+    if (!name) {
       this.error.set('El nombre es obligatorio.');
       return;
     }
-    this.cargando.set(true);
+    this.isLoading.set(true);
     this.error.set('');
-    this.nombreCtrl.disable();
+    this.nameCtrl.disable();
 
-    this.familyService.crear({ name: nombre }).subscribe({
-      next: (familia) => {
-        this.authService.agregarFamilia({
-          familyId: familia.id,
-          familyName: familia.name,
+    this.familyService.create({ name }).subscribe({
+      next: (family) => {
+        this.authService.addFamily({
+          familyId: family.id,
+          familyName: family.name,
           role: 'PARENT',
         });
-        this.authService.setFamiliaActiva(familia.id);
+        this.authService.setActiveFamily(family.id);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.error.set(err.error?.message ?? 'No se pudo crear la familia.');
-        this.cargando.set(false);
-        this.nombreCtrl.enable();
+        this.isLoading.set(false);
+        this.nameCtrl.enable();
       },
     });
   }
 
-  volver(): void {
-    this.nombreCtrl.reset();
+  goBack(): void {
+    this.nameCtrl.reset();
     this.error.set('');
-    this.mostrarFormulario.set(false);
+    this.showForm.set(false);
   }
 }

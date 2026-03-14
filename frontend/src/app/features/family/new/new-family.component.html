@@ -5,8 +5,8 @@
     <div class="top-bar">
       <span class="logo-small" aria-label="FamilyTask">FamilyTask</span>
       <div class="user-chip" aria-label="Usuario actual">
-        <div class="avatar" aria-hidden="true">{{ inicialNombre() }}</div>
-        <span class="user-name">{{ nombreCorto() }}</span>
+        <div class="avatar" aria-hidden="true">{{ nameInitial() }}</div>
+        <span class="user-name">{{ shortName() }}</span>
       </div>
     </div>
 
@@ -23,11 +23,11 @@
           <div class="pip"></div>
         </div>
         <div class="tag">// PRIMER ACCESO</div>
-        <div class="card-title" role="heading" aria-level="1">¡Bienvenido, {{ nombreCorto() }}!</div>
+        <div class="card-title" role="heading" aria-level="1">¡Bienvenido, {{ shortName() }}!</div>
         <div class="card-sub">Aún no perteneces a ningún grupo familiar.</div>
       </div>
 
-      @if (!mostrarFormulario()) {
+      @if (!showForm()) {
 
         <!-- Estado inicial: opción + info -->
         <div class="body">
@@ -59,7 +59,7 @@
         </div>
 
         <div class="cta-wrap">
-          <button class="btn-cta" type="button" (click)="mostrarFormulario.set(true)">
+          <button class="btn-cta" type="button" (click)="showForm.set(true)">
             <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
               <path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
             </svg>
@@ -80,8 +80,8 @@
               class="field-input"
               type="text"
               placeholder="Ej. Familia García"
-              [formControl]="nombreCtrl"
-              (keyup.enter)="crear()"
+              [formControl]="nameCtrl"
+              (keyup.enter)="create()"
               autocomplete="off"
             />
             @if (error()) {
@@ -94,10 +94,10 @@
           <button
             class="btn-cta"
             type="button"
-            (click)="crear()"
-            [disabled]="cargando()"
+            (click)="create()"
+            [disabled]="isLoading()"
           >
-            @if (cargando()) {
+            @if (isLoading()) {
               <span class="spinner" aria-hidden="true"></span>
               Creando...
             } @else {
@@ -110,7 +110,7 @@
         </div>
 
         <p class="footer-note">
-          <button class="back-link" type="button" (click)="volver()">← Volver</button>
+          <button class="back-link" type="button" (click)="goBack()">← Volver</button>
         </p>
 
       }

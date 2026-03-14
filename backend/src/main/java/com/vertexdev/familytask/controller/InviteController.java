@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/invitaciones")
+@RequestMapping("/api/invitations")
 @RequiredArgsConstructor
 public class InviteController {
 
@@ -25,7 +25,7 @@ public class InviteController {
      * The Parent/Guardian generates the invitation.
      * Requires JWT in the Authorization header.
      *
-     * POST /api/invitaciones
+     * POST /api/invitations
      * Body: { "invitedEmail": "...", "role": "MEMBER", "familyId": 1 }
      */
     @PostMapping
@@ -41,10 +41,10 @@ public class InviteController {
      * The invited user, already authenticated with Google, sends the token stored in localStorage.
      * Requires JWT in the Authorization header.
      *
-     * POST /api/invitaciones/procesar
+     * POST /api/invitations/process
      * Body: { "token": "uuid-token-value" }
      */
-    @PostMapping("/procesar")
+    @PostMapping("/process")
     public ResponseEntity<Void> processInvitation(
             @Valid @RequestBody ProcessInviteRequest request,
             @AuthenticationPrincipal User authenticatedUser) {
