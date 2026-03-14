@@ -3,6 +3,7 @@ package com.vertexdev.familytask.service;
 import com.vertexdev.familytask.dto.invite.CreateInviteRequest;
 import com.vertexdev.familytask.dto.invite.InviteResponse;
 import com.vertexdev.familytask.dto.invite.ProcessInviteRequest;
+import com.vertexdev.familytask.exception.InvitationException;
 import com.vertexdev.familytask.mapper.InviteMapper;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
@@ -45,13 +46,14 @@ public class InvitationService {
     @Transactional
     public InviteResponse createInvitation(CreateInviteRequest request, User requester) {
         FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
-                .orElseThrow(() -> new RuntimeException("Familia no encontrada"));
+                .orElseThrow(() -> new InvitationException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
 
         // Verify that the requester is PARENT in this family
         familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
                 .filter(m -> m.getRole() == Role.PARENT && m.getIsActive())
-                .orElseThrow(() -> new RuntimeException("No tienes permisos para invitar miembros a esta familia"));
+                .orElseThrow(() -> new InvitationException("ACCESS_DENIED",
+                        "No tienes permisos para invitar miembros a esta familia.", 403));
 
         // Validate that the email is not already an active member or has a pending invitation
         boolean alreadyMember = userRepository.findByEmail(request.getInvitedEmail())
@@ -59,19 +61,14 @@ public class InvitationService {
                         .existsByFamilyGroupIdAndUserId(familyGroup.getId(), existingUser.getId()))
                 .orElse(false);
 
-        if (alreadyMember) {
-            throw new RuntimeException(
-                    "Este correo ya es miembro activo de esta familia.");
-        }
-
-
         boolean hasPendingInvitation = invitationRepository
                 .existsByInvitedEmailAndFamilyGroupIdAndIsUsedFalseAndExpirationDateAfter(
                         request.getInvitedEmail(), familyGroup.getId(), LocalDateTime.now()
                 );
 
         if (alreadyMember || hasPendingInvitation) {
-            throw new RuntimeException("Este correo ya tiene una invitación pendiente para esta familia.");
+            throw new InvitationException("ALREADY_MEMBER_OR_PENDING",
+                    "Este correo ya pertenece a la familia o tiene una invitación pendiente.", 409);
         }
 
         // Create the invitation
@@ -105,31 +102,31 @@ public class InvitationService {
         try {
             tokenUUID = UUID.fromString(request.getToken());
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("La invitación no es válida o expiró");
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
         }
 
         Invitation invitation = invitationRepository.findByToken(tokenUUID)
-                .orElseThrow(() -> new RuntimeException("La invitación no es válida o expiró"));
+                .orElseThrow(() -> new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400));
 
         // Validate that it hasn't been used
         if (invitation.getIsUsed()) {
-            throw new RuntimeException("La invitación no es válida o expiró");
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
         }
 
         // Validate that it hasn't expired
         if (LocalDateTime.now().isAfter(invitation.getExpirationDate())) {
-            throw new RuntimeException("La invitación no es válida o expiró");
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
         }
 
         // Validate that the Google email matches the invitation email
         if (!invitation.getInvitedEmail().equalsIgnoreCase(authenticatedUser.getEmail())) {
-            throw new RuntimeException("Esta invitación no pertenece a tu cuenta de Google");
+            throw new InvitationException("EMAIL_MISMATCH", "Esta invitación no pertenece a tu cuenta de Google.", 403);
         }
 
         // Verify that user is not already a member
         if (familyMemberRepository.existsByFamilyGroupIdAndUserId(
                 invitation.getFamilyGroup().getId(), authenticatedUser.getId())) {
-            throw new RuntimeException("Ya eres miembro de esta familia");
+            throw new InvitationException("ALREADY_MEMBER", "Ya eres miembro de esta familia.", 409);
         }
 
         // Add user as a member of the family with the invitation role

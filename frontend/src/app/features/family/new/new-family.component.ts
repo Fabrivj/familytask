@@ -54,7 +54,7 @@ export class NewFamilyComponent {
           role: 'PARENT',
         });
         this.authService.setActiveFamily(family.id);
-        this.router.navigate(['/dashboard'], {
+        this.router.navigate(['/invitation/create'], {
           state: { message: 'Familia creada exitosamente.' },
         });
       },
