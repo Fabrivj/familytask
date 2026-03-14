@@ -1,0 +1,195 @@
+<div class="page-container">
+  <div class="page">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <span class="logo-small" aria-label="FamilyTask">FamilyTask</span>
+      <div class="user-chip" aria-label="Usuario actual">
+        <div class="avatar" aria-hidden="true">{{ nameInitial() }}</div>
+        <span class="user-name">{{ shortName() }}</span>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+      <div class="corner tl" aria-hidden="true"></div>
+      <div class="corner br" aria-hidden="true"></div>
+
+      <!-- Header -->
+      <div class="card-header">
+        <div class="step-row" aria-hidden="true">
+          <div class="pip done"></div>
+          <div class="pip done"></div>
+          <div class="pip on"></div>
+        </div>
+        <div class="tag">// PASO 3 DE 3</div>
+        <div class="card-title" role="heading" aria-level="1">Invita a tu familia</div>
+        <div class="card-sub">
+          Genera un link para que cada miembro se una a
+          <strong class="family-highlight">{{ familyName() }}</strong>
+        </div>
+      </div>
+
+      <!-- Family badge -->
+      <div class="body">
+
+        <div class="family-badge">
+          <div class="family-icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
+          <div class="family-info">
+            <span class="family-name">{{ familyName() }}</span>
+            <span class="family-role-badge">{{ familyRole() }}</span>
+          </div>
+        </div>
+
+        @if (!generatedLink()) {
+
+          <!-- Form: email + role -->
+          <div class="field-group">
+            <label class="field-label" for="invite-email">Email del invitado</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M2 6l8 5 8-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input
+                id="invite-email"
+                class="field-input"
+                type="email"
+                placeholder="correo@ejemplo.com"
+                [formControl]="emailCtrl"
+                (keyup.enter)="generateLink()"
+                autocomplete="email"
+              />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="invite-role">Rol del invitado</label>
+            <div class="select-wrap">
+              <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              <select
+                id="invite-role"
+                class="field-select"
+                [formControl]="roleCtrl"
+              >
+                <option value="CHILD">Hijo / a</option>
+                <option value="PARENT">Padre / Tutor</option>
+              </select>
+              <svg class="select-arrow" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          @if (error()) {
+            <p class="field-error" role="alert">{{ error() }}</p>
+          }
+
+        } @else {
+
+          <!-- Success: show generated link -->
+          <div class="success-section">
+            @if (successMessage()) {
+              <div class="success-toast" role="status">
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M5.5 8.5l1.5 1.5 3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ successMessage() }}
+              </div>
+            }
+
+            <div class="link-box">
+              <span class="link-text">{{ generatedLink() }}</span>
+              <button
+                class="btn-copy"
+                type="button"
+                (click)="copyLink()"
+                [attr.aria-label]="linkCopied() ? 'Copiado' : 'Copiar link'"
+              >
+                @if (linkCopied()) {
+                  ✓
+                } @else {
+                  Copiar
+                }
+              </button>
+            </div>
+
+            <div class="link-info">
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M8 7.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                <circle cx="8" cy="5.2" r="0.7" fill="currentColor"/>
+              </svg>
+              El link es de <strong>uso único</strong> y expira en 7 días.
+            </div>
+          </div>
+
+        }
+
+      </div>
+
+      <!-- CTA area -->
+      <div class="cta-wrap">
+        @if (!generatedLink()) {
+          <button
+            class="btn-cta"
+            type="button"
+            (click)="generateLink()"
+            [disabled]="isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="spinner" aria-hidden="true"></span>
+              Generando...
+            } @else {
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+                <path d="M6 3l-3 3v4a2 2 0 002 2h6a2 2 0 002-2V6l-3-3H6z" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 3v3h4V3" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Generar link
+            }
+          </button>
+        } @else {
+          <button
+            class="btn-cta btn-secondary"
+            type="button"
+            (click)="inviteAnother()"
+          >
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+              <path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Invitar a otro miembro
+          </button>
+        }
+      </div>
+
+      <!-- Skip / go to dashboard -->
+      <p class="footer-note">
+        @if (inviteCount() > 0) {
+          <span class="invite-count">{{ inviteCount() }} invitación{{ inviteCount() > 1 ? 'es' : '' }} generada{{ inviteCount() > 1 ? 's' : '' }}</span>
+          <span class="separator">·</span>
+        }
+        <button class="skip-link" type="button" (click)="goToDashboard()">
+          Saltar por ahora → ir al inicio
+        </button>
+      </p>
+
+    </div>
+
+    <!-- Help chip -->
+    <div class="help-row">
+      <div class="help-chip">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+          <circle cx="8" cy="8" r="6.5" stroke="#8AD8FF" stroke-width="1.3"/>
+          <path d="M8 7.5v4" stroke="#8AD8FF" stroke-width="1.3" stroke-linecap="round"/>
+          <circle cx="8" cy="5.2" r="0.8" fill="#8AD8FF"/>
+        </svg>
+        Podrás invitar más miembros después desde la configuración de tu familia.
+      </div>
+    </div>
+
+  </div>
+</div>

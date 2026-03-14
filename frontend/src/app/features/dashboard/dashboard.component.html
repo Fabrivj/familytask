@@ -37,42 +37,6 @@
             }
           </div>
         </section>
-
-        <!-- Generar invitación — solo visible si eres PARENT -->
-        @if (s.families[0].role === 'PARENT') {
-          <section class="section">
-            <h3>Invitar miembro</h3>
-            <div class="invite-form">
-              <input
-                type="email"
-                placeholder="Email del invitado"
-                [(ngModel)]="inviteeEmail"
-                [disabled]="isLoadingInvitation()"
-              />
-              <select [(ngModel)]="selectedRole" [disabled]="isLoadingInvitation()">
-                <option value="CHILD">Hijo</option>
-                <option value="PARENT">Padre/Tutor</option>
-              </select>
-              <button (click)="generateInvitation()" [disabled]="isLoadingInvitation()">
-                {{ isLoadingInvitation() ? 'Generando...' : 'Generar link' }}
-              </button>
-            </div>
-
-            @if (invitationError()) {
-              <p class="error">{{ invitationError() }}</p>
-            }
-
-            @if (generatedLink()) {
-              <div class="link-result">
-                <p>Link generado (válido 7 días):</p>
-                <div class="link-box">
-                  <span>{{ generatedLink() }}</span>
-                  <button class="btn-copy" (click)="copyLink()">Copiar</button>
-                </div>
-              </div>
-            }
-          </section>
-        }
       } @else {
         <p>Aún no perteneces a ninguna familia.
           <a routerLink="/family/new">Crear una</a>
@@ -115,38 +79,7 @@
   }
   .chip strong { color: #1a1a2e; }
   .chip span { font-size: 13px; color: #888; margin-top: 2px; }
-  .invite-form { display: flex; gap: 10px; flex-wrap: wrap; }
-  input[type="email"] {
-    flex: 1; min-width: 200px; padding: 12px 16px;
-    border: 2px solid #e0e0e0; border-radius: 10px;
-    font-size: 15px; outline: none;
-  }
-  input:focus { border-color: #4285F4; }
-  select {
-    padding: 12px 16px; border: 2px solid #e0e0e0;
-    border-radius: 10px; font-size: 15px;
-    background: white; outline: none; cursor: pointer;
-  }
-  .invite-form button {
-    padding: 12px 20px; background: #1a1a2e; color: white;
-    border: none; border-radius: 10px; font-size: 15px;
-    font-weight: 600; cursor: pointer; transition: opacity 0.2s;
-  }
-  .invite-form button:disabled { opacity: 0.6; cursor: not-allowed; }
   .logout-area { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-  .msg-success { color: #2e7d32; font-size: 13px; margin: 0; }
+  .msg-success { color: #2e7d32; font-size: 13px; margin: 0 0 16px; }
   .error { color: #d32f2f; font-size: 14px; margin-top: 10px; }
-  .link-result { margin-top: 16px; }
-  .link-result p { font-size: 14px; color: #555; margin-bottom: 8px; }
-  .link-box {
-    display: flex; align-items: center; gap: 10px;
-    background: white; border: 2px solid #e0e0e0;
-    border-radius: 10px; padding: 12px 16px;
-  }
-  .link-box span { flex: 1; font-size: 13px; color: #333; word-break: break-all; }
-  .btn-copy {
-    padding: 6px 14px; background: #4285F4; color: white;
-    border: none; border-radius: 8px; cursor: pointer;
-    font-size: 13px; font-weight: 600; white-space: nowrap;
-  }
 </style>

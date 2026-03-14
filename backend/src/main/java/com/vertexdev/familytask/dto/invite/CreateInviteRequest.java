@@ -9,8 +9,8 @@ import lombok.Data;
 @Data
 public class CreateInviteRequest {
 
-    @NotBlank
-    @Email(message = "Formato de email inválido")
+    @NotBlank(message = "El correo ingresado no es válido.")
+    @Email(message = "El correo ingresado no es válido.")
     private String invitedEmail;
 
     @NotNull(message = "El rol es requerido")
