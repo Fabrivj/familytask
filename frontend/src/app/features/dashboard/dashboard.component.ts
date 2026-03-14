@@ -13,6 +13,9 @@ import { InvitationService } from '../../core/services/invitation.service';
 export class DashboardComponent {
   readonly session = computed(() => this.authService.session());
 
+  // Incoming success message (e.g. from family creation)
+  readonly successMessage = signal<string | null>(history.state?.message ?? null);
+
   // Logout
   readonly logoutError = signal<string | null>(null);
 

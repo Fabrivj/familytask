@@ -19,6 +19,9 @@
     </header>
 
     <main>
+      @if (successMessage()) {
+        <p class="msg-success" role="status">{{ successMessage() }}</p>
+      }
       <h1>Bienvenido, {{ s.name.split(' ')[0] }} 👋</h1>
 
       <!-- Familias -->
