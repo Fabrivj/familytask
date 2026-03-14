@@ -1,17 +1,17 @@
 <div class="callback-container">
-  @if (estado() === 'procesando') {
+  @if (state() === 'processing') {
     <div class="callback-card">
       <div class="spinner"></div>
-      <p class="paso">{{ pasoActual() }}</p>
+      <p class="paso">{{ currentStep() }}</p>
     </div>
   }
 
-  @if (estado() === 'error') {
+  @if (state() === 'error') {
     <div class="callback-card error">
       <span class="error-icon">⚠️</span>
       <h2>Algo salió mal</h2>
-      <p>{{ mensajeError() }}</p>
-      <button (click)="volverAlLogin()">Volver al inicio</button>
+      <p>{{ errorMessage() }}</p>
+      <button (click)="goBackToLogin()">Volver al inicio</button>
     </div>
   }
 </div>

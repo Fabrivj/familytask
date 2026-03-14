@@ -1,5 +1,5 @@
 <div class="dash-container">
-  @if (sesion(); as s) {
+  @if (session(); as s) {
     <header class="dash-header">
       <div class="user-info">
         @if (s.pictureUrl) {
@@ -11,9 +11,9 @@
         </div>
       </div>
       <div class="logout-area">
-        <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesión</button>
-        @if (errorCierre()) {
-          <p class="error">{{ errorCierre() }}</p>
+        <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+        @if (logoutError()) {
+          <p class="error">{{ logoutError() }}</p>
         }
       </div>
     </header>
@@ -43,28 +43,28 @@
               <input
                 type="email"
                 placeholder="Email del invitado"
-                [(ngModel)]="emailInvitado"
-                [disabled]="cargandoInvitacion()"
+                [(ngModel)]="inviteeEmail"
+                [disabled]="isLoadingInvitation()"
               />
-              <select [(ngModel)]="rolSeleccionado" [disabled]="cargandoInvitacion()">
+              <select [(ngModel)]="selectedRole" [disabled]="isLoadingInvitation()">
                 <option value="CHILD">Hijo</option>
                 <option value="PARENT">Padre/Tutor</option>
               </select>
-              <button (click)="generarInvitacion()" [disabled]="cargandoInvitacion()">
-                {{ cargandoInvitacion() ? 'Generando...' : 'Generar link' }}
+              <button (click)="generateInvitation()" [disabled]="isLoadingInvitation()">
+                {{ isLoadingInvitation() ? 'Generando...' : 'Generar link' }}
               </button>
             </div>
 
-            @if (errorInvitacion()) {
-              <p class="error">{{ errorInvitacion() }}</p>
+            @if (invitationError()) {
+              <p class="error">{{ invitationError() }}</p>
             }
 
-            @if (linkGenerado()) {
+            @if (generatedLink()) {
               <div class="link-result">
                 <p>Link generado (válido 7 días):</p>
                 <div class="link-box">
-                  <span>{{ linkGenerado() }}</span>
-                  <button class="btn-copy" (click)="copiarLink()">Copiar</button>
+                  <span>{{ generatedLink() }}</span>
+                  <button class="btn-copy" (click)="copyLink()">Copiar</button>
                 </div>
               </div>
             }

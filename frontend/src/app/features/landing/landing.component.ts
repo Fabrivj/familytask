@@ -30,7 +30,7 @@ export class LandingComponent {
   private router = inject(Router);
 
   onCtaClick(): void {
-    if (this.auth.estaAutenticado()) {
+    if (this.auth.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     } else {
       this.router.navigate(['/auth/login']);

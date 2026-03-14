@@ -10,9 +10,9 @@ import { AuthService } from '../../../core/services/auth.service';
 export class LoginComponent {
   private readonly authService = inject(AuthService);
 
-  readonly mensajeCierre = signal<string | null>(history.state?.message ?? null);
+  readonly logoutMessage = signal<string | null>(history.state?.message ?? null);
 
-  iniciarSesionConGoogle(): void {
-    this.authService.redirigirAGoogle();
+  loginWithGoogle(): void {
+    this.authService.redirectToGoogle();
   }
 }
