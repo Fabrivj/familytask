@@ -30,12 +30,18 @@ export class NewFamilyComponent {
     return (this.authService.session()?.name?.[0] ?? '?').toUpperCase();
   });
 
+  private readonly VALIDATION_MSG =
+    'El nombre debe tener entre 3 y 50 caracteres y no puede contener caracteres inválidos.';
+  private readonly VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
+
   create(): void {
     const name = this.nameCtrl.value.trim();
-    if (!name) {
-      this.error.set('El nombre es obligatorio.');
+
+    if (!name || name.length < 3 || name.length > 50 || !this.VALID_NAME.test(name)) {
+      this.error.set(this.VALIDATION_MSG);
       return;
     }
+
     this.isLoading.set(true);
     this.error.set('');
     this.nameCtrl.disable();
@@ -48,10 +54,12 @@ export class NewFamilyComponent {
           role: 'PARENT',
         });
         this.authService.setActiveFamily(family.id);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dashboard'], {
+          state: { message: 'Familia creada exitosamente.' },
+        });
       },
       error: (err) => {
-        this.error.set(err.error?.message ?? 'No se pudo crear la familia.');
+        this.error.set(err.error?.message ?? 'No se pudo crear la familia. Intenta de nuevo.');
         this.isLoading.set(false);
         this.nameCtrl.enable();
       },

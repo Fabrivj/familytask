@@ -97,3 +97,10 @@
 @media (max-width: 700px) {
   .landing-section { padding: 56px 0; }
 }
+
+/* ── Shared feedback messages ── */
+.msg-success {
+  color: var(--success);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
