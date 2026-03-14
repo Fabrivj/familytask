@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/familias")
+@RequestMapping("/api/families")
 @RequiredArgsConstructor
 public class FamilyController {
 

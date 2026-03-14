@@ -17,14 +17,14 @@ export class InvitationService {
 
   create(request: CreateInviteRequest): Observable<InviteResponse> {
     return this.http.post<InviteResponse>(
-      `${environment.apiUrl}/invitaciones`,
+      `${environment.apiUrl}/invitations`,
       request
     );
   }
 
   process(request: ProcessInviteRequest): Observable<void> {
     return this.http.post<void>(
-      `${environment.apiUrl}/invitaciones/procesar`,
+      `${environment.apiUrl}/invitations/process`,
       request
     );
   }

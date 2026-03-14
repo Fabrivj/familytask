@@ -19,7 +19,7 @@ export class FamilyService {
 
   create(request: CreateFamilyRequest): Observable<FamilyResponse> {
     return this.http.post<FamilyResponse>(
-      `${environment.apiUrl}/familias`,
+      `${environment.apiUrl}/families`,
       request
     );
   }
