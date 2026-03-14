@@ -96,14 +96,14 @@ export class CallbackComponent implements OnInit {
 
     if (families.length === 0) {
       // Sin familia → pantalla de creación/espera
-      this.router.navigate(['/familia/nueva']);
+      this.router.navigate(['/family/new']);
     } else if (families.length === 1) {
       // Una sola familia → ir al dashboard directamente
       this.authService.setFamiliaActiva(families[0].familyId);
       this.router.navigate(['/dashboard']);
     } else {
       // Varias familias → selección
-      this.router.navigate(['/familia/seleccionar']);
+      this.router.navigate(['/family/select']);
     }
   }
 
