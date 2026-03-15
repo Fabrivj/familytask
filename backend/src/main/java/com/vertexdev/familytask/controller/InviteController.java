@@ -1,6 +1,8 @@
 package com.vertexdev.familytask.controller;
 
+import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.invite.CreateInviteRequest;
+import com.vertexdev.familytask.dto.invite.InvitePreviewResponse;
 import com.vertexdev.familytask.dto.invite.InviteResponse;
 import com.vertexdev.familytask.dto.invite.ProcessInviteRequest;
 import com.vertexdev.familytask.model.User;
@@ -9,9 +11,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -20,6 +24,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class InviteController {
 
     private final InvitationService invitationService;
+
+    /**
+     * Public endpoint: returns invitation details (family name, role, email) without requiring auth.
+     * Used by the frontend to display invitation info before the user logs in.
+     *
+     * GET /api/invitations/preview?token=<uuid>
+     */
+    @GetMapping("/preview")
+    public ResponseEntity<InvitePreviewResponse> previewInvitation(@RequestParam String token) {
+        return ResponseEntity.ok(invitationService.getPreview(token));
+    }
 
     /**
      * The Parent/Guardian generates the invitation.
@@ -45,11 +60,11 @@ public class InviteController {
      * Body: { "token": "uuid-token-value" }
      */
     @PostMapping("/process")
-    public ResponseEntity<Void> processInvitation(
+    public ResponseEntity<MessageResponse> processInvitation(
             @Valid @RequestBody ProcessInviteRequest request,
             @AuthenticationPrincipal User authenticatedUser) {
 
         invitationService.processInvitation(request, authenticatedUser);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new MessageResponse("Te has unido a la familia exitosamente."));
     }
 }

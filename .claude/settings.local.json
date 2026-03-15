@@ -5,7 +5,15 @@
       "Bash(mkdir invitation/accept)",
       "Bash(cp invitacion/accept/accept-invitation.component.html invitation/accept/accept-invitation.component.html)",
       "Bash(cp invitacion/accept/accept-invitation.component.ts invitation/accept/accept-invitation.component.ts)",
-      "Bash(rm -rf invitacion)"
+      "Bash(rm -rf invitacion)",
+      "Bash(cd \"/d/Desktop - Copy/Bachillerato Ing en Software/Cuatrimestres/2026/Enero - Mayo 2026/familtytask/backend\" && ./mvnw test -Dtest=*Controller* -q 2>&1 | tail -20)",
+      "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\backend\" && ./mvnw test -Dtest=\"JwtUtilTest,FamilyControllerTest,InviteControllerTest\" -pl . 2>&1 | tail -60)",
+      "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\frontend\" && npx vitest run --reporter=verbose 2>&1 | tail -80)",
+      "Bash(jar tf:*)",
+      "Bash(find /c/Users/Jose/.m2/repository/org/springframework/boot -name \"*webmvc*test*\" -o -name \"*test*webmvc*\" 2>/dev/null | head -10)",
+      "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\frontend\" && npx ng test --no-watch 2>&1 | tail -80)",
+      "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\backend\" && ./mvnw test -Dtest=\"JwtUtilTest,FamilyControllerTest,InviteControllerTest\" 2>&1 | tail -80)",
+      "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\backend\" && ./mvnw test -Dtest=\"JwtUtilTest,FamilyControllerTest,InviteControllerTest\" 2>&1 | tail -40)"
     ]
   }
 }

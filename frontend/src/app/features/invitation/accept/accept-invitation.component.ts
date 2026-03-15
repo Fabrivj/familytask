@@ -1,28 +1,72 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
+import { InviteDetailsResponse } from '../../../core/models/invitation.model';
 
-type PageState = 'loading' | 'ready' | 'processing' | 'error';
+type PageState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
 
 @Component({
   selector: 'app-accept-invitation',
   standalone: true,
   templateUrl: './accept-invitation.component.html',
+  styleUrl: './accept-invitation.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AcceptInvitationComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly invitationService = inject(InvitationService);
 
   readonly state = signal<PageState>('loading');
   readonly errorMessage = signal('');
+  readonly details = signal<InviteDetailsResponse | null>(null);
+
   private token = '';
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private invitationService: InvitationService,
-  ) {}
+  // ─── Computed helpers ──────────────────────────────────────────────────────
+  readonly rolLabel = computed(() => {
+    const role = this.details()?.role;
+    return role === 'PARENT' ? 'Padre / Tutor' : 'Hijo / a';
+  });
 
+  readonly rolEmoji = computed(() => {
+    return this.details()?.role === 'PARENT' ? '👑' : '👧';
+  });
+
+  readonly expirationText = computed(() => {
+    const exp = this.details()?.expirationDate;
+    if (!exp) return '';
+
+    const now = new Date();
+    const expDate = new Date(exp);
+    const diffMs = expDate.getTime() - now.getTime();
+
+    if (diffMs <= 0) return 'Este link ha expirado';
+
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    if (days > 0) {
+      return `Este link expira en ${days} día${days > 1 ? 's' : ''} y ${hours} hora${hours !== 1 ? 's' : ''}`;
+    }
+    return `Este link expira en ${hours} hora${hours !== 1 ? 's' : ''}`;
+  });
+
+  readonly inviterInitial = computed(() => {
+    const name = this.details()?.invitedByName;
+    return name ? name[0].toUpperCase() : '?';
+  });
+
+  // ─── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
 
@@ -32,47 +76,54 @@ export class AcceptInvitationComponent implements OnInit {
     }
 
     this.token = token;
-    // Always save to localStorage in case it needs to go through Google
     this.invitationService.saveToken(token);
-
-    if (this.authService.isAuthenticated()) {
-      // Already has session → process directly without going through Google
-      this.state.set('processing');
-      this.processDirectly(token);
-    } else {
-      // No session → show confirmation screen
-      this.state.set('ready');
-    }
+    this.loadDetails(token);
   }
 
-  private processDirectly(token: string): void {
-    this.invitationService.process({ token }).subscribe({
-      next: () => {
-        this.invitationService.clearToken();
-        // Refresh session so the dashboard sees the new family
-        this.authService.refreshSession().subscribe({
-          next: () => this.router.navigate(['/dashboard']),
-          error: () => this.router.navigate(['/dashboard']),
-        });
+  // ─── Load invitation details (public endpoint, no JWT needed) ──────────────
+  private loadDetails(token: string): void {
+    this.invitationService.getDetails(token).subscribe({
+      next: (details) => {
+        this.details.set(details);
+        this.state.set('ready');
       },
       error: (err) => {
-        this.invitationService.clearToken();
         const message = err.error?.message ?? 'La invitación no es válida o expiró.';
         this.showError(message);
       },
     });
   }
 
+  // ─── Accept invitation ─────────────────────────────────────────────────────
   acceptInvitation(): void {
-    // No session → go to Google, the callback handles the rest
-    this.authService.redirectToGoogle();
+    if (this.authService.isAuthenticated()) {
+      this.state.set('processing');
+      this.invitationService.process({ token: this.token }).subscribe({
+        next: () => {
+          this.invitationService.clearToken();
+          this.authService.refreshSession().subscribe({
+            next: () => this.router.navigate(['/family/select']),
+            error: () => this.router.navigate(['/family/select']),
+          });
+        },
+        error: (err) => {
+          this.invitationService.clearToken();
+          const message = err.error?.message ?? 'No se pudo procesar la invitación. Intenta de nuevo.';
+          this.showError(message);
+        },
+      });
+    } else {
+      this.authService.redirectToGoogle();
+    }
   }
 
+  // ─── Reject / decline ─────────────────────────────────────────────────────
   decline(): void {
     this.invitationService.clearToken();
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/']);
   }
 
+  // ─── Error helper ──────────────────────────────────────────────────────────
   private showError(message: string): void {
     this.state.set('error');
     this.errorMessage.set(message);

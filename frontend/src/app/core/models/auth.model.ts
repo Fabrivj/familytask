@@ -2,6 +2,8 @@ export interface FamilySummary {
   familyId: number;
   familyName: string;
   role: 'PARENT' | 'CHILD';
+  memberCount?: number;
+  activeTaskCount?: number;
 }
 
 export interface AuthResponse {

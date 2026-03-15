@@ -1,76 +1,139 @@
-<div class="inv-container">
-  @if (state() === 'loading' || state() === 'processing') {
-    <div class="inv-card">
-      <div class="spinner"></div>
-      <p>{{ state() === 'processing' ? 'Procesando tu invitación...' : 'Verificando invitación...' }}</p>
-    </div>
-  }
+<div class="page-container">
+  <div class="page">
 
-  @if (state() === 'ready') {
-    <div class="inv-card">
-      <span class="inv-icon">👨‍👩‍👧‍👦</span>
-      <h2>Te invitaron a unirte</h2>
-      <p>
-        Para aceptar la invitación necesitas iniciar sesión con tu cuenta de Google.
-        Asegúrate de usar el correo al que llegó la invitación.
-      </p>
-      <button class="btn-primary" (click)="acceptInvitation()">
-        Aceptar invitación con Google
-      </button>
-      <button class="btn-secondary" (click)="decline()">
-        Rechazar
-      </button>
+    <!-- Logo -->
+    <div class="logo-row">
+      <span class="logo" aria-label="FamilyTask">FamilyTask</span>
     </div>
-  }
 
-  @if (state() === 'error') {
-    <div class="inv-card error">
-      <span class="inv-icon">⚠️</span>
-      <h2>Invitación inválida</h2>
-      <p>{{ errorMessage() }}</p>
-      <button class="btn-primary" (click)="decline()">Ir al dashboard</button>
-    </div>
-  }
+    @if (state() === 'loading' || state() === 'processing') {
+
+      <!-- Loading / Processing -->
+      <div class="card">
+        <div class="corner tl" aria-hidden="true"></div>
+        <div class="corner br" aria-hidden="true"></div>
+        <div class="card-header">
+          <div class="tag">
+            {{ state() === 'processing' ? '// PROCESANDO' : '// VERIFICANDO' }}
+          </div>
+          <div class="card-title">
+            {{ state() === 'processing' ? 'Aceptando invitación...' : 'Verificando invitación...' }}
+          </div>
+        </div>
+        <div class="body center-body">
+          <div class="spinner-lg" aria-label="Cargando"></div>
+          <p class="loading-text">
+            {{ state() === 'processing' ? 'Uniéndote al grupo familiar...' : 'Cargando detalles de la invitación...' }}
+          </p>
+        </div>
+      </div>
+
+    } @else if (state() === 'ready') {
+
+      <!-- Invitation details -->
+      <div class="card">
+        <div class="corner tl" aria-hidden="true"></div>
+        <div class="corner br" aria-hidden="true"></div>
+
+        <!-- Header -->
+        <div class="card-header">
+          <div class="tag">// TE INVITARON A UNIRTE</div>
+          <div class="card-title" role="heading" aria-level="1">{{ details()?.familyName }}</div>
+          <div class="inviter-chip">
+            <div class="inviter-avatar" aria-hidden="true">{{ inviterInitial() }}</div>
+            <span>Invitado por <strong>{{ details()?.invitedByName }}</strong></span>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="body">
+
+          <!-- Role badge -->
+          <div class="role-badge">
+            <span class="role-emoji" aria-hidden="true">{{ rolEmoji() }}</span>
+            <div class="role-info">
+              <span class="role-label">TU ROL EN ESTE GRUPO</span>
+              <span class="role-value">{{ rolLabel() }}</span>
+            </div>
+            <span class="assigned-tag">Asignado</span>
+          </div>
+
+          <!-- Expiration -->
+          <div class="expiration-row">
+            <span class="expiration-dot" aria-hidden="true"></span>
+            <span class="expiration-text">{{ expirationText() }}</span>
+          </div>
+
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-wrap">
+          <button
+            class="btn-accept"
+            type="button"
+            (click)="acceptInvitation()"
+          >
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+              <path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            ACEPTAR INVITACIÓN
+          </button>
+          <button
+            class="btn-reject"
+            type="button"
+            (click)="decline()"
+          >
+            RECHAZAR INVITACIÓN
+          </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+          <span class="footer-brand">FAMILY TASK</span>
+          <span class="footer-year">2026</span>
+        </div>
+
+      </div>
+
+    } @else if (state() === 'success') {
+
+      <!-- Success -->
+      <div class="card">
+        <div class="corner tl" aria-hidden="true"></div>
+        <div class="corner br" aria-hidden="true"></div>
+        <div class="card-header">
+          <div class="tag">// LISTO</div>
+          <div class="card-title">¡Te uniste exitosamente!</div>
+        </div>
+        <div class="body center-body">
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <p class="loading-text">Redirigiendo al dashboard...</p>
+        </div>
+      </div>
+
+    } @else if (state() === 'error') {
+
+      <!-- Error -->
+      <div class="card">
+        <div class="corner tl" aria-hidden="true"></div>
+        <div class="corner br" aria-hidden="true"></div>
+        <div class="card-header">
+          <div class="tag tag-error">// INVITACIÓN INVÁLIDA</div>
+          <div class="card-title">No se pudo verificar</div>
+          <div class="card-sub">{{ errorMessage() }}</div>
+        </div>
+        <div class="cta-wrap">
+          <button class="btn-accept" type="button" (click)="decline()">
+            Volver al inicio
+          </button>
+        </div>
+        <div class="card-footer">
+          <span class="footer-brand">FAMILY TASK</span>
+          <span class="footer-year">2026</span>
+        </div>
+      </div>
+
+    }
+
+  </div>
 </div>
-
-<style>
-  .inv-container {
-    min-height: 100vh; display: flex;
-    align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-  }
-  .inv-card {
-    background: white; border-radius: 24px;
-    padding: 48px 40px; text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-    max-width: 420px; width: 100%;
-  }
-  .inv-icon { font-size: 52px; display: block; margin-bottom: 16px; }
-  h2 { margin: 0 0 12px; font-size: 24px; color: #1a1a2e; }
-  p { color: #666; line-height: 1.6; margin: 0 0 28px; }
-  .spinner {
-    width: 48px; height: 48px;
-    border: 4px solid #e0e0e0;
-    border-top-color: #4285F4;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 24px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .btn-primary {
-    display: block; width: 100%; padding: 14px;
-    background: #1a1a2e; color: white; border: none;
-    border-radius: 12px; font-size: 16px; font-weight: 600;
-    cursor: pointer; margin-bottom: 12px; transition: opacity 0.2s;
-  }
-  .btn-primary:hover { opacity: 0.85; }
-  .btn-secondary {
-    display: block; width: 100%; padding: 12px;
-    background: transparent; color: #888;
-    border: 2px solid #e0e0e0; border-radius: 12px;
-    font-size: 15px; cursor: pointer; transition: all 0.2s;
-  }
-  .btn-secondary:hover { border-color: #ccc; color: #555; }
-  .error h2 { color: #d32f2f; }
-</style>

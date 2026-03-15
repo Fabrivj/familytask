@@ -35,6 +35,10 @@ public class Invitation {
     @JoinColumn(name = "family_group_id", nullable = false)
     private FamilyGroup familyGroup;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private User createdBy;
+
     @Column(name = "expiration_date", nullable = false)
     private LocalDateTime expirationDate;
 

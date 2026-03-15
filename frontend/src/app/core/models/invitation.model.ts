@@ -1,6 +1,8 @@
+export type InvitationRole = 'PARENT' | 'CHILD';
+
 export interface CreateInviteRequest {
   invitedEmail: string;
-  role: 'PARENT' | 'CHILD';
+  role: InvitationRole;
   familyId: number;
 }
 
@@ -13,4 +15,11 @@ export interface InviteResponse {
 
 export interface ProcessInviteRequest {
   token: string;
+}
+
+export interface InviteDetailsResponse {
+  familyName: string;
+  invitedByName: string;
+  role: InvitationRole;
+  expirationDate: string;
 }

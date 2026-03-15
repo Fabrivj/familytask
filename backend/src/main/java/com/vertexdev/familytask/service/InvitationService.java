@@ -1,6 +1,7 @@
 package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.dto.invite.CreateInviteRequest;
+import com.vertexdev.familytask.dto.invite.InvitePreviewResponse;
 import com.vertexdev.familytask.dto.invite.InviteResponse;
 import com.vertexdev.familytask.dto.invite.ProcessInviteRequest;
 import com.vertexdev.familytask.exception.InvitationException;
@@ -82,6 +83,7 @@ public class InvitationService {
                 .familyGroup(familyGroup)
                 .expirationDate(expirationDate)
                 .isUsed(false)
+                .createdBy(requester)
                 .build();
 
         invitationRepository.save(invitation);
@@ -94,29 +96,31 @@ public class InvitationService {
     }
 
     /**
+     * Public preview: returns invitation details without authentication.
+     * Used by the frontend to display family/role info before the user logs in.
+     */
+    public InvitePreviewResponse getPreview(String tokenStr) {
+        Invitation invitation = resolveActiveInvitation(tokenStr);
+
+        String invitedByName = invitation.getCreatedBy() != null
+                ? invitation.getCreatedBy().getName()
+                : null;
+
+        return InvitePreviewResponse.builder()
+                .familyName(invitation.getFamilyGroup().getName())
+                .invitedByName(invitedByName)
+                .invitedEmail(invitation.getInvitedEmail())
+                .role(invitation.getRole().name())
+                .expirationDate(invitation.getExpirationDate())
+                .build();
+    }
+
+    /**
      * Step 4 of the flow: The invitee, already authenticated with Google, processes the token.
      */
     @Transactional
     public void processInvitation(ProcessInviteRequest request, User authenticatedUser) {
-        UUID tokenUUID;
-        try {
-            tokenUUID = UUID.fromString(request.getToken());
-        } catch (IllegalArgumentException e) {
-            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
-        }
-
-        Invitation invitation = invitationRepository.findByToken(tokenUUID)
-                .orElseThrow(() -> new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400));
-
-        // Validate that it hasn't been used
-        if (invitation.getIsUsed()) {
-            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
-        }
-
-        // Validate that it hasn't expired
-        if (LocalDateTime.now().isAfter(invitation.getExpirationDate())) {
-            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
-        }
+        Invitation invitation = resolveActiveInvitation(request.getToken());
 
         // Validate that the Google email matches the invitation email
         if (!invitation.getInvitedEmail().equalsIgnoreCase(authenticatedUser.getEmail())) {
@@ -130,22 +134,57 @@ public class InvitationService {
         }
 
         // Add user as a member of the family with the invitation role
-        FamilyMember newMember = FamilyMember.builder()
-                .familyGroup(invitation.getFamilyGroup())
-                .user(authenticatedUser)
-                .role(invitation.getRole())
-                .isActive(true)
-                .build();
+        try {
+            FamilyMember newMember = FamilyMember.builder()
+                    .familyGroup(invitation.getFamilyGroup())
+                    .user(authenticatedUser)
+                    .role(invitation.getRole())
+                    .isActive(true)
+                    .build();
 
-        familyMemberRepository.save(newMember);
+            familyMemberRepository.save(newMember);
 
-        // Mark invitation as used
-        invitation.setIsUsed(true);
-        invitationRepository.save(invitation);
+            // Mark invitation as used
+            invitation.setIsUsed(true);
+            invitationRepository.save(invitation);
+        } catch (Exception e) {
+            log.error("Failed to add user {} to family {}: {}",
+                    authenticatedUser.getEmail(),
+                    invitation.getFamilyGroup().getName(),
+                    e.getMessage());
+            throw new InvitationException("ASSOCIATION_FAILED",
+                    "No se pudo completar la incorporación. Intenta de nuevo.", 500);
+        }
 
         log.info("User {} added to family {} with role {}",
                 authenticatedUser.getEmail(),
                 invitation.getFamilyGroup().getName(),
                 invitation.getRole());
+    }
+
+    /**
+     * Parses and validates a token string, returning the active Invitation.
+     * Throws INVALID_TOKEN (400) if the token is malformed, not found, already used, or expired.
+     */
+    private Invitation resolveActiveInvitation(String tokenStr) {
+        UUID tokenUUID;
+        try {
+            tokenUUID = UUID.fromString(tokenStr);
+        } catch (IllegalArgumentException e) {
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
+        }
+
+        Invitation invitation = invitationRepository.findByToken(tokenUUID)
+                .orElseThrow(() -> new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400));
+
+        if (invitation.getIsUsed()) {
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
+        }
+
+        if (LocalDateTime.now().isAfter(invitation.getExpirationDate())) {
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
+        }
+
+        return invitation;
     }
 }
