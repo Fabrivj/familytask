@@ -32,3 +32,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Claude Code local config (agents/skills are per-machine, not versioned) ###
+.claude/agents/
+.claude/skills/
+.claude/worktrees/
+.claude/settings.local.json

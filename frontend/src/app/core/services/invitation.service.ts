@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CreateInviteRequest,
+  InviteDetailsResponse,
   InviteResponse,
   ProcessInviteRequest,
 } from '../models/invitation.model';
+import { SKIP_AUTH_REDIRECT_ON_403 } from '../interceptors/skip-auth-redirect.token';
 
 @Injectable({ providedIn: 'root' })
 export class InvitationService {
@@ -22,10 +24,19 @@ export class InvitationService {
     );
   }
 
-  process(request: ProcessInviteRequest): Observable<void> {
-    return this.http.post<void>(
+  /** Obtiene detalles de la invitación para preview (sin JWT). */
+  getDetails(token: string): Observable<InviteDetailsResponse> {
+    return this.http.get<InviteDetailsResponse>(
+      `${environment.apiUrl}/invitations/preview`,
+      { params: { token } }
+    );
+  }
+
+  process(request: ProcessInviteRequest): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
       `${environment.apiUrl}/invitations/process`,
-      request
+      request,
+      { context: new HttpContext().set(SKIP_AUTH_REDIRECT_ON_403, true) }
     );
   }
 
