@@ -76,8 +76,8 @@ export class CallbackComponent implements OnInit {
           this.invitationService.clearToken();
           this.currentStep.set('Cargando tu familia...');
           this.authService.refreshSession().subscribe({
-            next: () => this.router.navigate(['/dashboard']),
-            error: () => this.router.navigate(['/dashboard']),
+            next: () => this.redirectByFamilyCount(),
+            error: () => this.router.navigate(['/family/select']),
           });
         },
         error: (err) => {
@@ -103,6 +103,16 @@ export class CallbackComponent implements OnInit {
       this.router.navigate(['/dashboard']);
     } else {
       // Multiple families → selection
+      this.router.navigate(['/family/select']);
+    }
+  }
+
+  private redirectByFamilyCount(): void {
+    const families = this.authService.families();
+    if (families.length === 1) {
+      this.authService.setActiveFamily(families[0].familyId);
+      this.router.navigate(['/dashboard']);
+    } else {
       this.router.navigate(['/family/select']);
     }
   }

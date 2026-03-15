@@ -20,5 +20,7 @@ public class AuthResponse {
         private Long familyId;
         private String familyName;
         private String role;
+        private Integer memberCount;
+        private Integer activeTaskCount;
     }
 }

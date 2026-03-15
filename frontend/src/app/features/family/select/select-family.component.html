@@ -1,50 +1,115 @@
 <div class="page-container">
-  <div class="card">
-    <span class="icon">👨‍👩‍👧‍👦</span>
-    <h1>Selecciona una familia</h1>
-    <p>Perteneces a más de una familia. ¿Con cuál quieres trabajar hoy?</p>
 
-    <div class="familias-list">
-      @for (familia of families(); track familia.familyId) {
-        <button class="familia-item" (click)="select(familia.familyId)">
-          <div class="familia-info">
-            <strong>{{ familia.familyName }}</strong>
-            <span>{{ familia.role === 'PARENT' ? '👑 Padre/Tutor' : '👦 Hijo' }}</span>
-          </div>
-          <span class="arrow">→</span>
-        </button>
-      }
+  <!-- Top bar -->
+  <header class="top-bar">
+    <span class="logo" aria-label="FamilyTask">FamilyTask</span>
+    <div class="top-right">
+      <div class="user-chip" aria-label="Usuario actual">
+        <div class="avatar" aria-hidden="true">{{ nameInitial() }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ shortName() }}</span>
+          <span class="user-email">{{ userEmail() }}</span>
+        </div>
+      </div>
+      <button
+        class="btn-logout"
+        type="button"
+        (click)="logout()"
+        [disabled]="logoutLoading()"
+      >
+        {{ logoutLoading() ? 'CERRANDO...' : 'CERRAR SESIÓN' }}
+      </button>
     </div>
-  </div>
-</div>
+  </header>
 
-<style>
-  .page-container {
-    min-height: 100vh; display: flex;
-    align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-  }
-  .card {
-    background: white; border-radius: 24px;
-    padding: 48px 40px; text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-    max-width: 440px; width: 100%;
-  }
-  .icon { font-size: 52px; display: block; margin-bottom: 16px; }
-  h1 { color: #1a1a2e; margin: 0 0 8px; }
-  p { color: #666; margin: 0 0 28px; }
-  .familias-list { display: flex; flex-direction: column; gap: 12px; }
-  .familia-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 20px; background: #f8f9fa;
-    border: 2px solid #e0e0e0; border-radius: 12px;
-    cursor: pointer; transition: all 0.2s; text-align: left;
-    width: 100%;
-  }
-  .familia-item:hover { border-color: #4285F4; background: #f0f4ff; }
-  .familia-info { display: flex; flex-direction: column; gap: 4px; }
-  .familia-info strong { color: #1a1a2e; font-size: 16px; }
-  .familia-info span { color: #888; font-size: 13px; }
-  .arrow { color: #4285F4; font-size: 18px; }
-</style>
+  <!-- Content -->
+  <main class="content">
+
+    <div class="heading-area">
+      <div class="tag">// BIENVENIDO DE VUELTA, {{ shortName() | uppercase }}</div>
+      <h1 class="page-title" role="heading" aria-level="1">¿A qué familia entras hoy?</h1>
+      <p class="page-sub">Selecciona un grupo para acceder a su dashboard.</p>
+    </div>
+
+    @if (loadError()) {
+      <p class="error-banner" role="alert">{{ loadError() }}</p>
+    }
+
+    @if (logoutError()) {
+      <p class="error-banner" role="alert">{{ logoutError() }}</p>
+    }
+
+    <!-- Family cards grid -->
+    <div class="families-grid">
+
+      @for (familia of families(); track familia.familyId) {
+        <div
+          class="family-card"
+          [class.active]="isSelected(familia.familyId)"
+          role="article"
+          [attr.aria-label]="'Familia ' + familia.familyName"
+          (click)="selectCard(familia.familyId)"
+        >
+          <div class="card-top">
+            <div class="family-avatar" [class.avatar-active]="isSelected(familia.familyId)" aria-hidden="true">
+              🏠
+            </div>
+            <h2 class="family-name" [class.name-active]="isSelected(familia.familyId)">{{ familia.familyName }}</h2>
+            <span [class]="'role-badge ' + getRoleBadgeClass(familia.role)">
+              {{ getRoleLabel(familia.role) }}
+            </span>
+          </div>
+
+          <div class="card-stats">
+            <div class="stat-row">
+              <span class="stat-label">MIEMBROS</span>
+              <span class="stat-value">{{ familia.memberCount ?? '—' }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">TAREAS ACTIVAS</span>
+              <span class="stat-value">{{ familia.activeTaskCount ?? '—' }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">TU ROL</span>
+              <span class="stat-value">{{ getRoleShort(familia.role) }}</span>
+            </div>
+          </div>
+
+          <button
+            class="btn-enter"
+            [class.btn-enter-active]="isSelected(familia.familyId)"
+            type="button"
+            (click)="$event.stopPropagation(); select(familia.familyId)"
+          >
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            ENTRAR
+          </button>
+        </div>
+      }
+
+      <!-- New family card -->
+      <div
+        class="family-card new-card"
+        role="button"
+        tabindex="0"
+        aria-label="Crear nueva familia"
+        (click)="createNew()"
+        (keyup.enter)="createNew()"
+      >
+        <div class="new-card-content">
+          <div class="new-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="new-label">NUEVA FAMILIA</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
