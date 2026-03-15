@@ -72,11 +72,15 @@ public class AuthService {
         List<AuthResponse.FamilySummary> families = familyMemberRepository
                 .findByUserIdAndIsActiveTrue(user.getId())
                 .stream()
-                .map(m -> AuthResponse.FamilySummary.builder()
-                        .familyId(m.getFamilyGroup().getId())
-                        .familyName(m.getFamilyGroup().getName())
-                        .role(m.getRole().name())
-                        .build())
+                .map(m -> {
+                    long count = familyMemberRepository.countByFamilyGroupIdAndIsActiveTrue(m.getFamilyGroup().getId());
+                    return AuthResponse.FamilySummary.builder()
+                            .familyId(m.getFamilyGroup().getId())
+                            .familyName(m.getFamilyGroup().getName())
+                            .role(m.getRole().name())
+                            .memberCount((int) count)
+                            .build();
+                })
                 .toList();
 
         return AuthResponse.builder()
