@@ -1,19 +1,18 @@
-<div class="page-container">
+<div class="page-container scanlines">
   <div class="page">
 
     <!-- Top bar -->
     <div class="top-bar">
       <span class="logo-small" aria-label="FamilyTask">FamilyTask</span>
       <div class="user-chip" aria-label="Usuario actual">
-        <div class="avatar" aria-hidden="true">{{ nameInitial() }}</div>
+        <app-user-avatar [name]="shortName()" [size]="26" />
         <span class="user-name">{{ shortName() }}</span>
       </div>
     </div>
 
     <!-- Card -->
     <div class="card">
-      <div class="corner tl" aria-hidden="true"></div>
-      <div class="corner br" aria-hidden="true"></div>
+      <app-card-corners />
 
       <!-- Header -->
       <div class="card-header">
@@ -44,48 +43,31 @@
         @if (!generatedLink()) {
 
           <!-- Form: email + role -->
-          <div class="field-group">
-            <label class="field-label" for="invite-email">Email del invitado</label>
-            <div class="input-wrap">
-              <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/>
-                <path d="M2 6l8 5 8-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <input
-                id="invite-email"
-                class="field-input"
-                type="email"
-                placeholder="correo@ejemplo.com"
-                [formControl]="emailCtrl"
-                (keyup.enter)="generateLink()"
-                autocomplete="email"
-              />
-            </div>
-          </div>
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Email del invitado</mat-label>
+            <input
+              matInput
+              type="email"
+              placeholder="correo@ejemplo.com"
+              [formControl]="emailCtrl"
+              (keyup.enter)="generateLink()"
+              autocomplete="email"
+            />
+            @if (emailCtrl.touched && emailCtrl.invalid) {
+              <mat-error>{{ getEmailError() }}</mat-error>
+            }
+          </mat-form-field>
 
-          <div class="field-group">
-            <label class="field-label" for="invite-role">Rol del invitado</label>
-            <div class="select-wrap">
-              <svg class="input-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.4"/>
-                <path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-              <select
-                id="invite-role"
-                class="field-select"
-                [formControl]="roleCtrl"
-              >
-                <option value="CHILD">Hijo / a</option>
-                <option value="PARENT">Padre / Tutor</option>
-              </select>
-              <svg class="select-arrow" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-          </div>
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Rol del invitado</mat-label>
+            <mat-select [formControl]="roleCtrl">
+              <mat-option value="CHILD">Hijo / a</mat-option>
+              <mat-option value="PARENT">Padre / Tutor</mat-option>
+            </mat-select>
+          </mat-form-field>
 
           @if (error()) {
-            <p class="field-error" role="alert">{{ error() }}</p>
+            <p class="api-error" role="alert">{{ error() }}</p>
           }
 
         } @else {
@@ -142,7 +124,7 @@
             [disabled]="isLoading()"
           >
             @if (isLoading()) {
-              <span class="spinner" aria-hidden="true"></span>
+              <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Generando link" />
               Generando...
             } @else {
               <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">

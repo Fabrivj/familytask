@@ -1,4 +1,4 @@
-<div class="page-container">
+<div class="page-container scanlines">
   <div class="page">
 
     <!-- Logo -->
@@ -10,8 +10,7 @@
 
       <!-- Loading / Processing -->
       <div class="card">
-        <div class="corner tl" aria-hidden="true"></div>
-        <div class="corner br" aria-hidden="true"></div>
+        <app-card-corners />
         <div class="card-header">
           <div class="tag">
             {{ state() === 'processing' ? '// PROCESANDO' : '// VERIFICANDO' }}
@@ -21,7 +20,7 @@
           </div>
         </div>
         <div class="body center-body">
-          <div class="spinner-lg" aria-label="Cargando"></div>
+          <mat-progress-spinner diameter="40" mode="indeterminate" [attr.aria-label]="state() === 'processing' ? 'Procesando' : 'Cargando'" />
           <p class="loading-text">
             {{ state() === 'processing' ? 'Uniéndote al grupo familiar...' : 'Cargando detalles de la invitación...' }}
           </p>
@@ -32,15 +31,14 @@
 
       <!-- Invitation details -->
       <div class="card">
-        <div class="corner tl" aria-hidden="true"></div>
-        <div class="corner br" aria-hidden="true"></div>
+        <app-card-corners />
 
         <!-- Header -->
         <div class="card-header">
           <div class="tag">// TE INVITARON A UNIRTE</div>
           <div class="card-title" role="heading" aria-level="1">{{ details()?.familyName }}</div>
           <div class="inviter-chip">
-            <div class="inviter-avatar" aria-hidden="true">{{ inviterInitial() }}</div>
+            <app-user-avatar [name]="details()?.invitedByName ?? '?'" [size]="26" />
             <span>Invitado por <strong>{{ details()?.invitedByName }}</strong></span>
           </div>
         </div>
@@ -68,21 +66,13 @@
 
         <!-- CTA -->
         <div class="cta-wrap">
-          <button
-            class="btn-accept"
-            type="button"
-            (click)="acceptInvitation()"
-          >
+          <button class="btn-accept" type="button" (click)="acceptInvitation()">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
               <path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             ACEPTAR INVITACIÓN
           </button>
-          <button
-            class="btn-reject"
-            type="button"
-            (click)="decline()"
-          >
+          <button class="btn-reject" type="button" (click)="decline()">
             RECHAZAR INVITACIÓN
           </button>
         </div>
@@ -99,8 +89,7 @@
 
       <!-- Success -->
       <div class="card">
-        <div class="corner tl" aria-hidden="true"></div>
-        <div class="corner br" aria-hidden="true"></div>
+        <app-card-corners />
         <div class="card-header">
           <div class="tag">// LISTO</div>
           <div class="card-title">¡Te uniste exitosamente!</div>
@@ -115,8 +104,7 @@
 
       <!-- Error -->
       <div class="card">
-        <div class="corner tl" aria-hidden="true"></div>
-        <div class="corner br" aria-hidden="true"></div>
+        <app-card-corners />
         <div class="card-header">
           <div class="tag tag-error">// INVITACIÓN INVÁLIDA</div>
           <div class="card-title">No se pudo verificar</div>

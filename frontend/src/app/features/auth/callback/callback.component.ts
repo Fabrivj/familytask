@@ -1,5 +1,13 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
 
@@ -7,21 +15,20 @@ type CallbackState = 'processing' | 'error';
 
 @Component({
   selector: 'app-callback',
-  standalone: true,
+  imports: [MatButtonModule, MatProgressSpinnerModule],
   templateUrl: './callback.component.html',
+  styleUrl: './callback.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CallbackComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly invitationService = inject(InvitationService);
 
   readonly state = signal<CallbackState>('processing');
   readonly errorMessage = signal<string>('');
   readonly currentStep = signal<string>('Verificando sesión con Google...');
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private invitationService: InvitationService,
-  ) {}
 
   ngOnInit(): void {
     const error = this.route.snapshot.queryParamMap.get('error');
@@ -40,7 +47,6 @@ export class CallbackComponent implements OnInit {
   }
 
   private processCallback(code: string): void {
-    // Google sends error=access_denied when the user cancels
     const error = this.route.snapshot.queryParamMap.get('error');
     if (error === 'access_denied') {
       this.showError('Inicio de sesión cancelado.');
@@ -95,14 +101,11 @@ export class CallbackComponent implements OnInit {
     const families = authResponse.families ?? [];
 
     if (families.length === 0) {
-      // No family → creation/waiting screen
       this.router.navigate(['/family/new']);
     } else if (families.length === 1) {
-      // Single family → go to dashboard directly
       this.authService.setActiveFamily(families[0].familyId);
       this.router.navigate(['/dashboard']);
     } else {
-      // Multiple families → selection
       this.router.navigate(['/family/select']);
     }
   }

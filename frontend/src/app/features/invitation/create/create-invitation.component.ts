@@ -7,12 +7,26 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
+import { CardCornersComponent } from '../../../shared/components/card-corners/card-corners.component';
+import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-create-invitation',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    CardCornersComponent,
+    UserAvatarComponent,
+  ],
   templateUrl: './create-invitation.component.html',
   styleUrl: './create-invitation.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,7 +60,10 @@ export class CreateInvitationComponent {
   });
 
   // ─── Form controls ─────────────────────────────────────────────────────────
-  readonly emailCtrl = new FormControl('', { nonNullable: true });
+  readonly emailCtrl = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.email],
+  });
   readonly roleCtrl = new FormControl<'PARENT' | 'CHILD'>('CHILD', { nonNullable: true });
 
   // ─── State signals ─────────────────────────────────────────────────────────
@@ -57,23 +74,19 @@ export class CreateInvitationComponent {
   readonly linkCopied = signal(false);
   readonly inviteCount = signal(0);
 
-  // ─── Validation ────────────────────────────────────────────────────────────
-  private readonly EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+  getEmailError(): string {
+    const c = this.emailCtrl;
+    if (c.hasError('required')) return 'El correo es obligatorio.';
+    if (c.hasError('email')) return 'El correo ingresado no es válido.';
+    return '';
+  }
 
   generateLink(): void {
+    this.emailCtrl.markAllAsTouched();
+    if (this.emailCtrl.invalid) return;
+
     const email = this.emailCtrl.value.trim();
     const familyId = this.authService.getActiveFamilyId();
-
-    // Validate email
-    if (!email) {
-      this.error.set('El correo es obligatorio.');
-      return;
-    }
-
-    if (!this.EMAIL_REGEX.test(email)) {
-      this.error.set('El correo ingresado no es válido.');
-      return;
-    }
 
     if (!familyId) {
       this.error.set('No hay familia activa seleccionada.');

@@ -1,85 +1,68 @@
-<div class="dash-container">
-  @if (session(); as s) {
-    <header class="dash-header">
-      <div class="user-info">
-        @if (s.pictureUrl) {
-          <img [src]="s.pictureUrl" [alt]="s.name" class="avatar" />
-        }
-        <div>
-          <strong>{{ s.name }}</strong>
-          <span>{{ s.email }}</span>
-        </div>
-      </div>
-      <div class="logout-area">
-        <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
-        @if (logoutError()) {
-          <p class="error">{{ logoutError() }}</p>
-        }
-      </div>
-    </header>
+<div class="page-container scanlines">
+  <div class="page">
 
-    <main>
-      @if (successMessage()) {
-        <p class="msg-success" role="status">{{ successMessage() }}</p>
-      }
-      <h1>Bienvenido, {{ s.name.split(' ')[0] }} 👋</h1>
+    @if (session(); as s) {
 
-      <!-- Familias -->
-      @if (s.families.length > 0) {
-        <section class="section">
-          <h3>Tus familias</h3>
-          <div class="chips">
-            @for (familia of s.families; track familia.familyId) {
-              <div class="chip">
-                <strong>{{ familia.familyName }}</strong>
-                <span>{{ familia.role === 'PARENT' ? '👑 Padre/Tutor' : '👦 Hijo' }}</span>
-              </div>
+      <header class="top-bar">
+        <span class="logo" aria-label="FamilyTask">FamilyTask</span>
+        <div class="user-chip" aria-label="Usuario actual">
+          @if (s.pictureUrl) {
+            <img [src]="s.pictureUrl" [alt]="s.name" class="avatar-photo" />
+          } @else {
+            <div class="avatar-initial" aria-hidden="true">{{ s.name[0]?.toUpperCase() }}</div>
+          }
+          <span class="user-name">{{ s.name.split(' ')[0] }}</span>
+          <button
+            class="btn-logout"
+            type="button"
+            (click)="logout()"
+            [disabled]="isLoading()"
+            aria-label="Cerrar sesión"
+          >
+            @if (isLoading()) {
+              <mat-progress-spinner diameter="12" mode="indeterminate" />
+            } @else {
+              Salir
             }
-          </div>
-        </section>
-      } @else {
-        <p>Aún no perteneces a ninguna familia.
-          <a routerLink="/family/new">Crear una</a>
-        </p>
-      }
-    </main>
-  }
-</div>
+          </button>
+        </div>
+      </header>
 
-<style>
-  .dash-container {
-    min-height: 100vh; background: #f5f7fa;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-  }
-  .dash-header {
-    background: white; padding: 16px 32px;
-    display: flex; align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .user-info { display: flex; align-items: center; gap: 12px; }
-  .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-  .user-info div { display: flex; flex-direction: column; }
-  .user-info strong { font-size: 15px; color: #1a1a2e; }
-  .user-info span { font-size: 13px; color: #888; }
-  .btn-logout {
-    padding: 8px 18px; background: #1a1a2e; color: white;
-    border: none; border-radius: 8px; cursor: pointer; font-size: 14px;
-  }
-  main { padding: 40px 32px; max-width: 700px; }
-  h1 { color: #1a1a2e; margin-bottom: 32px; }
-  .section { margin-bottom: 40px; }
-  h3 { margin-bottom: 16px; color: #444; }
-  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
-  .chip {
-    display: inline-flex; flex-direction: column;
-    background: white; border-radius: 12px;
-    padding: 12px 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .chip strong { color: #1a1a2e; }
-  .chip span { font-size: 13px; color: #888; margin-top: 2px; }
-  .logout-area { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-  .msg-success { color: #2e7d32; font-size: 13px; margin: 0 0 16px; }
-  .error { color: #d32f2f; font-size: 14px; margin-top: 10px; }
-</style>
+      <main class="main">
+
+        @if (successMessage()) {
+          <p class="msg-success" role="status">✓ {{ successMessage() }}</p>
+        }
+
+        <div class="welcome">
+          <div class="welcome-tag">// DASHBOARD</div>
+          <h1 class="welcome-title">Bienvenido, {{ s.name.split(' ')[0] }} 👋</h1>
+        </div>
+
+        @if (s.families.length > 0) {
+          <section class="section">
+            <h2 class="section-label">Tus familias</h2>
+            <div class="chips">
+              @for (familia of s.families; track familia.familyId) {
+                <div class="chip">
+                  <strong class="chip-name">{{ familia.familyName }}</strong>
+                  <span class="chip-role">
+                    {{ familia.role === 'PARENT' ? '👑 Padre / Tutor' : '👦 Hijo' }}
+                  </span>
+                </div>
+              }
+            </div>
+          </section>
+        } @else {
+          <p class="empty-msg">
+            Aún no perteneces a ninguna familia.
+            <a class="empty-link" routerLink="/family/new">Crear una →</a>
+          </p>
+        }
+
+      </main>
+
+    }
+
+  </div>
+</div>

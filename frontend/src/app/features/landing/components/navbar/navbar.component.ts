@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  HostListener,
   inject,
   output,
   signal,
@@ -11,18 +10,20 @@ import { ViewportScroller } from '@angular/common';
 
 @Component({
   selector: 'app-landing-navbar',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  },
 })
 export class LandingNavbarComponent {
   readonly ctaClicked = output<void>();
 
-  private elementRef = inject(ElementRef);
-  private scroller = inject(ViewportScroller);
+  private readonly elementRef = inject(ElementRef);
+  private readonly scroller = inject(ViewportScroller);
 
-  mobileMenuOpen = signal(false);
+  readonly mobileMenuOpen = signal(false);
 
   toggleMenu(): void {
     this.mobileMenuOpen.update(v => !v);
@@ -38,7 +39,6 @@ export class LandingNavbarComponent {
     this.ctaClicked.emit();
   }
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.mobileMenuOpen.set(false);

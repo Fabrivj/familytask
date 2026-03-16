@@ -1,19 +1,18 @@
-<div class="page-container">
+<div class="page-container scanlines">
   <div class="page">
 
     <!-- Top bar -->
     <div class="top-bar">
       <span class="logo-small" aria-label="FamilyTask">FamilyTask</span>
       <div class="user-chip" aria-label="Usuario actual">
-        <div class="avatar" aria-hidden="true">{{ nameInitial() }}</div>
+        <app-user-avatar [name]="shortName()" [size]="26" />
         <span class="user-name">{{ shortName() }}</span>
       </div>
     </div>
 
     <!-- Card -->
     <div class="card">
-      <div class="corner tl" aria-hidden="true"></div>
-      <div class="corner br" aria-hidden="true"></div>
+      <app-card-corners />
 
       <!-- Header (siempre visible) -->
       <div class="card-header">
@@ -73,21 +72,24 @@
 
         <!-- Estado formulario -->
         <div class="body">
-          <div class="field-group">
-            <label class="field-label" for="nombre-familia">Nombre del grupo familiar</label>
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Nombre del grupo familiar</mat-label>
             <input
-              id="nombre-familia"
-              class="field-input"
+              matInput
               type="text"
               placeholder="Ej. Familia García"
               [formControl]="nameCtrl"
               (keyup.enter)="create()"
               autocomplete="off"
             />
-            @if (error()) {
-              <p class="field-error" role="alert">{{ error() }}</p>
+            @if (nameCtrl.touched && nameCtrl.invalid) {
+              <mat-error>{{ getNameError() }}</mat-error>
             }
-          </div>
+          </mat-form-field>
+
+          @if (apiError()) {
+            <p class="api-error" role="alert">{{ apiError() }}</p>
+          }
         </div>
 
         <div class="cta-wrap">
@@ -98,7 +100,7 @@
             [disabled]="isLoading()"
           >
             @if (isLoading()) {
-              <span class="spinner" aria-hidden="true"></span>
+              <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Creando familia" />
               Creando...
             } @else {
               <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">

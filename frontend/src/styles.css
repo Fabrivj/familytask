@@ -104,3 +104,16 @@
   font-size: 13px;
   margin-bottom: 12px;
 }
+
+/* ── Scanlines overlay — add class="... scanlines" to any page-container ── */
+.scanlines::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
