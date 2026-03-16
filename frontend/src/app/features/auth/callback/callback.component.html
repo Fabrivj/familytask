@@ -2,8 +2,7 @@
 
   @if (state() === 'processing') {
     <div class="card">
-      <div class="corner tl" aria-hidden="true"></div>
-      <div class="corner br" aria-hidden="true"></div>
+      <app-card-corners />
       <div class="card-header">
         <div class="tag">// VERIFICANDO</div>
         <div class="card-title">Iniciando sesión</div>
@@ -21,21 +20,15 @@
 
   @if (state() === 'error') {
     <div class="card">
-      <div class="corner tl" aria-hidden="true"></div>
-      <div class="corner br" aria-hidden="true"></div>
+      <app-card-corners />
       <div class="card-header">
         <div class="tag tag-error">// ERROR</div>
+        <span class="error-icon" aria-hidden="true">⚠️</span>
         <div class="card-title">Algo salió mal</div>
         <div class="card-sub">{{ errorMessage() }}</div>
       </div>
       <div class="cta-wrap">
-        <button
-          mat-flat-button
-          color="primary"
-          class="btn-full"
-          type="button"
-          (click)="goBackToLogin()"
-        >
+        <button class="btn-full" type="button" (click)="goBackToLogin()">
           Volver al inicio
         </button>
       </div>

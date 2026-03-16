@@ -6,16 +6,16 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
+import { CardCornersComponent } from '../../../shared/components/card-corners/card-corners.component';
 
 type CallbackState = 'processing' | 'error';
 
 @Component({
   selector: 'app-callback',
-  imports: [MatButtonModule, MatProgressSpinnerModule],
+  imports: [MatProgressSpinnerModule, CardCornersComponent],
   templateUrl: './callback.component.html',
   styleUrl: './callback.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
