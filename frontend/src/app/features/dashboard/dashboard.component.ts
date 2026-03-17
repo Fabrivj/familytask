@@ -5,13 +5,15 @@ import {
   signal,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/services/auth.service';
+import { PageLayoutComponent } from '../../shared/components/page-layout/page-layout.component';
+import { TopBarComponent } from '../../shared/components/top-bar/top-bar.component';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, MatProgressSpinnerModule],
+  imports: [RouterLink, PageLayoutComponent, TopBarComponent, PageHeaderComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

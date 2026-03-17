@@ -6,14 +6,16 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { UpperCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
 
 @Component({
   selector: 'app-select-family',
-  standalone: true,
-  imports: [UpperCasePipe],
+  imports: [PageLayoutComponent, TopBarComponent, PageHeaderComponent, RoleBadgeComponent],
   templateUrl: './select-family.component.html',
   styleUrl: './select-family.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,10 +36,6 @@ export class SelectFamilyComponent implements OnInit {
 
   readonly userEmail = computed(() => {
     return this.authService.session()?.email ?? '';
-  });
-
-  readonly nameInitial = computed(() => {
-    return (this.userName()[0] ?? '?').toUpperCase();
   });
 
   readonly selectedFamilyId = signal<number | null>(null);
@@ -90,16 +88,8 @@ export class SelectFamilyComponent implements OnInit {
     this.router.navigate(['/family/new']);
   }
 
-  getRoleLabel(role: string): string {
-    return role === 'PARENT' ? 'Padre / Admin' : 'Hijo / a';
-  }
-
   getRoleShort(role: string): string {
     return role === 'PARENT' ? 'Padre' : 'Hijo';
-  }
-
-  getRoleBadgeClass(role: string): string {
-    return role === 'PARENT' ? 'badge-parent' : 'badge-child';
   }
 
   logout(): void {

@@ -1,135 +1,100 @@
-<div class="page-container scanlines">
-  <div class="page">
+<app-page-layout>
 
-    <!-- Top bar -->
-    <div class="top-bar">
-      <span class="logo-small" aria-label="FamilyTask">FamilyTask</span>
-      <div class="user-chip" aria-label="Usuario actual">
-        <app-user-avatar [name]="shortName()" [size]="26" />
-        <span class="user-name">{{ shortName() }}</span>
+  <app-top-bar [userName]="shortName()" />
+
+  <app-neon-card>
+
+    <ng-container card-header>
+      <div class="step-row" aria-hidden="true">
+        <div class="pip on"></div>
+        <div class="pip"></div>
+        <div class="pip"></div>
       </div>
-    </div>
+      <p class="tag">// PRIMER ACCESO</p>
+      <h1 class="card-title" role="heading" aria-level="1">¡Bienvenido, {{ shortName() }}!</h1>
+      <p class="card-sub">Aún no perteneces a ningún grupo familiar.</p>
+    </ng-container>
 
-    <!-- Card -->
-    <div class="card">
-      <app-card-corners />
+    @if (!showForm()) {
 
-      <!-- Header (siempre visible) -->
-      <div class="card-header">
-        <div class="step-row" aria-hidden="true">
-          <div class="pip on"></div>
-          <div class="pip"></div>
-          <div class="pip"></div>
+      <div class="opt" role="presentation">
+        <div class="opt-icon" aria-hidden="true">🏠</div>
+        <div class="opt-body">
+          <div class="opt-title">Crear una familia</div>
+          <div class="opt-desc">
+            Sé el administrador del grupo. Agrega a tu pareja e hijos y empieza a gestionar tareas con recompensas.
+          </div>
+          <div class="badges" aria-label="Características del rol">
+            <span class="badge bp">Padre / Tutor</span>
+            <span class="badge bc">Admin</span>
+            <span class="badge bg">Tú invitas</span>
+          </div>
         </div>
-        <div class="tag">// PRIMER ACCESO</div>
-        <div class="card-title" role="heading" aria-level="1">¡Bienvenido, {{ shortName() }}!</div>
-        <div class="card-sub">Aún no perteneces a ningún grupo familiar.</div>
       </div>
 
-      @if (!showForm()) {
-
-        <!-- Estado inicial: opción + info -->
-        <div class="body">
-
-          <div class="opt" role="presentation">
-            <div class="opt-icon" aria-hidden="true">🏠</div>
-            <div class="opt-body">
-              <div class="opt-title">Crear una familia</div>
-              <div class="opt-desc">
-                Sé el administrador del grupo. Agrega a tu pareja e hijos y empieza a gestionar tareas con recompensas.
-              </div>
-              <div class="badges" aria-label="Características del rol">
-                <span class="badge bp">Padre / Tutor</span>
-                <span class="badge bc">Admin</span>
-                <span class="badge bg">Tú invitas</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="info-box" role="note">
-            <span class="info-icon" aria-hidden="true">💬</span>
-            <div class="info-text">
-              <strong>¿Te van a invitar?</strong> No necesitas hacer nada aquí.
-              Cuando alguien cree el grupo te compartirá un
-              <strong>link de invitación</strong> — solo ábrelo y únete automáticamente.
-            </div>
-          </div>
-
+      <div class="info-box" role="note">
+        <span class="info-icon" aria-hidden="true">💬</span>
+        <div class="info-text">
+          <strong>¿Te van a invitar?</strong> No necesitas hacer nada aquí.
+          Cuando alguien cree el grupo te compartirá un
+          <strong>link de invitación</strong> — solo ábrelo y únete automáticamente.
         </div>
+      </div>
 
-        <div class="cta-wrap">
-          <button class="btn-cta" type="button" (click)="showForm.set(true)">
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-              <path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            Crear mi familia
-          </button>
-        </div>
+    } @else {
 
-        <p class="footer-note">Puedes modificar el nombre luego en configuración</p>
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Nombre del grupo familiar</mat-label>
+        <input
+          matInput
+          type="text"
+          placeholder="Ej. Familia García"
+          [formControl]="nameCtrl"
+          (keyup.enter)="create()"
+          autocomplete="off"
+        />
+        @if (nameCtrl.touched && nameCtrl.invalid) {
+          <mat-error>{{ getNameError() }}</mat-error>
+        }
+      </mat-form-field>
 
-      } @else {
-
-        <!-- Estado formulario -->
-        <div class="body">
-          <mat-form-field appearance="outline" class="field-full">
-            <mat-label>Nombre del grupo familiar</mat-label>
-            <input
-              matInput
-              type="text"
-              placeholder="Ej. Familia García"
-              [formControl]="nameCtrl"
-              (keyup.enter)="create()"
-              autocomplete="off"
-            />
-            @if (nameCtrl.touched && nameCtrl.invalid) {
-              <mat-error>{{ getNameError() }}</mat-error>
-            }
-          </mat-form-field>
-
-          @if (apiError()) {
-            <p class="api-error" role="alert">{{ apiError() }}</p>
-          }
-        </div>
-
-        <div class="cta-wrap">
-          <button
-            class="btn-cta"
-            type="button"
-            (click)="create()"
-            [disabled]="isLoading()"
-          >
-            @if (isLoading()) {
-              <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Creando familia" />
-              Creando...
-            } @else {
-              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Confirmar
-            }
-          </button>
-        </div>
-
-        <p class="footer-note">
-          <button class="back-link" type="button" (click)="goBack()">← Volver</button>
-        </p>
-
+      @if (apiError()) {
+        <p class="api-error" role="alert">{{ apiError() }}</p>
       }
 
-    </div>
+    }
 
-    <!-- Help chip -->
-    <div class="help-row">
-      <div class="help-chip">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
-          <circle cx="8" cy="8" r="6.5" stroke="#8AD8FF" stroke-width="1.3"/>
-          <path d="M8 7.5v4" stroke="#8AD8FF" stroke-width="1.3" stroke-linecap="round"/>
-          <circle cx="8" cy="5.2" r="0.8" fill="#8AD8FF"/>
+    @if (!showForm()) {
+      <button card-cta class="btn-cta" type="button" (click)="showForm.set(true)">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        ¿Tienes dudas? Escríbele a tu familiar para que te comparta el link de invitación.
-      </div>
-    </div>
+        Crear mi familia
+      </button>
+    } @else {
+      <button card-cta class="btn-cta" type="button" (click)="create()" [disabled]="isLoading()">
+        @if (isLoading()) {
+          <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Creando familia" />
+          Creando...
+        } @else {
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Confirmar
+        }
+      </button>
+    }
 
-  </div>
-</div>
+    @if (!showForm()) {
+      <p card-footer class="footer-note">Puedes modificar el nombre luego en configuración</p>
+    } @else {
+      <p card-footer class="footer-note">
+        <button class="back-link" type="button" (click)="goBack()">← Volver</button>
+      </p>
+    }
+
+  </app-neon-card>
+
+  <app-help-chip>¿Tienes dudas? Escríbele a tu familiar para que te comparta el link de invitación.</app-help-chip>
+
+</app-page-layout>

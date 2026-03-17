@@ -1,131 +1,11 @@
-.page-container {
-  min-height: 100vh;
-  background: var(--bg);
-  background-image: radial-gradient(circle, rgba(var(--border-rgb), 0.07) 1px, transparent 1px);
-  background-size: 32px 32px;
-  font-family: 'Nunito', sans-serif;
-  color: var(--text);
-}
-
-.page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 28px 48px;
-}
-
-/* ── TOP BAR ── */
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 22px 0 22px;
-  border-bottom: 1px solid rgba(var(--border-rgb), 0.09);
-  margin-bottom: 44px;
-  position: relative;
-  z-index: 1;
-}
-
-.logo {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 12px;
-  color: var(--text);
-  text-shadow: -1px 0 0 var(--primary), 1px 0 0 var(--border);
-}
-
-.user-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(var(--border-rgb), 0.2);
-  border-radius: 100px;
-  padding: 6px 14px 6px 8px;
-}
-
-.avatar-photo {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.avatar-initial {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--secondary), var(--border));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  flex-shrink: 0;
-}
-
-.user-name {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-sub);
-  letter-spacing: 0.04em;
-}
-
-.btn-logout {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: 1px solid rgba(var(--primary-rgb), 0.27);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--primary);
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.btn-logout:hover:not(:disabled) {
-  border-color: var(--primary);
-  background: rgba(var(--primary-rgb), 0.05);
-}
-
-.btn-logout:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 /* ── MAIN ── */
 .main {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 28px 48px;
   position: relative;
   z-index: 1;
-}
-
-.welcome {
-  margin-bottom: 40px;
-}
-
-.welcome-tag {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  color: var(--primary);
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-
-.welcome-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: clamp(1.6rem, 4vw, 2.2rem);
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.02em;
-  margin: 0;
 }
 
 /* ── SECTION ── */
@@ -201,7 +81,23 @@
   text-decoration: underline;
 }
 
-/* Spinner inside logout button */
-.btn-logout .mat-mdc-progress-spinner {
-  --mdc-circular-progress-active-indicator-color: var(--primary);
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .main {
+    padding: 28px 16px 40px;
+  }
+
+  /* Family items become full-width list rows on mobile */
+  .chips {
+    flex-direction: column;
+  }
+
+  .chip {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: 10px;
+  }
 }

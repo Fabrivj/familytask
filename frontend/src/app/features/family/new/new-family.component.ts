@@ -6,8 +6,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { FamilyService } from '../../../core/services/family.service';
-import { CardCornersComponent } from '../../../shared/components/card-corners/card-corners.component';
-import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
+import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
+import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { HelpChipComponent } from '../../../shared/components/help-chip/help-chip.component';
 
 const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
 
@@ -18,8 +20,10 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    CardCornersComponent,
-    UserAvatarComponent,
+    PageLayoutComponent,
+    NeonCardComponent,
+    TopBarComponent,
+    HelpChipComponent,
   ],
   templateUrl: './new-family.component.html',
   styleUrl: './new-family.component.css',
