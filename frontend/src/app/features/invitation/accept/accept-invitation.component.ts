@@ -7,15 +7,18 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
 import { InviteDetailsResponse } from '../../../core/models/invitation.model';
+import { CardCornersComponent } from '../../../shared/components/card-corners/card-corners.component';
+import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 
 type PageState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
 
 @Component({
   selector: 'app-accept-invitation',
-  standalone: true,
+  imports: [MatProgressSpinnerModule, CardCornersComponent, UserAvatarComponent],
   templateUrl: './accept-invitation.component.html',
   styleUrl: './accept-invitation.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

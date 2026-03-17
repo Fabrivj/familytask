@@ -104,3 +104,128 @@
   font-size: 13px;
   margin-bottom: 12px;
 }
+
+/* ── Scanlines overlay — add class="... scanlines" to any page-container ── */
+.scanlines::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ============================================================
+   ANGULAR MATERIAL — TEMA NEON
+   Override directo de clases MDC para consistencia con el
+   design system neon del proyecto.
+   ============================================================ */
+
+/* Borde del outlined form field */
+.mdc-notched-outline__leading,
+.mdc-notched-outline__notch,
+.mdc-notched-outline__trailing {
+  border-color: var(--border) !important;
+}
+
+.mat-mdc-form-field:hover .mdc-notched-outline__leading,
+.mat-mdc-form-field:hover .mdc-notched-outline__notch,
+.mat-mdc-form-field:hover .mdc-notched-outline__trailing {
+  border-color: var(--primary) !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--primary) !important;
+}
+
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__trailing {
+  border-color: var(--error) !important;
+}
+
+/* Label flotante */
+.mdc-floating-label {
+  color: var(--text-sub) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-floating-label {
+  color: var(--primary) !important;
+}
+
+.mat-mdc-form-field.mat-form-field-invalid .mdc-floating-label {
+  color: var(--error) !important;
+}
+
+/* Input text */
+.mat-mdc-input-element {
+  color: var(--text) !important;
+  font-family: 'Nunito', sans-serif !important;
+  caret-color: var(--primary) !important;
+}
+
+/* Error hint */
+.mat-mdc-form-field-error {
+  color: var(--error) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+/* mat-select trigger */
+.mat-mdc-select-value-text,
+.mat-mdc-select-placeholder {
+  color: var(--text) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+.mat-mdc-select-arrow {
+  color: var(--border) !important;
+}
+
+/* mat-select panel (dropdown) */
+.mat-mdc-select-panel {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.mat-mdc-option {
+  color: var(--text) !important;
+  font-family: 'Nunito', sans-serif !important;
+  background-color: var(--panel) !important;
+}
+
+.mat-mdc-option:hover,
+.mat-mdc-option.mat-mdc-option-active {
+  background-color: #FF2EBE18 !important;
+}
+
+.mat-mdc-option.mdc-list-item--selected {
+  color: var(--primary) !important;
+}
+
+/* mat-progress-spinner */
+.mdc-circular-progress__indeterminate-circle-graphic {
+  stroke: var(--primary) !important;
+}
+
+/* mat-snack-bar */
+.mat-mdc-snack-bar-container {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__label {
+  color: var(--text) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-button {
+  color: var(--border) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+}

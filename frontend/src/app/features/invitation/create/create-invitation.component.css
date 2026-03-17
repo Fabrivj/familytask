@@ -1,13 +1,4 @@
 .page-container {
-  --bg:       #0A0033;
-  --panel:    #0F004D;
-  --primary:  #FF2EBE;
-  --secondary:#0048FF;
-  --border:   #00EFFF;
-  --text:     #CFFFFF;
-  --text-sub: #8AD8FF;
-  --success:  #3CFF5A;
-
   min-height: 100vh;
   background: var(--bg);
   background-image: radial-gradient(circle, #00EFFF12 1px, transparent 1px);
@@ -18,19 +9,6 @@
   font-family: 'Nunito', sans-serif;
   color: var(--text);
   padding: 24px 16px;
-}
-
-/* Scanlines */
-.page-container::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    to bottom, transparent 0px, transparent 3px,
-    rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px
-  );
-  pointer-events: none;
-  z-index: 100;
 }
 
 /* ── PAGE ── */
@@ -68,20 +46,6 @@
   padding: 5px 12px 5px 6px;
 }
 
-.avatar {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0048FF, #FF2EBE);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-}
-
 .user-name {
   font-family: 'Rajdhani', sans-serif;
   font-size: 12px;
@@ -98,28 +62,6 @@
   box-shadow: 0 8px 40px #00EFFF1a, 0 2px 12px #00000066;
   overflow: hidden;
   position: relative;
-}
-
-.corner {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-color: var(--primary);
-  border-style: solid;
-}
-
-.corner.tl {
-  top: -1px;
-  left: -1px;
-  border-width: 3px 0 0 3px;
-  border-radius: 16px 0 0 0;
-}
-
-.corner.br {
-  bottom: -1px;
-  right: -1px;
-  border-width: 0 3px 3px 0;
-  border-radius: 0 0 16px 0;
 }
 
 /* ── CARD HEADER ── */
@@ -244,95 +186,24 @@
 }
 
 /* ── FORM ── */
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.field-label {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-sub);
-}
-
-.input-wrap,
-.select-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-icon {
-  position: absolute;
-  left: 14px;
-  width: 16px;
-  height: 16px;
-  color: var(--text-sub);
-  pointer-events: none;
-  opacity: 0.6;
-}
-
-.field-input,
-.field-select {
-  background: #ffffff08;
-  border: 1.5px solid #00EFFF44;
-  border-radius: 9px;
-  padding: 13px 16px 13px 40px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+.field-full {
   width: 100%;
 }
 
-.field-select {
-  appearance: none;
-  cursor: pointer;
-  padding-right: 36px;
-}
-
-.select-arrow {
-  position: absolute;
-  right: 14px;
-  width: 12px;
-  height: 12px;
+.field-prefix-icon {
+  width: 16px;
+  height: 16px;
   color: var(--text-sub);
-  pointer-events: none;
   opacity: 0.6;
+  margin-right: 6px;
+  flex-shrink: 0;
 }
 
-.field-input::placeholder {
-  color: #8AD8FF55;
-}
-
-.field-input:focus,
-.field-select:focus {
-  border-color: var(--border);
-  box-shadow: 0 0 0 3px #00EFFF18;
-}
-
-.field-input:disabled,
-.field-select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.field-error {
+.api-error {
   font-size: 12px;
   color: var(--primary);
   letter-spacing: 0.03em;
-  padding: 0 2px;
-}
-
-/* ── SELECT OPTIONS ── */
-.field-select option {
-  background: var(--panel);
-  color: var(--text);
+  margin: 0;
 }
 
 /* ── SUCCESS SECTION ── */
@@ -482,25 +353,6 @@
 
 .btn-cta.btn-secondary svg {
   stroke: var(--border);
-}
-
-/* Spinner */
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spinner { animation: none; }
 }
 
 /* ── FOOTER NOTE ── */

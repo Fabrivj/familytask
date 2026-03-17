@@ -1,12 +1,26 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { FamilyService } from '../../../core/services/family.service';
+import { CardCornersComponent } from '../../../shared/components/card-corners/card-corners.component';
+import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
+
+const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
 
 @Component({
   selector: 'app-new-family',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    CardCornersComponent,
+    UserAvatarComponent,
+  ],
   templateUrl: './new-family.component.html',
   styleUrl: './new-family.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,9 +30,18 @@ export class NewFamilyComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly nameCtrl = new FormControl('', { nonNullable: true });
+  readonly nameCtrl = new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(50),
+      Validators.pattern(VALID_NAME),
+    ],
+  });
+
   readonly isLoading = signal(false);
-  readonly error = signal('');
+  readonly apiError = signal('');
   readonly showForm = signal(false);
 
   readonly shortName = computed(() => {
@@ -30,20 +53,22 @@ export class NewFamilyComponent {
     return (this.authService.session()?.name?.[0] ?? '?').toUpperCase();
   });
 
-  private readonly VALIDATION_MSG =
-    'El nombre debe tener entre 3 y 50 caracteres y no puede contener caracteres inválidos.';
-  private readonly VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
+  getNameError(): string {
+    const c = this.nameCtrl;
+    if (c.hasError('required')) return 'El nombre es obligatorio.';
+    if (c.hasError('minlength')) return 'Mínimo 3 caracteres.';
+    if (c.hasError('maxlength')) return 'Máximo 50 caracteres.';
+    if (c.hasError('pattern')) return 'El nombre contiene caracteres inválidos.';
+    return '';
+  }
 
   create(): void {
+    this.nameCtrl.markAllAsTouched();
+    if (this.nameCtrl.invalid) return;
+
     const name = this.nameCtrl.value.trim();
-
-    if (!name || name.length < 3 || name.length > 50 || !this.VALID_NAME.test(name)) {
-      this.error.set(this.VALIDATION_MSG);
-      return;
-    }
-
     this.isLoading.set(true);
-    this.error.set('');
+    this.apiError.set('');
     this.nameCtrl.disable();
 
     this.familyService.create({ name }).subscribe({
@@ -59,7 +84,7 @@ export class NewFamilyComponent {
         });
       },
       error: (err) => {
-        this.error.set(err.error?.message ?? 'No se pudo crear la familia. Intenta de nuevo.');
+        this.apiError.set(err.error?.message ?? 'No se pudo crear la familia. Intenta de nuevo.');
         this.isLoading.set(false);
         this.nameCtrl.enable();
       },
@@ -68,7 +93,7 @@ export class NewFamilyComponent {
 
   goBack(): void {
     this.nameCtrl.reset();
-    this.error.set('');
+    this.apiError.set('');
     this.showForm.set(false);
   }
 }
