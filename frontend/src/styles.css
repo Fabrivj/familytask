@@ -1,6 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+@import './app/shared/styles/_neon-tokens.css';
+@import './app/shared/styles/_neon-utilities.css';
 
 /* ============================================================
    LANDING PAGE — CSS VARIABLES & GLOBAL UTILITIES
@@ -201,7 +203,7 @@
 
 .mat-mdc-option:hover,
 .mat-mdc-option.mat-mdc-option-active {
-  background-color: #FF2EBE18 !important;
+  background-color: rgba(var(--primary-rgb), 0.09) !important;
 }
 
 .mat-mdc-option.mdc-list-item--selected {

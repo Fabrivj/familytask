@@ -1,0 +1,16 @@
+/* ============================================================
+   NEON TOKENS — RGB Channel Decomposition
+   Enables alpha usage: rgba(var(--primary-rgb), 0.27)
+   ============================================================ */
+:root {
+  --primary-rgb: 255, 46, 190;
+  --secondary-rgb: 0, 72, 255;
+  --border-rgb: 0, 239, 255;
+  --success-rgb: 60, 255, 90;
+  --warning-rgb: 255, 230, 0;
+  --error-rgb: 255, 59, 59;
+  --text-rgb: 207, 255, 255;
+  --text-sub-rgb: 138, 216, 255;
+  --panel-rgb: 15, 0, 77;
+  --bg-rgb: 10, 0, 51;
+}

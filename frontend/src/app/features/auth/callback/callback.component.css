@@ -1,32 +1,13 @@
-.page-container {
-  min-height: 100vh;
-  background: var(--bg);
-  background-image: radial-gradient(circle, #00EFFF12 1px, transparent 1px);
-  background-size: 32px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Nunito', sans-serif;
-  color: var(--text);
-  padding: 24px 16px;
-}
-
-/* ── CARD ── */
+/* ── Card (extends global .card) ── */
 .card {
-  background: var(--panel);
-  border: 1.5px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 8px 40px #00EFFF1a, 0 2px 12px #00000066;
-  overflow: hidden;
-  position: relative;
   width: 100%;
   max-width: 400px;
 }
 
-/* ── CARD HEADER ── */
+/* ── Card Header ── */
 .card-header {
-  background: linear-gradient(90deg, #0048FF14, #FF2EBE0d);
-  border-bottom: 1px solid #00EFFF2a;
+  background: linear-gradient(90deg, rgba(var(--secondary-rgb), 0.08), rgba(var(--primary-rgb), 0.05));
+  border-bottom: 1px solid rgba(var(--border-rgb), 0.16);
   padding: 28px 28px 24px;
   text-align: center;
 }
@@ -63,7 +44,7 @@
   margin-top: 10px;
 }
 
-/* ── CARD BODY ── */
+/* ── Card Body ── */
 .card-body {
   padding: 22px;
 }
@@ -101,12 +82,12 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 4px 22px #FF2EBE44;
+  box-shadow: 0 4px 22px rgba(var(--primary-rgb), 0.27);
   transition: box-shadow 0.2s;
 }
 
 .btn-full:hover {
-  box-shadow: 0 4px 32px #FF2EBE66;
+  box-shadow: 0 4px 32px rgba(var(--primary-rgb), 0.4);
 }
 
 .btn-full:focus-visible {
