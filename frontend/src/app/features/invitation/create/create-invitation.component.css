@@ -44,16 +44,6 @@
   letter-spacing: 0.04em;
 }
 
-.family-role-badge {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.07em;
-  padding: 2px 8px;
-  border-radius: 20px;
-  border: 1px solid rgba(var(--secondary-rgb), 0.33);
-  color: var(--secondary);
-  background: rgba(var(--secondary-rgb), 0.05);
-}
 
 /* ── Form ── */
 .field-prefix-icon {

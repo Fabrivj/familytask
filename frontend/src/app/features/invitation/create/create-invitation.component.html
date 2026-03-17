@@ -1,185 +1,151 @@
-<div class="page-container scanlines">
-  <div class="page">
+<app-page-layout>
 
-    <!-- Top bar -->
-    <div class="top-bar">
-      <span class="logo-small" aria-label="FamilyTask">FamilyTask</span>
-      <div class="user-chip" aria-label="Usuario actual">
-        <app-user-avatar [name]="shortName()" [size]="26" />
-        <span class="user-name">{{ shortName() }}</span>
+  <app-top-bar [userName]="shortName()" />
+
+  <app-neon-card>
+
+    <ng-container card-header>
+      <div class="step-row" aria-hidden="true">
+        <div class="pip done"></div>
+        <div class="pip done"></div>
+        <div class="pip on"></div>
       </div>
-    </div>
-
-    <!-- Card -->
-    <div class="card">
-      <app-card-corners />
-
-      <!-- Header -->
-      <div class="card-header">
-        <div class="step-row" aria-hidden="true">
-          <div class="pip done"></div>
-          <div class="pip done"></div>
-          <div class="pip on"></div>
-        </div>
-        <div class="tag">// PASO 3 DE 3</div>
-        <div class="card-title" role="heading" aria-level="1">Invita a tu familia</div>
-        <div class="card-sub">
-          Genera un link para que cada miembro se una a
-          <strong class="family-highlight">{{ familyName() }}</strong>
-        </div>
-      </div>
-
-      <!-- Family badge -->
-      <div class="body">
-
-        <div class="family-badge">
-          <div class="family-icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
-          <div class="family-info">
-            <span class="family-name">{{ familyName() }}</span>
-            <span class="family-role-badge">{{ familyRole() }}</span>
-          </div>
-        </div>
-
-        @if (!generatedLink()) {
-
-          <!-- Form: email + role -->
-          <mat-form-field appearance="outline" class="field-full">
-            <mat-label>Email del invitado</mat-label>
-            <svg matPrefix class="field-prefix-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M2 6l8 5 8-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <input
-              matInput
-              type="email"
-              placeholder="correo@ejemplo.com"
-              [formControl]="emailCtrl"
-              (keyup.enter)="generateLink()"
-              autocomplete="email"
-            />
-            @if (emailCtrl.touched && emailCtrl.invalid) {
-              <mat-error>{{ getEmailError() }}</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="field-full">
-            <mat-label>Rol del invitado</mat-label>
-            <svg matPrefix class="field-prefix-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            </svg>
-            <mat-select [formControl]="roleCtrl">
-              <mat-option value="CHILD">Hijo / a</mat-option>
-              <mat-option value="PARENT">Padre / Tutor</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          @if (error()) {
-            <p class="api-error" role="alert">{{ error() }}</p>
-          }
-
-        } @else {
-
-          <!-- Success: show generated link -->
-          <div class="success-section">
-            @if (successMessage()) {
-              <div class="success-toast" role="status">
-                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/>
-                  <path d="M5.5 8.5l1.5 1.5 3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                {{ successMessage() }}
-              </div>
-            }
-
-            <div class="link-box">
-              <span class="link-text">{{ generatedLink() }}</span>
-              <button
-                class="btn-copy"
-                type="button"
-                (click)="copyLink()"
-                [attr.aria-label]="linkCopied() ? 'Copiado' : 'Copiar link'"
-              >
-                @if (linkCopied()) {
-                  ✓
-                } @else {
-                  Copiar
-                }
-              </button>
-            </div>
-
-            <div class="link-info">
-              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M8 7.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                <circle cx="8" cy="5.2" r="0.7" fill="currentColor"/>
-              </svg>
-              El link es de <strong>uso único</strong> y expira en 7 días.
-            </div>
-          </div>
-
-        }
-
-      </div>
-
-      <!-- CTA area -->
-      <div class="cta-wrap">
-        @if (!generatedLink()) {
-          <button
-            class="btn-cta"
-            type="button"
-            (click)="generateLink()"
-            [disabled]="isLoading()"
-          >
-            @if (isLoading()) {
-              <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Generando link" />
-              Generando...
-            } @else {
-              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
-                <path d="M6 3l-3 3v4a2 2 0 002 2h6a2 2 0 002-2V6l-3-3H6z" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M6 3v3h4V3" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Generar link
-            }
-          </button>
-        } @else {
-          <button
-            class="btn-cta btn-secondary"
-            type="button"
-            (click)="inviteAnother()"
-          >
-            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
-              <path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            Invitar a otro miembro
-          </button>
-        }
-      </div>
-
-      <!-- Skip / go to dashboard -->
-      <p class="footer-note">
-        @if (inviteCount() > 0) {
-          <span class="invite-count">{{ inviteCount() }} invitación{{ inviteCount() > 1 ? 'es' : '' }} generada{{ inviteCount() > 1 ? 's' : '' }}</span>
-          <span class="separator">·</span>
-        }
-        <button class="skip-link" type="button" (click)="goToDashboard()">
-          Saltar por ahora → ir al inicio
-        </button>
+      <p class="tag">// PASO 3 DE 3</p>
+      <h1 class="card-title" role="heading" aria-level="1">Invita a tu familia</h1>
+      <p class="card-sub">
+        Genera un link para que cada miembro se una a
+        <strong class="family-highlight">{{ familyName() }}</strong>
       </p>
+    </ng-container>
 
-    </div>
-
-    <!-- Help chip -->
-    <div class="help-row">
-      <div class="help-chip">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
-          <circle cx="8" cy="8" r="6.5" stroke="#8AD8FF" stroke-width="1.3"/>
-          <path d="M8 7.5v4" stroke="#8AD8FF" stroke-width="1.3" stroke-linecap="round"/>
-          <circle cx="8" cy="5.2" r="0.8" fill="#8AD8FF"/>
-        </svg>
-        Podrás invitar más miembros después desde la configuración de tu familia.
+    <div class="family-badge">
+      <div class="family-icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
+      <div class="family-info">
+        <span class="family-name">{{ familyName() }}</span>
+        <app-role-badge [role]="familyRole()" />
       </div>
     </div>
 
-  </div>
-</div>
+    @if (!generatedLink()) {
+
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Email del invitado</mat-label>
+        <svg matPrefix class="field-prefix-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M2 6l8 5 8-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <input
+          matInput
+          type="email"
+          placeholder="correo@ejemplo.com"
+          [formControl]="emailCtrl"
+          (keyup.enter)="generateLink()"
+          autocomplete="email"
+        />
+        @if (emailCtrl.touched && emailCtrl.invalid) {
+          <mat-error>{{ getEmailError() }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Rol del invitado</mat-label>
+        <svg matPrefix class="field-prefix-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <mat-select [formControl]="roleCtrl">
+          <mat-option value="CHILD">Hijo / a</mat-option>
+          <mat-option value="PARENT">Padre / Tutor</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      @if (error()) {
+        <p class="api-error" role="alert">{{ error() }}</p>
+      }
+
+    } @else {
+
+      <div class="success-section">
+        @if (successMessage()) {
+          <div class="success-toast" role="status">
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M5.5 8.5l1.5 1.5 3.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ successMessage() }}
+          </div>
+        }
+
+        <div class="link-box">
+          <span class="link-text">{{ generatedLink() }}</span>
+          <button
+            class="btn-copy"
+            type="button"
+            (click)="copyLink()"
+            [attr.aria-label]="linkCopied() ? 'Copiado' : 'Copiar link'"
+          >
+            @if (linkCopied()) { ✓ } @else { Copiar }
+          </button>
+        </div>
+
+        <div class="link-info">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M8 7.5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="8" cy="5.2" r="0.7" fill="currentColor"/>
+          </svg>
+          El link es de <strong>uso único</strong> y expira en 7 días.
+        </div>
+      </div>
+
+    }
+
+    <ng-container card-cta>
+      @if (!generatedLink()) {
+        <button
+          class="btn-cta"
+          type="button"
+          (click)="generateLink()"
+          [disabled]="isLoading()"
+        >
+          @if (isLoading()) {
+            <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Generando link" />
+            Generando...
+          } @else {
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+              <path d="M6 3l-3 3v4a2 2 0 002 2h6a2 2 0 002-2V6l-3-3H6z" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 3v3h4V3" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Generar link
+          }
+        </button>
+      } @else {
+        <button
+          class="btn-cta btn-secondary"
+          type="button"
+          (click)="inviteAnother()"
+        >
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+            <path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Invitar a otro miembro
+        </button>
+      }
+    </ng-container>
+
+    <p card-footer class="footer-note">
+      @if (inviteCount() > 0) {
+        <span class="invite-count">{{ inviteCount() }} invitación{{ inviteCount() > 1 ? 'es' : '' }} generada{{ inviteCount() > 1 ? 's' : '' }}</span>
+        <span class="separator">·</span>
+      }
+      <button class="skip-link" type="button" (click)="goToDashboard()">
+        Saltar por ahora → ir al inicio
+      </button>
+    </p>
+
+  </app-neon-card>
+
+  <app-help-chip>Podrás invitar más miembros después desde la configuración de tu familia.</app-help-chip>
+
+</app-page-layout>
+

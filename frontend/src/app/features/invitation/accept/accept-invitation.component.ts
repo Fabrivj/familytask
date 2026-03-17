@@ -11,14 +11,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
 import { InviteDetailsResponse } from '../../../core/models/invitation.model';
-import { CardCornersComponent } from '../../../shared/components/card-corners/card-corners.component';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
+import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
 
 type PageState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
 
 @Component({
   selector: 'app-accept-invitation',
-  imports: [MatProgressSpinnerModule, CardCornersComponent, UserAvatarComponent],
+  imports: [MatProgressSpinnerModule, UserAvatarComponent, PageLayoutComponent, NeonCardComponent],
   templateUrl: './accept-invitation.component.html',
   styleUrl: './accept-invitation.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

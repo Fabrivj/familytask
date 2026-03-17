@@ -1,45 +1,4 @@
-/* ── Logo ── */
-.logo-row {
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.logo {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
-  color: var(--text);
-  text-shadow: -1px 0 0 var(--primary), 1px 0 0 var(--border);
-}
-
-/* ── Card Header ── */
-.card-header {
-  background: linear-gradient(90deg, rgba(var(--secondary-rgb), 0.08), rgba(var(--primary-rgb), 0.05));
-  border-bottom: 1px solid rgba(var(--border-rgb), 0.16);
-  padding: 28px 28px 24px;
-  text-align: center;
-}
-
-.tag {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  color: var(--primary);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.tag-error {
-  color: var(--error);
-}
-
-.card-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 24px;
-  color: var(--text);
-  letter-spacing: 0.03em;
-  margin-bottom: 14px;
-}
+.tag-error { color: var(--error); }
 
 /* ── Inviter Chip ── */
 .inviter-chip {
@@ -59,21 +18,8 @@
   font-weight: 600;
 }
 
-/* ── Body ── */
-.body {
-  padding: 22px 22px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.center-body {
-  align-items: center;
-  padding: 40px 22px;
-}
-
 /* ── Role Badge ── */
-.role-badge {
+.role-card {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -157,13 +103,6 @@
 }
 
 /* ── CTA ── */
-.cta-wrap {
-  padding: 4px 22px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
 .btn-accept {
   width: 100%;
   padding: 15px;
@@ -268,8 +207,3 @@
   box-shadow: 0 0 24px rgba(var(--success-rgb), 0.27);
 }
 
-@media (max-width: 400px) {
-  .card-header { padding-left: 18px; padding-right: 18px; }
-  .body { padding: 16px 14px; }
-  .cta-wrap { padding: 4px 14px 18px; }
-}

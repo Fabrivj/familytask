@@ -1,127 +1,96 @@
-<div class="page-container scanlines">
-  <div class="page">
+<app-page-layout>
 
-    <!-- Logo -->
-    <div class="logo-row">
-      <span class="logo" aria-label="FamilyTask">FamilyTask</span>
-    </div>
-
-    @if (state() === 'loading' || state() === 'processing') {
-
-      <!-- Loading / Processing -->
-      <div class="card">
-        <app-card-corners />
-        <div class="card-header">
-          <div class="tag">
-            {{ state() === 'processing' ? '// PROCESANDO' : '// VERIFICANDO' }}
-          </div>
-          <div class="card-title">
-            {{ state() === 'processing' ? 'Aceptando invitación...' : 'Verificando invitación...' }}
-          </div>
-        </div>
-        <div class="body center-body">
-          <mat-progress-spinner diameter="40" mode="indeterminate" [attr.aria-label]="state() === 'processing' ? 'Procesando' : 'Cargando'" />
-          <p class="loading-text">
-            {{ state() === 'processing' ? 'Uniéndote al grupo familiar...' : 'Cargando detalles de la invitación...' }}
-          </p>
-        </div>
-      </div>
-
-    } @else if (state() === 'ready') {
-
-      <!-- Invitation details -->
-      <div class="card">
-        <app-card-corners />
-
-        <!-- Header -->
-        <div class="card-header">
-          <div class="tag">// TE INVITARON A UNIRTE</div>
-          <div class="card-title" role="heading" aria-level="1">{{ details()?.familyName }}</div>
-          <div class="inviter-chip">
-            <app-user-avatar [name]="details()?.invitedByName ?? '?'" [size]="26" />
-            <span>Invitado por <strong>{{ details()?.invitedByName }}</strong></span>
-          </div>
-        </div>
-
-        <!-- Body -->
-        <div class="body">
-
-          <!-- Role badge -->
-          <div class="role-badge">
-            <span class="role-emoji" aria-hidden="true">{{ rolEmoji() }}</span>
-            <div class="role-info">
-              <span class="role-label">TU ROL EN ESTE GRUPO</span>
-              <span class="role-value">{{ rolLabel() }}</span>
-            </div>
-            <span class="assigned-tag">Asignado</span>
-          </div>
-
-          <!-- Expiration -->
-          <div class="expiration-row">
-            <span class="expiration-dot" aria-hidden="true"></span>
-            <span class="expiration-text">{{ expirationText() }}</span>
-          </div>
-
-        </div>
-
-        <!-- CTA -->
-        <div class="cta-wrap">
-          <button class="btn-accept" type="button" (click)="acceptInvitation()">
-            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
-              <path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            ACEPTAR INVITACIÓN
-          </button>
-          <button class="btn-reject" type="button" (click)="decline()">
-            RECHAZAR INVITACIÓN
-          </button>
-        </div>
-
-        <!-- Footer -->
-        <div class="card-footer">
-          <span class="footer-brand">FAMILY TASK</span>
-          <span class="footer-year">2026</span>
-        </div>
-
-      </div>
-
-    } @else if (state() === 'success') {
-
-      <!-- Success -->
-      <div class="card">
-        <app-card-corners />
-        <div class="card-header">
-          <div class="tag">// LISTO</div>
-          <div class="card-title">¡Te uniste exitosamente!</div>
-        </div>
-        <div class="body center-body">
-          <div class="success-icon" aria-hidden="true">✓</div>
-          <p class="loading-text">Redirigiendo al dashboard...</p>
-        </div>
-      </div>
-
-    } @else if (state() === 'error') {
-
-      <!-- Error -->
-      <div class="card">
-        <app-card-corners />
-        <div class="card-header">
-          <div class="tag tag-error">// INVITACIÓN INVÁLIDA</div>
-          <div class="card-title">No se pudo verificar</div>
-          <div class="card-sub">{{ errorMessage() }}</div>
-        </div>
-        <div class="cta-wrap">
-          <button class="btn-accept" type="button" (click)="decline()">
-            Volver al inicio
-          </button>
-        </div>
-        <div class="card-footer">
-          <span class="footer-brand">FAMILY TASK</span>
-          <span class="footer-year">2026</span>
-        </div>
-      </div>
-
-    }
-
+  <div class="logo-row">
+    <span class="logo" aria-label="FamilyTask">FamilyTask</span>
   </div>
-</div>
+
+  @if (state() === 'loading' || state() === 'processing') {
+
+    <app-neon-card [centered]="true">
+      <ng-container card-header>
+        <p class="tag">{{ state() === 'processing' ? '// PROCESANDO' : '// VERIFICANDO' }}</p>
+        <p class="card-title">{{ state() === 'processing' ? 'Aceptando invitación...' : 'Verificando invitación...' }}</p>
+      </ng-container>
+      <mat-progress-spinner diameter="40" mode="indeterminate" [attr.aria-label]="state() === 'processing' ? 'Procesando' : 'Cargando'" />
+      <p class="loading-text">
+        {{ state() === 'processing' ? 'Uniéndote al grupo familiar...' : 'Cargando detalles de la invitación...' }}
+      </p>
+    </app-neon-card>
+
+  } @else if (state() === 'ready') {
+
+    <app-neon-card>
+      <ng-container card-header>
+        <p class="tag">// TE INVITARON A UNIRTE</p>
+        <h1 class="card-title" role="heading" aria-level="1">{{ details()?.familyName }}</h1>
+        <div class="inviter-chip">
+          <app-user-avatar [name]="details()?.invitedByName ?? '?'" [size]="26" />
+          <span>Invitado por <strong>{{ details()?.invitedByName }}</strong></span>
+        </div>
+      </ng-container>
+
+      <div class="role-card">
+        <span class="role-emoji" aria-hidden="true">{{ rolEmoji() }}</span>
+        <div class="role-info">
+          <span class="role-label">TU ROL EN ESTE GRUPO</span>
+          <span class="role-value">{{ rolLabel() }}</span>
+        </div>
+        <span class="assigned-tag">Asignado</span>
+      </div>
+
+      <div class="expiration-row">
+        <span class="expiration-dot" aria-hidden="true"></span>
+        <span class="expiration-text">{{ expirationText() }}</span>
+      </div>
+
+      <ng-container card-cta>
+        <button class="btn-accept" type="button" (click)="acceptInvitation()">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+            <path d="M3 8.5l3.5 3.5L13 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          ACEPTAR INVITACIÓN
+        </button>
+        <button class="btn-reject" type="button" (click)="decline()">
+          RECHAZAR INVITACIÓN
+        </button>
+      </ng-container>
+
+      <div card-footer class="card-footer">
+        <span class="footer-brand">FAMILY TASK</span>
+        <span class="footer-year">2026</span>
+      </div>
+    </app-neon-card>
+
+  } @else if (state() === 'success') {
+
+    <app-neon-card [centered]="true">
+      <ng-container card-header>
+        <p class="tag">// LISTO</p>
+        <p class="card-title">¡Te uniste exitosamente!</p>
+      </ng-container>
+      <div class="success-icon" aria-hidden="true">✓</div>
+      <p class="loading-text">Redirigiendo al dashboard...</p>
+    </app-neon-card>
+
+  } @else if (state() === 'error') {
+
+    <app-neon-card>
+      <ng-container card-header>
+        <p class="tag tag-error">// INVITACIÓN INVÁLIDA</p>
+        <p class="card-title">No se pudo verificar</p>
+        <p class="card-sub">{{ errorMessage() }}</p>
+      </ng-container>
+
+      <button card-cta class="btn-accept" type="button" (click)="decline()">
+        Volver al inicio
+      </button>
+
+      <div card-footer class="card-footer">
+        <span class="footer-brand">FAMILY TASK</span>
+        <span class="footer-year">2026</span>
+      </div>
+    </app-neon-card>
+
+  }
+
+</app-page-layout>
