@@ -1,28 +1,25 @@
-/* You can add global styles to this file, and also import other style files */
+/* ============================================================
+   GLOBAL STYLES — Entry Point
+   @import rules MUST come first (CSS spec). Reset and other rules follow.
+   ============================================================ */
 
-@import 'tailwindcss';
-@import './app/shared/styles/_neon-tokens.css';
-@import './app/shared/styles/_neon-utilities.css';
+/* ── Design Variables ── */
+@import './styles/_variables.css';
+
+/* ── UI Patterns (shared CSS — gradually replaced by Angular components) ── */
+@import './styles/_ui-patterns.css';
+
+/* ── Angular Material — Neon Theme ── */
+@import './styles/_material-overrides.css';
+
+/* ── CSS Reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
 
 /* ============================================================
-   LANDING PAGE — CSS VARIABLES & GLOBAL UTILITIES
+   LANDING PAGE — Layout & utilities
+   Used only by landing page sections.
    ============================================================ */
-:root {
-  --bg:        #0A0033;
-  --panel:     #0F004D;
-  --primary:   #FF2EBE;
-  --secondary: #0048FF;
-  --border:    #00EFFF;
-  --text:      #CFFFFF;
-  --text-sub:  #8AD8FF;
-  --success:   #3CFF5A;
-  --warning:   #FFE600;
-  --error:     #FF3B3B;
-  --radius:    8px;
-  --radius-lg: 16px;
-}
-
-/* Shared layout utilities used across landing sections */
 .landing-container {
   width: 100%;
   max-width: 1160px;
@@ -100,14 +97,18 @@
   .landing-section { padding: 56px 0; }
 }
 
-/* ── Shared feedback messages ── */
+/* ============================================================
+   GLOBAL UTILITIES
+   ============================================================ */
+
+/* Feedback messages */
 .msg-success {
   color: var(--success);
   font-size: 13px;
   margin-bottom: 12px;
 }
 
-/* ── Scanlines overlay — add class="... scanlines" to any page-container ── */
+/* Scanlines overlay */
 .scanlines::before {
   content: '';
   position: fixed;
@@ -118,116 +119,4 @@
   );
   pointer-events: none;
   z-index: 100;
-}
-
-/* ============================================================
-   ANGULAR MATERIAL — TEMA NEON
-   Override directo de clases MDC para consistencia con el
-   design system neon del proyecto.
-   ============================================================ */
-
-/* Borde del outlined form field */
-.mdc-notched-outline__leading,
-.mdc-notched-outline__notch,
-.mdc-notched-outline__trailing {
-  border-color: var(--border) !important;
-}
-
-.mat-mdc-form-field:hover .mdc-notched-outline__leading,
-.mat-mdc-form-field:hover .mdc-notched-outline__notch,
-.mat-mdc-form-field:hover .mdc-notched-outline__trailing {
-  border-color: var(--primary) !important;
-}
-
-.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
-.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
-.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
-  border-color: var(--primary) !important;
-}
-
-.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__leading,
-.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__notch,
-.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__trailing {
-  border-color: var(--error) !important;
-}
-
-/* Label flotante */
-.mdc-floating-label {
-  color: var(--text-sub) !important;
-  font-family: 'Nunito', sans-serif !important;
-}
-
-.mat-mdc-form-field.mat-focused .mdc-floating-label {
-  color: var(--primary) !important;
-}
-
-.mat-mdc-form-field.mat-form-field-invalid .mdc-floating-label {
-  color: var(--error) !important;
-}
-
-/* Input text */
-.mat-mdc-input-element {
-  color: var(--text) !important;
-  font-family: 'Nunito', sans-serif !important;
-  caret-color: var(--primary) !important;
-}
-
-/* Error hint */
-.mat-mdc-form-field-error {
-  color: var(--error) !important;
-  font-family: 'Nunito', sans-serif !important;
-}
-
-/* mat-select trigger */
-.mat-mdc-select-value-text,
-.mat-mdc-select-placeholder {
-  color: var(--text) !important;
-  font-family: 'Nunito', sans-serif !important;
-}
-
-.mat-mdc-select-arrow {
-  color: var(--border) !important;
-}
-
-/* mat-select panel (dropdown) */
-.mat-mdc-select-panel {
-  background: var(--panel) !important;
-  border: 1px solid var(--border) !important;
-}
-
-.mat-mdc-option {
-  color: var(--text) !important;
-  font-family: 'Nunito', sans-serif !important;
-  background-color: var(--panel) !important;
-}
-
-.mat-mdc-option:hover,
-.mat-mdc-option.mat-mdc-option-active {
-  background-color: rgba(var(--primary-rgb), 0.09) !important;
-}
-
-.mat-mdc-option.mdc-list-item--selected {
-  color: var(--primary) !important;
-}
-
-/* mat-progress-spinner */
-.mdc-circular-progress__indeterminate-circle-graphic {
-  stroke: var(--primary) !important;
-}
-
-/* mat-snack-bar */
-.mat-mdc-snack-bar-container {
-  background: var(--panel) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--text) !important;
-}
-
-.mat-mdc-snack-bar-container .mdc-snackbar__label {
-  color: var(--text) !important;
-  font-family: 'Nunito', sans-serif !important;
-}
-
-.mat-mdc-snack-bar-container .mat-mdc-button {
-  color: var(--border) !important;
-  font-family: 'Rajdhani', sans-serif !important;
 }

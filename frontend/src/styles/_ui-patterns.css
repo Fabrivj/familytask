@@ -1,8 +1,9 @@
 /* ============================================================
-   NEON UTILITIES — Shared component styles
-   Common patterns extracted from feature component CSS.
-   Uses existing class names so components can remove their
-   local definitions and inherit from global.
+   UI PATTERNS — Shared CSS component patterns
+   These classes are used across multiple feature components.
+   They are gradually being replaced by Angular components
+   (app-neon-card, app-page-layout, app-top-bar, etc.).
+   Once a pattern is fully replaced, remove it from here.
    ============================================================ */
 
 /* ── Page Container (centered variant) ── */

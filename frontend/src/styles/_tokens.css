@@ -1,0 +1,18 @@
+/* ============================================================
+   DESIGN TOKENS — Colors, Spacing, Radius
+   Source of truth for the neon design system.
+   ============================================================ */
+:root {
+  --bg:        #0A0033;
+  --panel:     #0F004D;
+  --primary:   #FF2EBE;
+  --secondary: #0048FF;
+  --border:    #00EFFF;
+  --text:      #CFFFFF;
+  --text-sub:  #8AD8FF;
+  --success:   #3CFF5A;
+  --warning:   #FFE600;
+  --error:     #FF3B3B;
+  --radius:    8px;
+  --radius-lg: 16px;
+}
