@@ -13,8 +13,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
-import { CardCornersComponent } from '../../../shared/components/card-corners/card-corners.component';
-import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
+import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
+import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { HelpChipComponent } from '../../../shared/components/help-chip/help-chip.component';
+import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
 
 @Component({
   selector: 'app-create-invitation',
@@ -24,8 +27,11 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
     MatInputModule,
     MatSelectModule,
     MatProgressSpinnerModule,
-    CardCornersComponent,
-    UserAvatarComponent,
+    PageLayoutComponent,
+    NeonCardComponent,
+    TopBarComponent,
+    HelpChipComponent,
+    RoleBadgeComponent,
   ],
   templateUrl: './create-invitation.component.html',
   styleUrl: './create-invitation.component.css',
@@ -52,11 +58,11 @@ export class CreateInvitationComponent {
     return families.find(f => f.familyId === activeId)?.familyName ?? 'Tu familia';
   });
 
-  readonly familyRole = computed(() => {
+  readonly familyRole = computed((): 'PARENT' | 'CHILD' => {
     const families = this.authService.families();
     const activeId = this.authService.getActiveFamilyId();
     const role = families.find(f => f.familyId === activeId)?.role;
-    return role === 'PARENT' ? 'Padre / Tutor' : 'Hijo';
+    return role === 'PARENT' ? 'PARENT' : 'CHILD';
   });
 
   // ─── Form controls ─────────────────────────────────────────────────────────

@@ -1,38 +1,33 @@
-<div class="page-container scanlines">
+<app-page-layout>
 
   @if (state() === 'processing') {
-    <div class="card">
-      <app-card-corners />
-      <div class="card-header">
-        <div class="tag">// VERIFICANDO</div>
-        <div class="card-title">Iniciando sesión</div>
-      </div>
-      <div class="card-body center">
-        <mat-progress-spinner
-          mode="indeterminate"
-          diameter="44"
-          aria-label="Procesando inicio de sesión"
-        />
-        <p class="step-text">{{ currentStep() }}</p>
-      </div>
-    </div>
+    <app-neon-card [centered]="true">
+      <ng-container card-header>
+        <p class="tag">// VERIFICANDO</p>
+        <h1 class="card-title">Iniciando sesión</h1>
+      </ng-container>
+      <mat-progress-spinner
+        mode="indeterminate"
+        diameter="44"
+        aria-label="Procesando inicio de sesión"
+      />
+      <p class="step-text">{{ currentStep() }}</p>
+    </app-neon-card>
   }
 
   @if (state() === 'error') {
-    <div class="card">
-      <app-card-corners />
-      <div class="card-header">
-        <div class="tag tag-error">// ERROR</div>
+    <app-neon-card>
+      <ng-container card-header>
+        <p class="tag tag-error">// ERROR</p>
         <span class="error-icon" aria-hidden="true">⚠️</span>
-        <div class="card-title">Algo salió mal</div>
-        <div class="card-sub">{{ errorMessage() }}</div>
-      </div>
-      <div class="cta-wrap">
-        <button class="btn-full" type="button" (click)="goBackToLogin()">
-          Volver al inicio
-        </button>
-      </div>
-    </div>
+        <h1 class="card-title">Algo salió mal</h1>
+        <p class="card-sub">{{ errorMessage() }}</p>
+      </ng-container>
+      <button card-cta class="btn-cta" type="button" (click)="goBackToLogin()">
+        Volver al inicio
+      </button>
+    </app-neon-card>
   }
 
-</div>
+</app-page-layout>
+

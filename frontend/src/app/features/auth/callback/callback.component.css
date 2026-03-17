@@ -1,45 +1,3 @@
-.page-container {
-  min-height: 100vh;
-  background: var(--bg);
-  background-image: radial-gradient(circle, #00EFFF12 1px, transparent 1px);
-  background-size: 32px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Nunito', sans-serif;
-  color: var(--text);
-  padding: 24px 16px;
-}
-
-/* ── CARD ── */
-.card {
-  background: var(--panel);
-  border: 1.5px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 8px 40px #00EFFF1a, 0 2px 12px #00000066;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-}
-
-/* ── CARD HEADER ── */
-.card-header {
-  background: linear-gradient(90deg, #0048FF14, #FF2EBE0d);
-  border-bottom: 1px solid #00EFFF2a;
-  padding: 28px 28px 24px;
-  text-align: center;
-}
-
-.tag {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  color: var(--primary);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
 .tag-error { color: var(--error); }
 
 .error-icon {
@@ -48,68 +6,9 @@
   margin: 8px 0 12px;
 }
 
-.card-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 22px;
-  color: var(--text);
-  letter-spacing: 0.03em;
-}
-
-.card-sub {
-  font-size: 13px;
-  color: var(--text-sub);
-  line-height: 1.6;
-  margin-top: 10px;
-}
-
-/* ── CARD BODY ── */
-.card-body {
-  padding: 22px;
-}
-
-.card-body.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  padding: 40px 22px;
-}
-
 .step-text {
   font-size: 13px;
   color: var(--text-sub);
   text-align: center;
   margin: 0;
-}
-
-/* ── CTA ── */
-.cta-wrap {
-  padding: 4px 22px 22px;
-}
-
-.btn-full {
-  width: 100%;
-  padding: 13px;
-  border: none;
-  border-radius: 9px;
-  background: var(--primary);
-  color: #fff;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: 0 4px 22px #FF2EBE44;
-  transition: box-shadow 0.2s;
-}
-
-.btn-full:hover {
-  box-shadow: 0 4px 32px #FF2EBE66;
-}
-
-.btn-full:focus-visible {
-  outline: 2px solid var(--border);
-  outline-offset: 2px;
 }

@@ -1,35 +1,21 @@
-<div class="page-container">
+<app-page-layout variant="full">
 
-  <!-- Top bar -->
-  <header class="top-bar">
-    <span class="logo" aria-label="FamilyTask">FamilyTask</span>
-    <div class="top-right">
-      <div class="user-chip" aria-label="Usuario actual">
-        <div class="avatar" aria-hidden="true">{{ nameInitial() }}</div>
-        <div class="user-info">
-          <span class="user-name">{{ shortName() }}</span>
-          <span class="user-email">{{ userEmail() }}</span>
-        </div>
-      </div>
-      <button
-        class="btn-logout"
-        type="button"
-        (click)="logout()"
-        [disabled]="logoutLoading()"
-      >
-        {{ logoutLoading() ? 'CERRANDO...' : 'CERRAR SESIÓN' }}
-      </button>
-    </div>
-  </header>
+  <app-top-bar
+    [userName]="shortName()"
+    [userEmail]="userEmail()"
+    [showLogout]="true"
+    [logoutLoading]="logoutLoading()"
+    (logout)="logout()"
+  />
 
-  <!-- Content -->
   <main class="content">
 
-    <div class="heading-area">
-      <div class="tag">// BIENVENIDO DE VUELTA, {{ shortName() | uppercase }}</div>
-      <h1 class="page-title" role="heading" aria-level="1">¿A qué familia entras hoy?</h1>
-      <p class="page-sub">Selecciona un grupo para acceder a su dashboard.</p>
-    </div>
+    <app-page-header
+      [tag]="'// BIENVENIDO DE VUELTA, ' + shortName().toUpperCase()"
+      title="¿A qué familia entras hoy?"
+      subtitle="Selecciona un grupo para acceder a su dashboard."
+      [centered]="true"
+    />
 
     @if (loadError()) {
       <p class="error-banner" role="alert">{{ loadError() }}</p>
@@ -55,9 +41,7 @@
               🏠
             </div>
             <h2 class="family-name" [class.name-active]="isSelected(familia.familyId)">{{ familia.familyName }}</h2>
-            <span [class]="'role-badge ' + getRoleBadgeClass(familia.role)">
-              {{ getRoleLabel(familia.role) }}
-            </span>
+            <app-role-badge [role]="familia.role" />
           </div>
 
           <div class="card-stats">
@@ -112,4 +96,4 @@
 
   </main>
 
-</div>
+</app-page-layout>

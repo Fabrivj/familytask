@@ -13,7 +13,15 @@
       "Bash(find /c/Users/Jose/.m2/repository/org/springframework/boot -name \"*webmvc*test*\" -o -name \"*test*webmvc*\" 2>/dev/null | head -10)",
       "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\frontend\" && npx ng test --no-watch 2>&1 | tail -80)",
       "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\backend\" && ./mvnw test -Dtest=\"JwtUtilTest,FamilyControllerTest,InviteControllerTest\" 2>&1 | tail -80)",
-      "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\backend\" && ./mvnw test -Dtest=\"JwtUtilTest,FamilyControllerTest,InviteControllerTest\" 2>&1 | tail -40)"
+      "Bash(cd \"D:\\\\Desktop - Copy\\\\Bachillerato Ing en Software\\\\Cuatrimestres\\\\2026\\\\Enero - Mayo 2026\\\\familtytask\\\\backend\" && ./mvnw test -Dtest=\"JwtUtilTest,FamilyControllerTest,InviteControllerTest\" 2>&1 | tail -40)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx ng:*)",
+      "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\shared\\\\components\\\\page-layout\\\\page-layout.component.css\")",
+      "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\features\\\\auth\\\\callback\\\\callback.component.html\")",
+      "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\features\\\\auth\\\\callback\\\\callback.component.ts\")",
+      "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\styles.css\")",
+      "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\features\\\\family\\\\select\\\\select-family.component.html\")",
+      "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\features\\\\invitation\\\\create\\\\create-invitation.component.html\")"
     ]
   }
 }

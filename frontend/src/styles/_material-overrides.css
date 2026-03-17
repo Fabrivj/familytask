@@ -1,0 +1,112 @@
+/* ============================================================
+   ANGULAR MATERIAL — NEON THEME OVERRIDES
+   Applies the neon design system to Angular Material MDC
+   components. Overrides are scoped to specific MDC classes
+   to avoid bleed into custom components.
+   ============================================================ */
+
+/* ── Form Field: Outline borders ── */
+.mdc-notched-outline__leading,
+.mdc-notched-outline__notch,
+.mdc-notched-outline__trailing {
+  border-color: var(--border) !important;
+}
+
+.mat-mdc-form-field:hover .mdc-notched-outline__leading,
+.mat-mdc-form-field:hover .mdc-notched-outline__notch,
+.mat-mdc-form-field:hover .mdc-notched-outline__trailing {
+  border-color: var(--primary) !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--primary) !important;
+}
+
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-form-field-invalid .mdc-notched-outline__trailing {
+  border-color: var(--error) !important;
+}
+
+/* ── Form Field: Floating label ── */
+.mdc-floating-label {
+  color: var(--text-sub) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-floating-label {
+  color: var(--primary) !important;
+}
+
+.mat-mdc-form-field.mat-form-field-invalid .mdc-floating-label {
+  color: var(--error) !important;
+}
+
+/* ── Form Field: Input text ── */
+.mat-mdc-input-element {
+  color: var(--text) !important;
+  font-family: 'Nunito', sans-serif !important;
+  caret-color: var(--primary) !important;
+}
+
+/* ── Form Field: Error hint ── */
+.mat-mdc-form-field-error {
+  color: var(--error) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+/* ── Select: Trigger ── */
+.mat-mdc-select-value-text,
+.mat-mdc-select-placeholder {
+  color: var(--text) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+.mat-mdc-select-arrow {
+  color: var(--border) !important;
+}
+
+/* ── Select: Dropdown panel ── */
+.mat-mdc-select-panel {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.mat-mdc-option {
+  color: var(--text) !important;
+  font-family: 'Nunito', sans-serif !important;
+  background-color: var(--panel) !important;
+}
+
+.mat-mdc-option:hover,
+.mat-mdc-option.mat-mdc-option-active {
+  background-color: rgba(var(--primary-rgb), 0.09) !important;
+}
+
+.mat-mdc-option.mdc-list-item--selected {
+  color: var(--primary) !important;
+}
+
+/* ── Progress Spinner ── */
+.mdc-circular-progress__indeterminate-circle-graphic {
+  stroke: var(--primary) !important;
+}
+
+/* ── Snack Bar ── */
+.mat-mdc-snack-bar-container {
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__label {
+  color: var(--text) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-button {
+  color: var(--border) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+}

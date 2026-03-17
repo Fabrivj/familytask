@@ -9,13 +9,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
-import { CardCornersComponent } from '../../../shared/components/card-corners/card-corners.component';
+import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
 
 type CallbackState = 'processing' | 'error';
 
 @Component({
   selector: 'app-callback',
-  imports: [MatProgressSpinnerModule, CardCornersComponent],
+  imports: [MatProgressSpinnerModule, PageLayoutComponent, NeonCardComponent],
   templateUrl: './callback.component.html',
   styleUrl: './callback.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -129,3 +130,4 @@ export class CallbackComponent implements OnInit {
     this.router.navigate(['/auth/login']);
   }
 }
+

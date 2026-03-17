@@ -1,0 +1,13 @@
+<div class="card">
+  <app-card-corners />
+  <div class="card-header">
+    <ng-content select="[card-header]" />
+  </div>
+  <div class="body" [class.centered]="centered()">
+    <ng-content />
+  </div>
+  <div class="cta-wrap">
+    <ng-content select="[card-cta]" />
+  </div>
+  <ng-content select="[card-footer]" />
+</div>

@@ -1,0 +1,236 @@
+/* ============================================================
+   UI PATTERNS — Shared CSS component patterns
+   These classes are used across multiple feature components.
+   They are gradually being replaced by Angular components
+   (app-neon-card, app-page-layout, app-top-bar, etc.).
+   Once a pattern is fully replaced, remove it from here.
+   ============================================================ */
+
+/* ── Page Container (centered variant) ── */
+.page-container {
+  min-height: 100vh;
+  background: var(--bg);
+  background-image: radial-gradient(circle, rgba(var(--border-rgb), 0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  color: var(--text);
+  padding: 24px 16px;
+}
+
+/* ── Page Wrapper ── */
+.page {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Top Bar (card-level) ── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.logo-small {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--text);
+  text-shadow: -1px 0 0 var(--primary), 1px 0 0 var(--border);
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(var(--border-rgb), 0.2);
+  border-radius: 20px;
+  padding: 5px 12px 5px 6px;
+}
+
+.user-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  letter-spacing: 0.05em;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(var(--border-rgb), 0.1), 0 2px 12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Card Header ── */
+.card-header {
+  background: linear-gradient(90deg, rgba(var(--secondary-rgb), 0.08), rgba(var(--primary-rgb), 0.05));
+  border-bottom: 1px solid rgba(var(--border-rgb), 0.16);
+  padding: 24px 28px 22px;
+  text-align: center;
+}
+
+/* ── Step Indicators ── */
+.step-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.pip {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--border-rgb), 0.2);
+}
+
+.pip.on {
+  background: var(--border);
+  box-shadow: 0 0 6px var(--border);
+}
+
+.pip.done {
+  background: var(--secondary);
+  box-shadow: 0 0 4px rgba(var(--secondary-rgb), 0.53);
+}
+
+/* ── Tag ── */
+.tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--primary);
+  text-transform: uppercase;
+  margin-bottom: 9px;
+}
+
+/* ── Card Title ── */
+.card-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text);
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
+}
+
+/* ── Card Subtitle ── */
+.card-sub {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+/* ── Body ── */
+.body {
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Form ── */
+.field-full {
+  width: 100%;
+}
+
+.api-error {
+  font-size: 12px;
+  color: var(--primary);
+  letter-spacing: 0.03em;
+  margin: 0;
+}
+
+/* ── CTA ── */
+.cta-wrap {
+  padding: 0 22px 22px;
+}
+
+.btn-cta {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 9px;
+  background: var(--primary);
+  color: #fff;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 22px rgba(var(--primary-rgb), 0.27);
+  transition: opacity 0.2s, box-shadow 0.2s;
+}
+
+.btn-cta:hover:not(:disabled) {
+  box-shadow: 0 4px 32px rgba(var(--primary-rgb), 0.4);
+}
+
+.btn-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-cta:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
+}
+
+.btn-cta svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Help Row ── */
+.help-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.help-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(var(--border-rgb), 0.03);
+  border: 1px solid rgba(var(--border-rgb), 0.13);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 11px;
+  color: var(--text-sub);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.help-chip svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 400px) {
+  .card-header { padding-left: 18px; padding-right: 18px; }
+  .body { padding: 16px 14px; }
+  .cta-wrap { padding: 0 14px 18px; }
+}
