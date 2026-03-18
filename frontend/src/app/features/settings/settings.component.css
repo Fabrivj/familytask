@@ -1,0 +1,78 @@
+/* ── Main ── */
+.main {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 28px 48px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Config Card ── */
+.config-card {
+  max-width: 520px;
+  background: var(--panel);
+  border: 1.5px solid rgba(var(--border-rgb), 0.16);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.config-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: linear-gradient(90deg, rgba(var(--secondary-rgb), 0.08), rgba(var(--primary-rgb), 0.05));
+  border-bottom: 1px solid rgba(var(--border-rgb), 0.12);
+}
+
+.header-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--border);
+}
+
+.config-card-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--border);
+  text-transform: uppercase;
+}
+
+.config-card-body {
+  padding: 22px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Field Label ── */
+.field-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  margin-bottom: -6px;
+}
+
+/* ── Success Box ── */
+.msg-success--box {
+  border: 1px solid rgba(var(--success-rgb), 0.4);
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: rgba(var(--success-rgb), 0.05);
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .main {
+    padding: 28px 16px 40px;
+  }
+
+  .config-card {
+    max-width: 100%;
+  }
+}
