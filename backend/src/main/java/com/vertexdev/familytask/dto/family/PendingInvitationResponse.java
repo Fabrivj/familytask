@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class PendingInvitationResponse {
     private String email;
     private String role;
+    private String token;
     private LocalDateTime createdAt;
     private LocalDateTime expirationDate;
 }

@@ -163,6 +163,31 @@ public class InvitationService {
     }
 
     /**
+     * Cancels a pending invitation. Only a PARENT of the family can cancel it.
+     */
+    @Transactional
+    public void cancelInvitation(String tokenStr, User requester) {
+        UUID tokenUUID;
+        try {
+            tokenUUID = UUID.fromString(tokenStr);
+        } catch (IllegalArgumentException e) {
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida.", 400);
+        }
+
+        Invitation invitation = invitationRepository.findByToken(tokenUUID)
+                .orElseThrow(() -> new InvitationException("NOT_FOUND", "La invitación no existe.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(invitation.getFamilyGroup().getId(), requester.getId())
+                .filter(m -> m.getRole() == Role.PARENT && m.getIsActive())
+                .orElseThrow(() -> new InvitationException("ACCESS_DENIED",
+                        "No tienes permisos para cancelar esta invitación.", 403));
+
+        invitationRepository.delete(invitation);
+        log.info("Invitation for {} cancelled by {}", invitation.getInvitedEmail(), requester.getEmail());
+    }
+
+    /**
      * Parses and validates a token string, returning the active Invitation.
      * Throws INVALID_TOKEN (400) if the token is malformed, not found, already used, or expired.
      */

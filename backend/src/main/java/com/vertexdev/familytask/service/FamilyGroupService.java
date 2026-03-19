@@ -41,12 +41,13 @@ public class FamilyGroupService {
 
         familyGroupRepository.save(familyGroup);
 
-        // Creator automatically becomes PARENT
+        // Creator automatically becomes PARENT and admin
         FamilyMember member = FamilyMember.builder()
                 .familyGroup(familyGroup)
                 .user(creator)
                 .role(Role.PARENT)
                 .isActive(true)
+                .isAdmin(true)
                 .build();
 
         familyMemberRepository.save(member);
@@ -84,14 +85,11 @@ public class FamilyGroupService {
 
     @Transactional(readOnly = true)
     public FamilyMembersResponse getMembers(Long familyId, User requester) {
-        boolean isMember = familyMemberRepository
+        familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyId, requester.getId())
-                .map(FamilyMember::getIsActive)
-                .orElse(false);
-
-        if (!isMember) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No perteneces a esta familia.");
-        }
+                .filter(m -> m.getIsActive() && m.getRole() == Role.PARENT)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "No tienes permisos para ver los miembros de esta familia."));
 
         List<MemberItemResponse> members = familyMemberRepository
                 .findByFamilyGroupIdAndIsActiveTrue(familyId)
@@ -112,6 +110,7 @@ public class FamilyGroupService {
                 .map(i -> PendingInvitationResponse.builder()
                         .email(i.getInvitedEmail())
                         .role(i.getRole().name())
+                        .token(i.getToken().toString())
                         .createdAt(i.getCreatedAt())
                         .expirationDate(i.getExpirationDate())
                         .build())
