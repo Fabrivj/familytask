@@ -49,6 +49,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'family/members',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/family/members/family-members.component').then(
+        m => m.FamilyMembersComponent
+      ),
+  },
+  {
     path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () =>

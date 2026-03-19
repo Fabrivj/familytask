@@ -55,7 +55,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 })
 export class UserAvatarComponent {
   readonly name = input.required<string>();
-  readonly size = input<number>(32);
   readonly pictureUrl = input<string>('');
+  readonly size = input<number>(32);
   readonly initial = computed(() => (this.name()[0] ?? '?').toUpperCase());
 }
