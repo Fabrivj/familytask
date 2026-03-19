@@ -79,6 +79,20 @@ export class AuthService {
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   }
 
+  updateFamilyName(familyId: number, newName: string): void {
+    const currentSession = this._session();
+    if (!currentSession) return;
+
+    const updated: UserSession = {
+      ...currentSession,
+      families: currentSession.families.map(f =>
+        f.familyId === familyId ? { ...f, familyName: newName } : f
+      ),
+    };
+    this._session.set(updated);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
+  }
+
   addFamily(family: FamilySummary): void {
     const currentSession = this._session();
     if (!currentSession) return;

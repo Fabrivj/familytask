@@ -23,4 +23,11 @@ export class FamilyService {
       request
     );
   }
+
+  updateName(familyId: number, request: CreateFamilyRequest): Observable<FamilyResponse> {
+    return this.http.patch<FamilyResponse>(
+      `${environment.apiUrl}/families/${familyId}`,
+      request
+    );
+  }
 }
