@@ -36,4 +36,6 @@ public class CreateTaskRequest {
     private Long familyId;
 
     private LocalDateTime dueDate;
+
+    private Long assignedToId;
 }

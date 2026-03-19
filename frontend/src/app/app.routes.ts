@@ -69,6 +69,12 @@ export const routes: Routes = [
       import('./features/settings/settings.component').then(m => m.SettingsComponent),
   },
   {
+    path: 'tasks',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/tasks/list/tasks-list.component').then(m => m.TasksListComponent),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

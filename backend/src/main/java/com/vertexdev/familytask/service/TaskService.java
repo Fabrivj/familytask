@@ -13,12 +13,14 @@ import com.vertexdev.familytask.model.enums.TaskStatus;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.TaskRepository;
+import com.vertexdev.familytask.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -29,6 +31,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
+    private final UserRepository userRepository;
     private final TaskMapper taskMapper;
 
     public TaskResponse createTask(CreateTaskRequest request, User creator) {
@@ -52,10 +55,25 @@ public class TaskService {
             throw new TaskException("INVALID_PRIORITY", "El campo Prioridad es obligatorio.", 400);
         }
 
+        User assignedTo = null;
+        if (request.getAssignedToId() != null) {
+            assignedTo = userRepository.findById(request.getAssignedToId())
+                    .orElseThrow(() -> new TaskException("USER_NOT_FOUND", "El usuario asignado no existe.", 404));
+            final User finalAssignedTo = assignedTo;
+            boolean isMember = familyMemberRepository
+                    .findByFamilyGroupIdAndIsActiveTrue(familyGroup.getId())
+                    .stream()
+                    .anyMatch(m -> m.getUser().getId().equals(finalAssignedTo.getId()));
+            if (!isMember) {
+                throw new TaskException("NOT_A_MEMBER", "El usuario asignado no pertenece a esta familia.", 400);
+            }
+        }
+
         try {
             Task task = Task.builder()
                     .familyGroup(familyGroup)
                     .createdBy(creator)
+                    .assignedTo(assignedTo)
                     .title(request.getTitle().trim())
                     .description(request.getDescription().trim())
                     .location(request.getLocation().trim())
@@ -70,10 +88,35 @@ public class TaskService {
             log.info("Task '{}' created by user {} in family {}", task.getTitle(), creator.getEmail(), familyGroup.getName());
 
             return taskMapper.toResponse(task);
+        } catch (TaskException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Failed to create task for user {}: {}", creator.getEmail(), e.getMessage());
             throw new TaskException("TASK_CREATION_FAILED",
                     "Ocurrió un error al crear la tarea. Por favor, intente nuevamente.", 500);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskResponse> getTasks(Long familyId, User requester) {
+        FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
+                .orElseThrow(() -> new TaskException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
+                .filter(m -> m.getIsActive())
+                .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        try {
+            return taskRepository
+                    .findByFamilyGroupIdAndDeletedAtIsNull(familyGroup.getId())
+                    .stream()
+                    .map(taskMapper::toResponse)
+                    .toList();
+        } catch (Exception e) {
+            log.error("Failed to fetch tasks for family {}: {}", familyId, e.getMessage());
+            throw new TaskException("FETCH_FAILED",
+                    "Error al cargar las tareas. Por favor, intente nuevamente.", 500);
         }
     }
 }

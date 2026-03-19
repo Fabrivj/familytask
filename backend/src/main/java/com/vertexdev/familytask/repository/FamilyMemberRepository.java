@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface FamilyMemberRepository extends JpaRepository<FamilyMember, Long> {
     List<FamilyMember> findByUserIdAndIsActiveTrue(Long userId);
+    List<FamilyMember> findByFamilyGroupIdAndIsActiveTrue(Long familyGroupId);
     Optional<FamilyMember> findByFamilyGroupIdAndUserId(Long familyGroupId, Long userId);
     boolean existsByFamilyGroupIdAndUserId(Long familyGroupId, Long userId);
     long countByFamilyGroupIdAndRoleAndIsActiveTrue(Long familyGroupId, Role role);

@@ -19,4 +19,7 @@ public class TaskResponse {
     private Integer coinsReward;
     private LocalDateTime dueDate;
     private LocalDateTime createdAt;
+    private Long assignedToId;
+    private String assignedToName;
+    private String assignedToPictureUrl;
 }
