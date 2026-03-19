@@ -8,10 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api/families")
@@ -26,6 +24,16 @@ public class FamilyController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         FamilyResponse response = familyGroupService.createFamily(request, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<FamilyResponse> updateFamily(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateFamilyRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        FamilyResponse response = familyGroupService.updateFamilyName(id, request, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 }
