@@ -25,6 +25,7 @@ export interface MemberItem {
 export interface PendingInvitation {
   email: string;
   role: 'PARENT' | 'CHILD';
+  token: string;
   createdAt: string;
   expirationDate: string;
 }

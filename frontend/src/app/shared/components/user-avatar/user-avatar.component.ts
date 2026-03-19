@@ -31,7 +31,10 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
     }
   `,
   styles: [`
-    :host { display: contents; }
+    :host {
+      display: inline-flex;
+      flex-shrink: 0;
+    }
 
     .photo {
       border-radius: 50%;

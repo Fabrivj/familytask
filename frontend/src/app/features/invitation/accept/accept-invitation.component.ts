@@ -102,12 +102,18 @@ export class AcceptInvitationComponent implements OnInit {
   acceptInvitation(): void {
     if (this.authService.isAuthenticated()) {
       this.state.set('processing');
+      const oldFamilyIds = new Set<number>(this.authService.families().map(f => f.familyId));
       this.invitationService.process({ token: this.token }).subscribe({
         next: () => {
           this.invitationService.clearToken();
           this.authService.refreshSession().subscribe({
-            next: () => this.router.navigate(['/family/select']),
-            error: () => this.router.navigate(['/family/select']),
+            next: () => {
+              const families = this.authService.families();
+              const newFamily = families.find(f => !oldFamilyIds.has(f.familyId)) ?? families[0];
+              if (newFamily) this.authService.setActiveFamily(newFamily.familyId);
+              this.router.navigate(['/family/members']);
+            },
+            error: () => this.router.navigate(['/family/members']),
           });
         },
         error: (err) => {
@@ -117,7 +123,7 @@ export class AcceptInvitationComponent implements OnInit {
         },
       });
     } else {
-      this.authService.redirectToGoogle();
+      this.authService.redirectToGoogle(this.token);
     }
   }
 

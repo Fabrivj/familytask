@@ -17,6 +17,14 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
  *     [logoutLoading]="isLoading()"
  *     (logout)="onLogout()"
  *   />
+ *
+ * Usage (with family chip — sidebar pages):
+ *   <app-top-bar
+ *     [userName]="shortName()"
+ *     [userPictureUrl]="pictureUrl()"
+ *     [familyName]="familyName()"
+ *     [userRole]="userRole()"
+ *   />
  */
 @Component({
   selector: 'app-top-bar',
@@ -24,11 +32,22 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
   imports: [UserChipComponent],
   template: `
     <span class="logo" aria-label="FamilyTask">FamilyTask</span>
+
+    @if (familyName()) {
+      <div class="family-chip" aria-label="Familia activa">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M2 7.5L8 2l6 5.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V7.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+        {{ familyName() }}
+      </div>
+    }
+
     <div class="right">
       <app-user-chip
         [name]="userName()"
-        [email]="userEmail()"
+        [email]="userRole() || userEmail()"
         [pictureUrl]="userPictureUrl()"
+        [avatarSize]="36"
       />
       @if (showLogout()) {
         <button
@@ -98,10 +117,32 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
       outline-offset: 2px;
     }
 
+    .family-chip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(var(--border-rgb), 0.06);
+      border: 1.5px solid rgba(var(--border-rgb), 0.28);
+      border-radius: 20px;
+      padding: 5px 14px 5px 10px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .family-chip svg {
+      width: 14px;
+      height: 14px;
+      color: var(--border);
+      flex-shrink: 0;
+    }
+
     @media (max-width: 600px) {
-      :host {
-        padding: 12px 16px;
-      }
+      :host { padding: 12px 16px; }
+      .family-chip { display: none; }
     }
   `],
 })
@@ -109,6 +150,8 @@ export class TopBarComponent {
   readonly userName = input.required<string>();
   readonly userEmail = input<string>('');
   readonly userPictureUrl = input<string>('');
+  readonly familyName = input<string>('');
+  readonly userRole = input<string>('');
   readonly showLogout = input<boolean>(false);
   readonly logoutLoading = input<boolean>(false);
   readonly logout = output<void>();

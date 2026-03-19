@@ -3,11 +3,13 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { FamilyService } from '../../core/services/family.service';
 import { PageLayoutComponent } from '../../shared/components/page-layout/page-layout.component';
 import { TopBarComponent } from '../../shared/components/top-bar/top-bar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 
 const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
 
@@ -21,6 +23,7 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
     PageLayoutComponent,
     TopBarComponent,
     PageHeaderComponent,
+    SidebarComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
@@ -29,12 +32,17 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
 export class SettingsComponent {
   private readonly authService = inject(AuthService);
   private readonly familyService = inject(FamilyService);
+  private readonly router = inject(Router);
 
   readonly session = this.authService.session;
 
-  readonly shortName = computed(() => {
-    const name = this.authService.session()?.name ?? '';
-    return name.split(' ')[0];
+  readonly shortName = computed(() => this.authService.session()?.name?.split(' ')[0] ?? '');
+  readonly currentUserPictureUrl = computed(() => this.authService.session()?.pictureUrl ?? '');
+  readonly familyName = computed(() => this.authService.activeFamily()?.familyName ?? '');
+  readonly userRole = computed(() => {
+    const family = this.authService.activeFamily();
+    if (family?.role === 'PARENT') return family.isAdmin ? 'Padre · Admin' : 'Padre · Tutor';
+    return 'Hijo/a';
   });
 
   readonly nameCtrl = new FormControl('', {
@@ -50,6 +58,7 @@ export class SettingsComponent {
   readonly isLoading = signal(false);
   readonly apiError = signal('');
   readonly successMessage = signal('');
+  readonly logoutLoading = signal(false);
 
   constructor() {
     const familyId = this.authService.getActiveFamilyId();
@@ -59,6 +68,19 @@ export class SettingsComponent {
 
   getNameError(): string {
     return 'El nombre debe tener entre 3 y 50 caracteres y no puede contener caracteres inválidos.';
+  }
+
+  onLogout(): void {
+    this.logoutLoading.set(true);
+    this.authService.logout().subscribe({
+      next: (res) => {
+        this.authService.clearLocalSession();
+        this.router.navigate(['/auth/login'], { state: { message: res.message } });
+      },
+      error: () => {
+        this.logoutLoading.set(false);
+      },
+    });
   }
 
   save(): void {
