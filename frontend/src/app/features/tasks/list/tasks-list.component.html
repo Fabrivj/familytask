@@ -1,13 +1,17 @@
 <app-page-layout variant="full">
 
-  <app-top-bar
-    [userName]="shortName()"
-    [userPictureUrl]="session()?.pictureUrl ?? ''"
-    [showLogout]="true"
-    (logout)="logout()"
-  />
+  <div class="app-body">
+    <app-sidebar />
 
-  <main class="main">
+    <div class="content-col">
+      <app-top-bar
+        [userName]="shortName()"
+        [userPictureUrl]="session()?.pictureUrl ?? ''"
+        [showLogout]="true"
+        (logout)="logout()"
+      />
+
+      <main class="content">
 
     <!-- ── Header ────────────────────────────────────────────────── -->
     <div class="header-row">
@@ -218,13 +222,15 @@
       </div>
 
     }
-  </main>
+      </main>
+    </div>
+  </div>
 
 </app-page-layout>
 
 <!-- ═══════════ CREATE PANEL ═══════════ -->
 @if (showCreatePanel()) {
-  <div class="panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
+  <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
   <aside class="create-panel" role="dialog" aria-label="Crear nueva tarea">
     <div class="panel-header">
@@ -406,7 +412,7 @@
 
 <!-- ═══════════ DELETE MODAL ═══════════ -->
 @if (showDeleteModal()) {
-  <div class="modal-overlay" (click)="closeDeleteModal()" aria-hidden="true"></div>
+  <div class="overlay modal-overlay" (click)="closeDeleteModal()" aria-hidden="true"></div>
 
   <div class="delete-modal" role="dialog" aria-label="Confirmar eliminación">
     <div class="modal-icon">

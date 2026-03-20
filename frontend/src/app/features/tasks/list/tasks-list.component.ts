@@ -15,6 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { TaskService } from '../../../core/services/task.service';
 import { MemberItemResponse, TaskPriority, TaskResponse } from '../../../core/models/task.model';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 
@@ -25,6 +26,7 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
     ReactiveFormsModule,
     MatProgressSpinnerModule,
     PageLayoutComponent,
+    SidebarComponent,
     TopBarComponent,
     UserAvatarComponent,
   ],
