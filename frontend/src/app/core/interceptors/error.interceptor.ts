@@ -11,10 +11,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+
       const is401 = error.status === 401;
       const is403 = error.status === 403 && !req.context.get(SKIP_AUTH_REDIRECT_ON_403);
 
       if (is401 || is403) {
+        alert(`Redirigiendo al login — status: ${error.status} | url: ${error.url}| Considere usar el SKIP_AUTH_REDIRECT_ON_403`);
         authService.clearLocalSession();
         router.navigate(['/auth/login']);
       }
