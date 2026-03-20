@@ -200,6 +200,20 @@
   flex-shrink: 0;
 }
 
+/* ── Outline variant ── */
+.btn-cta.btn-outline {
+  background: transparent;
+  border: 1.5px solid rgba(var(--border-rgb), 0.25);
+  color: var(--text-sub);
+  box-shadow: none;
+}
+
+.btn-cta.btn-outline:hover:not(:disabled) {
+  border-color: var(--border);
+  color: var(--text);
+  box-shadow: none;
+}
+
 /* ── Help Row ── */
 .help-row {
   display: flex;
