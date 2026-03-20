@@ -27,7 +27,7 @@ export const routes: Routes = [
   },
   {
     path: 'invitation/create',
-    canActivate: [authGuard],
+    canActivate: [authGuard, parentGuard],
     loadComponent: () =>
       import('./features/invitation/create/create-invitation.component').then(
         m => m.CreateInvitationComponent
