@@ -44,6 +44,12 @@ export class CallbackComponent implements OnInit {
       return;
     }
 
+    // Recover invitation token from OAuth state param (more reliable than localStorage alone)
+    const state = this.route.snapshot.queryParamMap.get('state');
+    if (state) {
+      this.invitationService.saveToken(state);
+    }
+
     this.processCallback(code);
   }
 
@@ -77,13 +83,14 @@ export class CallbackComponent implements OnInit {
 
     if (invitationToken) {
       this.currentStep.set('Procesando tu invitación...');
+      const oldFamilyIds = new Set<number>((authResponse.families ?? []).map((f: any) => f.familyId as number));
 
       this.invitationService.process({ token: invitationToken }).subscribe({
         next: () => {
           this.invitationService.clearToken();
           this.currentStep.set('Cargando tu familia...');
           this.authService.refreshSession().subscribe({
-            next: () => this.redirectByFamilyCount(),
+            next: () => this.redirectToNewFamily(oldFamilyIds),
             error: () => this.router.navigate(['/family/select']),
           });
         },
@@ -95,6 +102,17 @@ export class CallbackComponent implements OnInit {
       });
     } else {
       this.redirectByContext(authResponse);
+    }
+  }
+
+  private redirectToNewFamily(oldFamilyIds: Set<number>): void {
+    const families = this.authService.families();
+    const newFamily = families.find(f => !oldFamilyIds.has(f.familyId)) ?? families[0];
+    if (newFamily) {
+      this.authService.setActiveFamily(newFamily.familyId);
+      this.router.navigate(['/family/members']);
+    } else {
+      this.router.navigate(['/family/select']);
     }
   }
 

@@ -2,13 +2,21 @@
 
   @if (session(); as s) {
 
-    <app-top-bar
-      [userName]="shortName()"
-      [userPictureUrl]="s.pictureUrl"
-      [showLogout]="false"
-    />
+    <div class="app-body">
+      <app-sidebar />
 
-    <main class="main">
+      <div class="content-col">
+        <app-top-bar
+          [userName]="shortName()"
+          [userPictureUrl]="currentUserPictureUrl()"
+          [familyName]="familyName()"
+          [userRole]="userRole()"
+          [showLogout]="true"
+          [logoutLoading]="logoutLoading()"
+          (logout)="onLogout()"
+        />
+
+        <main class="content">
 
       <app-page-header
         tag="// CONFIGURACIÓN DEL GRUPO"
@@ -67,7 +75,10 @@
 
       </section>
 
-    </main>
+        </main>
+
+      </div>
+    </div>
 
   }
 

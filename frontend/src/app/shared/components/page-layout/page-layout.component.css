@@ -40,9 +40,14 @@
   justify-content: flex-start;
   flex-direction: column;
   padding: 0;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .container.full .page {
   max-width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
 }
 

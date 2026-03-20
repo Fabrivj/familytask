@@ -14,7 +14,7 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UserAvatarComponent],
   template: `
-    <app-user-avatar [name]="name()" [size]="26" [pictureUrl]="pictureUrl()" />
+    <app-user-avatar [name]="name()" [size]="avatarSize()" [pictureUrl]="pictureUrl()" />
     <div class="info">
       <span class="user-name">{{ name() }}</span>
       @if (email()) {
@@ -66,4 +66,5 @@ export class UserChipComponent {
   readonly name = input.required<string>();
   readonly email = input<string>('');
   readonly pictureUrl = input<string>('');
+  readonly avatarSize = input<number>(26);
 }

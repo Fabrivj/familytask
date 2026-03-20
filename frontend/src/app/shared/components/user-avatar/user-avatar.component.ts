@@ -31,7 +31,10 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
     }
   `,
   styles: [`
-    :host { display: contents; }
+    :host {
+      display: inline-flex;
+      flex-shrink: 0;
+    }
 
     .photo {
       border-radius: 50%;
@@ -55,7 +58,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 })
 export class UserAvatarComponent {
   readonly name = input.required<string>();
-  readonly size = input<number>(32);
   readonly pictureUrl = input<string>('');
+  readonly size = input<number>(32);
   readonly initial = computed(() => (this.name()[0] ?? '?').toUpperCase());
 }

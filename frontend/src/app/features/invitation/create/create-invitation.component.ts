@@ -151,6 +151,6 @@ export class CreateInvitationComponent {
   }
 
   goToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/family/members']);
   }
 }

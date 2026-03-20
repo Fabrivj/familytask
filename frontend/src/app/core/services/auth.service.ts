@@ -17,10 +17,16 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this._session() !== null);
   readonly families = computed(() => this._session()?.families ?? []);
 
+  /** The FamilySummary for the currently active family, if any. */
+  readonly activeFamily = computed(() => {
+    const activeId = this._session()?.activeFamilyId;
+    return this.families().find(f => f.familyId === activeId);
+  });
+
   constructor(private http: HttpClient, private router: Router) {}
 
   // ─── Step 1: Redirect the user to Google ──────────────────────────────────
-  redirectToGoogle(): void {
+  redirectToGoogle(invitationToken?: string): void {
     const { clientId, redirectUri, scope, authEndpoint } = environment.google;
 
     const params = new URLSearchParams({
@@ -30,6 +36,7 @@ export class AuthService {
       scope,
       access_type: 'online',
       prompt: 'select_account',
+      ...(invitationToken ? { state: invitationToken } : {}),
     });
 
     window.location.href = `${authEndpoint}?${params.toString()}`;

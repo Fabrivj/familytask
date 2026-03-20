@@ -32,6 +32,12 @@ export class InvitationService {
     );
   }
 
+  cancel(token: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `${environment.apiUrl}/invitations/${token}`
+    );
+  }
+
   process(request: ProcessInviteRequest): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
       `${environment.apiUrl}/invitations/process`,
