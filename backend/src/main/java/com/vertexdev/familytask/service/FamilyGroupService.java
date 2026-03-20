@@ -1,18 +1,28 @@
 package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.dto.family.CreateFamilyRequest;
+import com.vertexdev.familytask.dto.family.FamilyMembersResponse;
 import com.vertexdev.familytask.dto.family.FamilyResponse;
+import com.vertexdev.familytask.dto.family.MemberItemResponse;
+import com.vertexdev.familytask.dto.family.PendingInvitationResponse;
 import com.vertexdev.familytask.exception.FamilyException;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
+import com.vertexdev.familytask.model.Invitation;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.Role;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
+import com.vertexdev.familytask.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +31,7 @@ public class FamilyGroupService {
 
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
+    private final InvitationRepository invitationRepository;
 
     @Transactional
     public FamilyResponse createFamily(CreateFamilyRequest request, User creator) {
@@ -30,12 +41,13 @@ public class FamilyGroupService {
 
         familyGroupRepository.save(familyGroup);
 
-        // Creator automatically becomes PARENT
+        // Creator automatically becomes PARENT and admin
         FamilyMember member = FamilyMember.builder()
                 .familyGroup(familyGroup)
                 .user(creator)
                 .role(Role.PARENT)
                 .isActive(true)
+                .isAdmin(true)
                 .build();
 
         familyMemberRepository.save(member);
@@ -68,6 +80,45 @@ public class FamilyGroupService {
                 .id(familyGroup.getId())
                 .name(familyGroup.getName())
                 .role(Role.PARENT.name())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public FamilyMembersResponse getMembers(Long familyId, User requester) {
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyId, requester.getId())
+                .filter(m -> m.getIsActive() && m.getRole() == Role.PARENT)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "No tienes permisos para ver los miembros de esta familia."));
+
+        List<MemberItemResponse> members = familyMemberRepository
+                .findByFamilyGroupIdAndIsActiveTrue(familyId)
+                .stream()
+                .map(m -> MemberItemResponse.builder()
+                        .id(m.getUser().getId())
+                        .name(m.getUser().getName())
+                        .email(m.getUser().getEmail())
+                        .pictureUrl(m.getUser().getPictureUrl())
+                        .role(m.getRole().name())
+                        .joinedAt(m.getJoinedAt())
+                        .build())
+                .toList();
+
+        List<PendingInvitationResponse> pending = invitationRepository
+                .findByFamilyGroupIdAndIsUsedFalseAndExpirationDateAfter(familyId, LocalDateTime.now())
+                .stream()
+                .map(i -> PendingInvitationResponse.builder()
+                        .email(i.getInvitedEmail())
+                        .role(i.getRole().name())
+                        .token(i.getToken().toString())
+                        .createdAt(i.getCreatedAt())
+                        .expirationDate(i.getExpirationDate())
+                        .build())
+                .toList();
+
+        return FamilyMembersResponse.builder()
+                .members(members)
+                .pendingInvitations(pending)
                 .build();
     }
 }

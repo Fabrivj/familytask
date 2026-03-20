@@ -1,6 +1,7 @@
 package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.family.CreateFamilyRequest;
+import com.vertexdev.familytask.dto.family.FamilyMembersResponse;
 import com.vertexdev.familytask.dto.family.FamilyResponse;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.FamilyGroupService;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/families")
@@ -34,6 +34,15 @@ public class FamilyController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         FamilyResponse response = familyGroupService.updateFamilyName(id, request, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{familyId}/members")
+    public ResponseEntity<FamilyMembersResponse> getMembers(
+            @PathVariable Long familyId,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        FamilyMembersResponse response = familyGroupService.getMembers(familyId, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 }

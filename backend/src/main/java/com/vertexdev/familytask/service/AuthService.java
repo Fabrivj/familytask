@@ -78,6 +78,7 @@ public class AuthService {
                             .familyId(m.getFamilyGroup().getId())
                             .familyName(m.getFamilyGroup().getName())
                             .role(m.getRole().name())
+                            .isAdmin(Boolean.TRUE.equals(m.getIsAdmin()))
                             .memberCount((int) count)
                             .build();
                 })
