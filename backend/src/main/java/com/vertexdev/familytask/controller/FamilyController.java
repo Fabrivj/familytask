@@ -1,8 +1,10 @@
 package com.vertexdev.familytask.controller;
 
+import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.family.CreateFamilyRequest;
 import com.vertexdev.familytask.dto.family.FamilyMembersResponse;
 import com.vertexdev.familytask.dto.family.FamilyResponse;
+import com.vertexdev.familytask.dto.family.UpdateRoleRequest;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.FamilyGroupService;
 import jakarta.validation.Valid;
@@ -44,6 +46,17 @@ public class FamilyController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         FamilyMembersResponse response = familyGroupService.getMembers(familyId, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{familyId}/members/{userId}/role")
+    public ResponseEntity<MessageResponse> updateMemberRole(
+            @PathVariable Long familyId,
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateRoleRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        MessageResponse response = familyGroupService.updateMemberRole(familyId, userId, request, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 }
