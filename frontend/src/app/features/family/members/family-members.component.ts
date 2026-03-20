@@ -17,13 +17,12 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 const POLL_INTERVAL_MS = 15_000;
 
 @Component({
   selector: 'app-family-members',
-  imports: [PageLayoutComponent, TopBarComponent, PageHeaderComponent, RoleBadgeComponent, SidebarComponent, UserAvatarComponent, ConfirmDialogComponent],
+  imports: [PageLayoutComponent, TopBarComponent, PageHeaderComponent, RoleBadgeComponent, SidebarComponent, UserAvatarComponent],
   templateUrl: './family-members.component.html',
   styleUrl: './family-members.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,8 +52,6 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     return 'Hijo/a';
   });
 
-  readonly isAdmin = computed(() => this.authService.activeFamily()?.isAdmin === true);
-
   private readonly currentEmail = computed(() => this.authService.session()?.email ?? '');
 
   readonly pageSubtitle = computed(() => {
@@ -75,19 +72,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   readonly toast = signal('');
   readonly copiedToken = signal('');
   readonly cancelingToken = signal('');
-  readonly changingRoleId = signal(0);
-  readonly openDropdownId = signal(0);
-  readonly confirmDialogOpen = signal(false);
-  readonly pendingRoleChange = signal<{ member: MemberItem; newRole: 'PARENT' | 'CHILD' } | null>(null);
   readonly logoutLoading = signal(false);
-
-  readonly confirmTitle = computed(() => 'Cambiar rol');
-  readonly confirmMessage = computed(() => {
-    const pending = this.pendingRoleChange();
-    if (!pending) return '';
-    const newRoleLabel = pending.newRole === 'PARENT' ? 'Padre/Tutor' : 'Hijo/a';
-    return `¿Estás seguro de cambiar el rol de ${pending.member.name} a ${newRoleLabel}?`;
-  });
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
   ngOnInit(): void {
@@ -206,53 +191,6 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
         this.cancelingToken.set('');
       },
     });
-  }
-
-  toggleDropdown(memberId: number): void {
-    this.openDropdownId.set(this.openDropdownId() === memberId ? 0 : memberId);
-  }
-
-  selectRole(member: MemberItem, newRole: 'PARENT' | 'CHILD'): void {
-    this.openDropdownId.set(0);
-    if (member.role === newRole) return;
-    this.pendingRoleChange.set({ member, newRole });
-    this.confirmDialogOpen.set(true);
-  }
-
-  onConfirmRoleChange(): void {
-    const pending = this.pendingRoleChange();
-    this.confirmDialogOpen.set(false);
-    this.pendingRoleChange.set(null);
-    if (!pending) return;
-
-    const familyId = this.authService.getActiveFamilyId();
-    if (!familyId) return;
-
-    this.changingRoleId.set(pending.member.id);
-
-    this.familyService.updateMemberRole(familyId, pending.member.id, pending.newRole).subscribe({
-      next: () => {
-        this.toast.set('Rol actualizado exitosamente.');
-        setTimeout(() => this.toast.set(''), 3500);
-        this.fetchMembers(familyId, false);
-        this.changingRoleId.set(0);
-      },
-      error: (err) => {
-        const message = err?.status === 403
-          ? 'No tienes permisos para cambiar roles en esta familia.'
-          : err?.status === 409
-            ? 'Debe existir al menos un Padre/Tutor en la familia.'
-            : 'No se pudo actualizar el rol. Intenta nuevamente.';
-        this.toast.set(message);
-        setTimeout(() => this.toast.set(''), 3500);
-        this.changingRoleId.set(0);
-      },
-    });
-  }
-
-  onCancelRoleChange(): void {
-    this.confirmDialogOpen.set(false);
-    this.pendingRoleChange.set(null);
   }
 
   copyLink(token: string): void {
