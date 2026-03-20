@@ -144,10 +144,12 @@ export class TasksListComponent {
       },
     });
 
-    this.taskService.getMembers(familyId).subscribe({
-      next: (members) => this.members.set(members),
-      error: () => {},
-    });
+    if (this.isParent()) {
+      this.taskService.getMembers(familyId).subscribe({
+        next: (members) => this.members.set(members),
+        error: () => {},
+      });
+    }
   }
 
   // ─── Filters ──────────────────────────────────────────────────────────────

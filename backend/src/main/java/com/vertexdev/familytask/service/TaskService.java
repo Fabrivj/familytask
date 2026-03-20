@@ -6,6 +6,7 @@ import com.vertexdev.familytask.exception.TaskException;
 import com.vertexdev.familytask.mapper.TaskMapper;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.Task;
+import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.Priority;
 import com.vertexdev.familytask.model.enums.Role;
@@ -102,15 +103,19 @@ public class TaskService {
         FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
                 .orElseThrow(() -> new TaskException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
 
-        familyMemberRepository
+        FamilyMember member = familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
                 .filter(m -> m.getIsActive())
                 .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
 
         try {
-            return taskRepository
-                    .findByFamilyGroupIdAndDeletedAtIsNull(familyGroup.getId())
-                    .stream()
+            List<Task> tasks;
+            if (member.getRole() == Role.CHILD) {
+                tasks = taskRepository.findVisibleTasksForChild(familyGroup.getId(), requester.getId());
+            } else {
+                tasks = taskRepository.findByFamilyGroupIdAndDeletedAtIsNull(familyGroup.getId());
+            }
+            return tasks.stream()
                     .map(taskMapper::toResponse)
                     .toList();
         } catch (Exception e) {
