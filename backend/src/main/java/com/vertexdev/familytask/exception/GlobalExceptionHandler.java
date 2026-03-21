@@ -2,12 +2,22 @@ package com.vertexdev.familytask.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.builder()
+                        .code("INVALID_REQUEST")
+                        .message("El formato de los datos enviados es inválido.")
+                        .build());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
@@ -34,6 +44,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(FamilyException.class)
     public ResponseEntity<ErrorResponse> handleFamilyException(FamilyException ex) {
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(TaskException.class)
+    public ResponseEntity<ErrorResponse> handleTaskException(TaskException ex) {
         return ResponseEntity.status(ex.getHttpStatus())
                 .body(ErrorResponse.builder()
                         .code(ex.getCode())
