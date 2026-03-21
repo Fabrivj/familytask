@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { parentGuard } from './core/guards/parent.guard';
 
 export const routes: Routes = [
   {
@@ -26,7 +27,7 @@ export const routes: Routes = [
   },
   {
     path: 'invitation/create',
-    canActivate: [authGuard],
+    canActivate: [authGuard, parentGuard],
     loadComponent: () =>
       import('./features/invitation/create/create-invitation.component').then(
         m => m.CreateInvitationComponent
@@ -50,7 +51,7 @@ export const routes: Routes = [
   },
   {
     path: 'family/members',
-    canActivate: [authGuard],
+    canActivate: [authGuard, parentGuard],
     loadComponent: () =>
       import('./features/family/members/family-members.component').then(
         m => m.FamilyMembersComponent

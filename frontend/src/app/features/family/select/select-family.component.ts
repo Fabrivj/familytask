@@ -81,7 +81,7 @@ export class SelectFamilyComponent implements OnInit {
 
   select(familyId: number): void {
     this.authService.setActiveFamily(familyId);
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/family/members']);
   }
 
   createNew(): void {

@@ -90,8 +90,8 @@ public class FamilyGroupService {
         familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyId, requester.getId())
                 .filter(m -> m.getIsActive() && m.getRole() == Role.PARENT)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "No tienes permisos para ver los miembros de esta familia."));
+                .orElseThrow(() -> new FamilyException("FORBIDDEN", "No tienes permisos para ver los miembros de esta familia.", 403));
+
 
         List<MemberItemResponse> members = familyMemberRepository
                 .findByFamilyGroupIdAndIsActiveTrue(familyId)
