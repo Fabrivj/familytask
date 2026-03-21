@@ -431,6 +431,9 @@
   color: var(--text-sub);
   opacity: 0.65;
   line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .invite-meta strong {
@@ -444,17 +447,19 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 14px;
+  height: 30px;
+  padding: 0 14px;
   font-family: 'Share Tech Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.08em;
   background: var(--secondary);
-  color: #000;
+  color: var(--text);
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: opacity 0.15s;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .btn-copy svg {
@@ -473,21 +478,25 @@
 
 .pending-badge {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
   font-family: 'Share Tech Mono', monospace;
   font-size: 9px;
   letter-spacing: 0.1em;
-  padding: 3px 11px;
+  padding: 0 11px;
   border-radius: 20px;
   border: 1px solid rgba(255, 215, 0, 0.4);
   color: #FFD700;
   background: rgba(255, 215, 0, 0.06);
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .btn-cancel-invite {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -639,4 +648,21 @@
   .members-grid { grid-template-columns: 1fr; }
   .content { padding: 20px 16px 40px; }
   .page-header-row { flex-direction: column; align-items: flex-start; }
+
+  .invite-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .invite-info {
+    width: 100%;
+    flex-basis: 100%;
+    order: -1;
+  }
+
+  .invite-meta {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
 }

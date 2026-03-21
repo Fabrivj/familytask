@@ -23,6 +23,14 @@ export class AuthService {
     return this.families().find(f => f.familyId === activeId);
   });
 
+  /** Human-readable role label for the active family, e.g. "Padre · Admin" */
+  readonly activeRoleLabel = computed(() => {
+    const family = this.activeFamily();
+    if (family?.role === 'PARENT') return family.isAdmin ? 'Padre · Admin' : 'Padre · Tutor';
+    if (family?.role === 'CHILD') return 'Hijo/a';
+    return '';
+  });
+
   constructor(private http: HttpClient, private router: Router) {}
 
   // ─── Step 1: Redirect the user to Google ──────────────────────────────────

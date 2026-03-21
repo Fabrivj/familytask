@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
 
 /**
@@ -15,6 +16,7 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-sidebar',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatIconModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
 })
@@ -25,6 +27,7 @@ export class SidebarComponent {
   readonly activeUrl = computed(() => this.router.url);
 
   readonly isParent = computed(() => this.authService.activeFamily()?.role === 'PARENT');
+  readonly hasMultipleFamilies = computed(() => this.authService.families().length > 1);
 
   isActive(route: string): boolean {
     return this.activeUrl().startsWith(route);
