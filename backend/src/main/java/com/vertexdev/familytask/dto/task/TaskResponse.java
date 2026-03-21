@@ -3,6 +3,7 @@ package com.vertexdev.familytask.dto.task;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,7 +18,7 @@ public class TaskResponse {
     private String location;
     private Integer xpReward;
     private Integer coinsReward;
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
     private LocalDateTime createdAt;
     private Long assignedToId;
     private String assignedToName;

@@ -115,6 +115,7 @@ export class TasksListComponent {
     validators: [Validators.required],
   });
   readonly dueDateCtrl = new FormControl<string | null>(null);
+  readonly minDate = new Date().toISOString().slice(0, 10);
   readonly selectedAssignee = signal<number | null>(null);
 
   // ─── Delete modal ─────────────────────────────────────────────────────────
@@ -186,11 +187,9 @@ export class TasksListComponent {
 
   formatDate(iso: string | null): string {
     if (!iso) return '—';
-    const d = new Date(iso);
+    const d = new Date(iso + 'T00:00:00');
     const now = new Date();
-    if (d.toDateString() === now.toDateString()) {
-      return 'Hoy ' + d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-    }
+    if (d.toDateString() === now.toDateString()) return 'Hoy';
     return d.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' });
   }
 
@@ -263,9 +262,7 @@ export class TasksListComponent {
     this.isCreating.set(true);
     this.createError.set('');
 
-    const dueDateRaw = this.dueDateCtrl.value;
-    // LocalDateTime expects yyyy-MM-ddTHH:mm:ss without timezone
-    const dueDate = dueDateRaw ? dueDateRaw.length === 16 ? dueDateRaw + ':00' : dueDateRaw : null;
+    const dueDate = this.dueDateCtrl.value ?? null;
 
     this.taskService.create({
       familyId,

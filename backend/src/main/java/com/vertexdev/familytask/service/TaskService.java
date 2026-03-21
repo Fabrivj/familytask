@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -44,7 +44,7 @@ public class TaskService {
                 .filter(m -> m.getRole() == Role.PARENT && m.getIsActive())
                 .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
 
-        if (request.getDueDate() != null && request.getDueDate().isBefore(LocalDateTime.now())) {
+        if (request.getDueDate() != null && request.getDueDate().isBefore(LocalDate.now())) {
             throw new TaskException("INVALID_DUE_DATE",
                     "La fecha límite debe ser igual o posterior a la fecha actual.", 400);
         }
@@ -113,7 +113,7 @@ public class TaskService {
             if (member.getRole() == Role.CHILD) {
                 tasks = taskRepository.findVisibleTasksForChild(familyGroup.getId(), requester.getId());
             } else {
-                tasks = taskRepository.findByFamilyGroupIdAndDeletedAtIsNull(familyGroup.getId());
+                tasks = taskRepository.findByFamilyGroupIdAndIsDeletedFalse(familyGroup.getId());
             }
             return tasks.stream()
                     .map(taskMapper::toResponse)

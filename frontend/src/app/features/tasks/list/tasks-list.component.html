@@ -359,7 +359,8 @@
         <input
           id="f-due"
           class="field-input"
-          type="datetime-local"
+          type="date"
+          [min]="minDate"
           [formControl]="dueDateCtrl"
         />
       </div>
