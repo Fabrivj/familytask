@@ -35,7 +35,7 @@ public class Task {
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
-    @Column(name = "tittle", nullable = false, length = 100)
+    @Column(name = "title", nullable = false, length = 100)
     private String title;
 
     @Column(nullable = false, length = 500)

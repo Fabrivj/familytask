@@ -31,6 +31,15 @@ export class AuthService {
     return '';
   });
 
+  /** First word of the user's display name, e.g. "Maria" from "Maria Torres" */
+  readonly shortName = computed(() => this._session()?.name?.split(' ')[0] ?? '');
+
+  /** First character of the user's name uppercased, e.g. "M". Falls back to "?" */
+  readonly nameInitial = computed(() => (this._session()?.name?.[0] ?? '?').toUpperCase());
+
+  /** familyName of the active family. Empty string if no active family. */
+  readonly activeFamilyName = computed(() => this.activeFamily()?.familyName ?? '');
+
   constructor(private http: HttpClient, private router: Router) {}
 
   // ─── Step 1: Redirect the user to Google ──────────────────────────────────
@@ -80,6 +89,21 @@ export class AuthService {
   // ─── Logout ───────────────────────────────────────────────────────────────
   logout(): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/logout`, {});
+  }
+
+  /** Performs the full logout flow: HTTP call → clear session → navigate to login.
+   *  Components subscribe only to handle the error case locally. */
+  performLogout(): Observable<never> {
+    return new Observable(observer => {
+      this.logout().subscribe({
+        next: (response) => {
+          this.clearLocalSession();
+          this.router.navigate(['/auth/login'], { state: { message: response.message } });
+          observer.complete();
+        },
+        error: (err) => observer.error(err),
+      });
+    });
   }
 
   clearLocalSession(): void {
@@ -139,9 +163,24 @@ export class AuthService {
   private loadSavedSession(): UserSession | null {
     try {
       const raw = localStorage.getItem(SESSION_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const session: UserSession = JSON.parse(raw);
+      if (this.isJwtExpired(session.token)) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+      return session;
     } catch {
       return null;
+    }
+  }
+
+  private isJwtExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return typeof payload.exp === 'number' && payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
     }
   }
 }

@@ -10,6 +10,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
@@ -23,6 +24,7 @@ import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-b
   selector: 'app-create-invitation',
   imports: [
     ReactiveFormsModule,
+    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -43,20 +45,9 @@ export class CreateInvitationComponent {
   private readonly router = inject(Router);
 
   // ─── User info ─────────────────────────────────────────────────────────────
-  readonly shortName = computed(() => {
-    const name = this.authService.session()?.name ?? '';
-    return name.split(' ')[0];
-  });
-
-  readonly nameInitial = computed(() => {
-    return (this.authService.session()?.name?.[0] ?? '?').toUpperCase();
-  });
-
-  readonly familyName = computed(() => {
-    const families = this.authService.families();
-    const activeId = this.authService.getActiveFamilyId();
-    return families.find(f => f.familyId === activeId)?.familyName ?? 'Tu familia';
-  });
+  readonly shortName = this.authService.shortName;
+  readonly nameInitial = this.authService.nameInitial;
+  readonly familyName = this.authService.activeFamilyName;
 
   readonly familyRole = computed((): 'PARENT' | 'CHILD' => {
     const families = this.authService.families();

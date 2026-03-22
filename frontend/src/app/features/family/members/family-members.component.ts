@@ -8,14 +8,17 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
-import { FamilyService, MemberItem, PendingInvitation } from '../../../core/services/family.service';
+import { PermissionsService } from '../../../core/services/permissions.service';
+import { FamilyService } from '../../../core/services/family.service';
+import { MembersService } from '../../../core/services/members.service';
 import { InvitationService } from '../../../core/services/invitation.service';
-import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
-import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { MemberItem, PendingInvitation } from '../../../core/models/member.model';
+import { MatIconModule } from '@angular/material/icon';
+import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
-import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -23,7 +26,7 @@ const POLL_INTERVAL_MS = 15_000;
 
 @Component({
   selector: 'app-family-members',
-  imports: [PageLayoutComponent, TopBarComponent, PageHeaderComponent, RoleBadgeComponent, SidebarComponent, UserAvatarComponent, ConfirmDialogComponent],
+  imports: [MatIconModule, AppShellComponent, PageHeaderComponent, RoleBadgeComponent, UserAvatarComponent, ConfirmDialogComponent],
   templateUrl: './family-members.component.html',
   styleUrl: './family-members.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,23 +34,15 @@ const POLL_INTERVAL_MS = 15_000;
 export class FamilyMembersComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly familyService = inject(FamilyService);
+  readonly permissions = inject(PermissionsService);
+  private readonly membersService = inject(MembersService);
   private readonly invitationService = inject(InvitationService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
 
   private pollTimer: ReturnType<typeof setInterval> | null = null;
 
-  // ── Session ──────────────────────────────────────────────────────────────
-  readonly session = this.authService.session;
-
-  readonly shortName = computed(() => this.authService.session()?.name?.split(' ')[0] ?? '');
-  readonly userEmail = computed(() => this.authService.session()?.email ?? '');
-  readonly currentUserPictureUrl = computed(() => this.authService.session()?.pictureUrl ?? '');
-
-  readonly familyName = computed(() => this.authService.activeFamily()?.familyName ?? '');
-
-  readonly userRole = this.authService.activeRoleLabel;
-
-  readonly isAdmin = computed(() => this.authService.activeFamily()?.isAdmin === true);
+  // ─── Sesión ───────────────────────────────────────────────────────────────
 
   private readonly currentEmail = computed(() => this.authService.session()?.email ?? '');
 
@@ -60,20 +55,18 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     return text;
   });
 
-  // ── Data signals ─────────────────────────────────────────────────────────
+  // ─── Estado ───────────────────────────────────────────────────────────────
   readonly members = signal<MemberItem[]>([]);
   readonly pendingInvitations = signal<PendingInvitation[]>([]);
   readonly isLoading = signal(true);
   readonly error = signal('');
   readonly isForbidden = signal(false);
-  readonly toast = signal('');
   readonly copiedToken = signal('');
   readonly cancelingToken = signal('');
   readonly changingRoleId = signal(0);
   readonly openDropdownId = signal(0);
   readonly confirmDialogOpen = signal(false);
   readonly pendingRoleChange = signal<{ member: MemberItem; newRole: 'PARENT' | 'CHILD' } | null>(null);
-  readonly logoutLoading = signal(false);
 
   readonly confirmTitle = computed(() => 'Cambiar rol');
   readonly confirmMessage = computed(() => {
@@ -83,12 +76,10 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     return `¿Estás seguro de cambiar el rol de ${pending.member.name} a ${newRoleLabel}?`;
   });
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────
   ngOnInit(): void {
     const state = history.state as { message?: string };
     if (state?.message) {
-      this.toast.set(state.message);
-      setTimeout(() => this.toast.set(''), 3500);
+      this.snackBar.open(state.message, 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
     }
 
     const familyId = this.authService.getActiveFamilyId();
@@ -105,7 +96,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     this.stopPolling();
   }
 
-  // ── Polling ──────────────────────────────────────────────────────────────
+  // ─── Polling ──────────────────────────────────────────────────────────────
   private startPolling(familyId: number): void {
     this.pollTimer = setInterval(() => {
       this.fetchMembers(familyId, false);
@@ -119,11 +110,11 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── Data loading ─────────────────────────────────────────────────────────
+  // ─── Carga de datos ───────────────────────────────────────────────────────
   private fetchMembers(familyId: number, showLoader: boolean): void {
     if (showLoader) this.isLoading.set(true);
 
-    this.familyService.getMembers(familyId).subscribe({
+    this.membersService.getMembers(familyId).subscribe({
       next: (data) => {
         this.members.set(data.members);
         this.pendingInvitations.set(data.pendingInvitations);
@@ -139,7 +130,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
             : 'Error al cargar los miembros. Intenta de nuevo.');
           this.isLoading.set(false);
         }
-        // Silent failure on background poll — keep previous data
+        // En el polling en background dejamos los datos anteriores visibles
       },
     });
   }
@@ -150,7 +141,11 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     this.fetchMembers(familyId, true);
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  canEdit(member: MemberItem): boolean {
+    return this.permissions.canEditMemberRole(member);
+  }
+
   isCurrentUser(member: MemberItem): boolean {
     return member.email === this.currentEmail();
   }
@@ -165,19 +160,6 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
 
   daysUntil(dateStr: string): number {
     return Math.max(0, Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86_400_000));
-  }
-
-  onLogout(): void {
-    this.logoutLoading.set(true);
-    this.authService.logout().subscribe({
-      next: (res) => {
-        this.authService.clearLocalSession();
-        this.router.navigate(['/auth/login'], { state: { message: res.message } });
-      },
-      error: () => {
-        this.logoutLoading.set(false);
-      },
-    });
   }
 
   inviteMember(): void {
@@ -226,8 +208,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
 
     this.familyService.updateMemberRole(familyId, pending.member.id, pending.newRole).subscribe({
       next: () => {
-        this.toast.set('Rol actualizado exitosamente.');
-        setTimeout(() => this.toast.set(''), 3500);
+        this.snackBar.open('Rol actualizado exitosamente.', 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
         this.fetchMembers(familyId, false);
         this.changingRoleId.set(0);
       },
@@ -237,8 +218,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
           : err?.status === 409
             ? 'Debe existir al menos un Padre/Tutor en la familia.'
             : 'No se pudo actualizar el rol. Intenta nuevamente.';
-        this.toast.set(message);
-        setTimeout(() => this.toast.set(''), 3500);
+        this.snackBar.open(message, 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
         this.changingRoleId.set(0);
       },
     });

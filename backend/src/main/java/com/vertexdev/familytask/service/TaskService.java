@@ -11,6 +11,7 @@ import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.Priority;
 import com.vertexdev.familytask.model.enums.Role;
 import com.vertexdev.familytask.model.enums.TaskStatus;
+import com.vertexdev.familytask.util.FamilyPermissions;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.TaskRepository;
@@ -34,6 +35,7 @@ public class TaskService {
     private final FamilyMemberRepository familyMemberRepository;
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
+    private final FamilyPermissions familyPermissions;
 
     public TaskResponse createTask(CreateTaskRequest request, User creator) {
         FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
@@ -41,7 +43,7 @@ public class TaskService {
 
         familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyGroup.getId(), creator.getId())
-                .filter(m -> m.getRole() == Role.PARENT && m.getIsActive())
+                .filter(familyPermissions::isActiveParent)
                 .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
 
         if (request.getDueDate() != null && request.getDueDate().isBefore(LocalDate.now())) {

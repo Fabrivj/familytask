@@ -47,8 +47,10 @@
 
 /* ── Form ── */
 .field-prefix-icon {
+  font-size: 16px;
   width: 16px;
   height: 16px;
+  line-height: 16px;
   color: var(--text-sub);
   opacity: 0.6;
   margin-right: 6px;
@@ -72,9 +74,11 @@
   letter-spacing: 0.02em;
 }
 
-.success-toast svg {
+.success-toast mat-icon {
+  font-size: 16px;
   width: 16px;
   height: 16px;
+  line-height: 16px;
   flex-shrink: 0;
   color: var(--success);
 }
@@ -130,9 +134,11 @@
   line-height: 1.5;
 }
 
-.link-info svg {
+.link-info mat-icon {
+  font-size: 13px;
   width: 13px;
   height: 13px;
+  line-height: 13px;
   flex-shrink: 0;
   color: var(--text-sub);
 }
@@ -140,6 +146,14 @@
 .link-info strong {
   color: var(--border);
   font-weight: 600;
+}
+
+/* ── Button icons ── */
+.btn-cta mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
 }
 
 /* ── Button Secondary Variant ── */
@@ -155,8 +169,8 @@
   box-shadow: 0 0 20px rgba(var(--border-rgb), 0.09);
 }
 
-.btn-cta.btn-secondary svg {
-  stroke: var(--border);
+.btn-cta.btn-secondary mat-icon {
+  color: var(--border);
 }
 
 /* ── Footer Note ── */

@@ -316,6 +316,22 @@
   flex-shrink: 0;
 }
 
+/* ── Full-width page layout skeleton (dashboard, tasks, settings, family-members) ── */
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.content-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
 /* ── Responsive ── */
 @media (max-width: 400px) {
   .card-header { padding-left: 18px; padding-right: 18px; }

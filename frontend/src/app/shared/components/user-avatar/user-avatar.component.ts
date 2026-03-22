@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 
 /**
  * Renders a circular avatar — either a photo (if pictureUrl is given)
@@ -12,7 +12,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   selector: 'app-user-avatar',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (pictureUrl()) {
+    @if (pictureUrl() && !imgError()) {
       <img
         class="photo"
         [src]="pictureUrl()"
@@ -20,6 +20,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
         [style.width.px]="size()"
         [style.height.px]="size()"
         aria-hidden="true"
+        (error)="imgError.set(true)"
       />
     } @else {
       <span
@@ -61,4 +62,13 @@ export class UserAvatarComponent {
   readonly pictureUrl = input<string>('');
   readonly size = input<number>(32);
   readonly initial = computed(() => (this.name()[0] ?? '?').toUpperCase());
+  readonly imgError = signal(false);
+
+  constructor() {
+    // Reset error state when the URL changes (e.g. navigating between members)
+    effect(() => {
+      this.pictureUrl();
+      this.imgError.set(false);
+    });
+  }
 }

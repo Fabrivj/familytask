@@ -12,6 +12,7 @@ import com.vertexdev.familytask.model.Invitation;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.Role;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
+import com.vertexdev.familytask.util.FamilyPermissions;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.InvitationRepository;
 import com.vertexdev.familytask.repository.UserRepository;
@@ -40,6 +41,7 @@ public class InvitationService {
     private final FamilyMemberRepository familyMemberRepository;
     private final InviteMapper invitationMapper;
     private final UserRepository userRepository;
+    private final FamilyPermissions familyPermissions;
 
     /**
      * Step 2 of the flow: Parent/Guardian generates the invitation.
@@ -52,7 +54,7 @@ public class InvitationService {
         // Verify that the requester is PARENT in this family
         familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
-                .filter(m -> m.getRole() == Role.PARENT && m.getIsActive())
+                .filter(familyPermissions::isActiveParent)
                 .orElseThrow(() -> new InvitationException("ACCESS_DENIED",
                         "No tienes permisos para invitar miembros a esta familia.", 403));
 
@@ -179,7 +181,7 @@ public class InvitationService {
 
         familyMemberRepository
                 .findByFamilyGroupIdAndUserId(invitation.getFamilyGroup().getId(), requester.getId())
-                .filter(m -> m.getRole() == Role.PARENT && m.getIsActive())
+                .filter(familyPermissions::isActiveParent)
                 .orElseThrow(() -> new InvitationException("ACCESS_DENIED",
                         "No tienes permisos para cancelar esta invitación.", 403));
 

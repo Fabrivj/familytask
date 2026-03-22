@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { FamilyService } from '../../../core/services/family.service';
@@ -17,6 +18,7 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
   selector: 'app-new-family',
   imports: [
     ReactiveFormsModule,
+    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
@@ -48,14 +50,8 @@ export class NewFamilyComponent {
   readonly apiError = signal('');
   readonly showForm = signal(false);
 
-  readonly shortName = computed(() => {
-    const name = this.authService.session()?.name ?? '';
-    return name.split(' ')[0];
-  });
-
-  readonly nameInitial = computed(() => {
-    return (this.authService.session()?.name?.[0] ?? '?').toUpperCase();
-  });
+  readonly shortName = this.authService.shortName;
+  readonly nameInitial = this.authService.nameInitial;
 
   getNameError(): string {
     const c = this.nameCtrl;
@@ -81,11 +77,10 @@ export class NewFamilyComponent {
           familyId: family.id,
           familyName: family.name,
           role: 'PARENT',
+          isAdmin: true,
         });
         this.authService.setActiveFamily(family.id);
-        this.router.navigate(['/family/members'], {
-          state: { message: 'Familia creada exitosamente.' },
-        });
+        this.router.navigate(['/invitation/create']);
       },
       error: (err) => {
         this.apiError.set(err.error?.message ?? 'No se pudo crear la familia. Intenta de nuevo.');
