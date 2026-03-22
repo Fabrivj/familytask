@@ -148,7 +148,7 @@ export class TasksListComponent {
       },
       error: (err) => {
         this.error.set(
-          err.error?.message ?? 'Error al cargar las tareas. Por favor, intente nuevamente.'
+          err.error?.message || 'Error al cargar las tareas. Por favor, intente nuevamente.'
         );
         this.isLoading.set(false);
       },
