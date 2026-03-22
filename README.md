@@ -1,3 +1,10 @@
 # FamilyTask
 
-Aplicación web para la gestión de tareas y hábitos en familia. Permite crear grupos familiares, invitar miembros, asignar tareas con recompensas en XP y monedas, y hacer seguimiento del progreso. Los padres administran las tareas y los miembros del hogar; los hijos las visualizan y las completan. Construida con Angular en el frontend y Spring Boot en el backend, autenticación con Google OAuth 2.0 y base de datos PostgreSQL.
+FamilyTask es una aplicación web de gestión familiar con enfoque en gamificación. Los padres crean tareas y hábitos para los miembros del hogar, asignando recompensas en XP y monedas que los hijos ganan al completarlas. La plataforma incluye un dashboard de información general, un módulo de tareas y hábitos, reportes de actividad familiar, asistencia con IA para la creación de contenido, y una tienda donde los miembros pueden canjear sus recompensas por premios definidos por los padres. Los roles están bien diferenciados: los padres administran y configuran, los hijos participan y progresan.
+
+## Stack
+
+- **Frontend:** Angular con Angular Material
+- **Backend:** Spring Boot
+- **Base de datos:** PostgreSQL
+- **Autenticación:** Google OAuth 2.0
