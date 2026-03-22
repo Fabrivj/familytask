@@ -16,6 +16,26 @@
 *, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); }
 
+/* ── Scrollbar — Neon theme ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(var(--panel-rgb), 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--border-rgb), 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--border-rgb), 0.55);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--border-rgb), 0.3) rgba(var(--panel-rgb), 0.6);
+}
+
 /* ============================================================
    LANDING PAGE — Layout & utilities
    Used only by landing page sections.

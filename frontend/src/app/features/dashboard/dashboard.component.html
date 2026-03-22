@@ -1,49 +1,35 @@
-<app-page-layout variant="full">
+<app-shell>
+  <main class="content">
 
-  @if (session(); as s) {
+    @if (successMessage()) {
+      <p class="msg-success" role="status">✓ {{ successMessage() }}</p>
+    }
 
-    <app-top-bar
-      [userName]="s.name.split(' ')[0]"
-      [userPictureUrl]="s.pictureUrl"
-      [showLogout]="true"
-      [logoutLoading]="isLoading()"
-      (logout)="logout()"
+    <app-page-header
+      tag="// DASHBOARD"
+      [title]="'Bienvenido, ' + shortName() + ' 👋'"
     />
 
-    <main class="main">
+    @if ((session()?.families ?? []).length > 0) {
+      <section class="section">
+        <h2 class="section-label">Tus familias</h2>
+        <div class="chips">
+          @for (familia of session()!.families; track familia.familyId) {
+            <div class="chip">
+              <strong class="chip-name">{{ familia.familyName }}</strong>
+              <span class="chip-role">
+                {{ familia.role === 'PARENT' ? '👑 Padre / Tutor' : '👦 Hijo' }}
+              </span>
+            </div>
+          }
+        </div>
+      </section>
+    } @else {
+      <p class="empty-msg">
+        Aún no perteneces a ninguna familia.
+        <a class="empty-link" routerLink="/family/new">Crear una →</a>
+      </p>
+    }
 
-      @if (successMessage()) {
-        <p class="msg-success" role="status">✓ {{ successMessage() }}</p>
-      }
-
-      <app-page-header
-        tag="// DASHBOARD"
-        [title]="'Bienvenido, ' + s.name.split(' ')[0] + ' 👋'"
-      />
-
-      @if (s.families.length > 0) {
-        <section class="section">
-          <h2 class="section-label">Tus familias</h2>
-          <div class="chips">
-            @for (familia of s.families; track familia.familyId) {
-              <div class="chip">
-                <strong class="chip-name">{{ familia.familyName }}</strong>
-                <span class="chip-role">
-                  {{ familia.role === 'PARENT' ? '👑 Padre / Tutor' : '👦 Hijo' }}
-                </span>
-              </div>
-            }
-          </div>
-        </section>
-      } @else {
-        <p class="empty-msg">
-          Aún no perteneces a ninguna familia.
-          <a class="empty-link" routerLink="/family/new">Crear una →</a>
-        </p>
-      }
-
-    </main>
-
-  }
-
-</app-page-layout>
+  </main>
+</app-shell>

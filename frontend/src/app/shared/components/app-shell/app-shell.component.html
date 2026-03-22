@@ -1,0 +1,19 @@
+<app-page-layout variant="full">
+  <div class="app-body">
+    <app-sidebar />
+
+    <div class="content-col">
+      <app-top-bar
+        [userName]="shortName()"
+        [userPictureUrl]="pictureUrl()"
+        [familyName]="familyName()"
+        [userRole]="userRole()"
+        [showLogout]="true"
+        [logoutLoading]="logoutLoading()"
+        (logout)="onLogout()"
+      />
+
+      <ng-content />
+    </div>
+  </div>
+</app-page-layout>

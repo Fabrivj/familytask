@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { timeout, TimeoutError } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
@@ -54,20 +55,16 @@ export class CallbackComponent implements OnInit {
   }
 
   private processCallback(code: string): void {
-    const error = this.route.snapshot.queryParamMap.get('error');
-    if (error === 'access_denied') {
-      this.showError('Inicio de sesión cancelado.');
-      return;
-    }
-
     this.currentStep.set('Autenticando con Google...');
 
-    this.authService.processGoogleCallback(code).subscribe({
+    this.authService.processGoogleCallback(code).pipe(timeout(15000)).subscribe({
       next: (authResponse) => this.postAuthentication(authResponse),
       error: (err) => {
         let message: string;
-        if (err.status === 0) {
-          message = 'No se pudo conectar con Google. Intenta de nuevo.';
+        if (err instanceof TimeoutError) {
+          message = 'La conexión tardó demasiado. Verifica tu conexión e intenta de nuevo.';
+        } else if (err.status === 0) {
+          message = 'No se pudo conectar con el servidor. Intenta de nuevo.';
         } else if (err.error?.code === 'EMAIL_NOT_FOUND') {
           message = 'No se pudo obtener tu correo. Reintenta el inicio de sesión.';
         } else {
@@ -110,7 +107,8 @@ export class CallbackComponent implements OnInit {
     const newFamily = families.find(f => !oldFamilyIds.has(f.familyId)) ?? families[0];
     if (newFamily) {
       this.authService.setActiveFamily(newFamily.familyId);
-      this.router.navigate(['/family/members']);
+      const dest = newFamily.role === 'PARENT' ? '/family/members' : '/dashboard';
+      this.router.navigate([dest]);
     } else {
       this.router.navigate(['/family/select']);
     }
@@ -122,16 +120,6 @@ export class CallbackComponent implements OnInit {
     if (families.length === 0) {
       this.router.navigate(['/family/new']);
     } else if (families.length === 1) {
-      this.authService.setActiveFamily(families[0].familyId);
-      this.router.navigate(['/dashboard']);
-    } else {
-      this.router.navigate(['/family/select']);
-    }
-  }
-
-  private redirectByFamilyCount(): void {
-    const families = this.authService.families();
-    if (families.length === 1) {
       this.authService.setActiveFamily(families[0].familyId);
       this.router.navigate(['/dashboard']);
     } else {

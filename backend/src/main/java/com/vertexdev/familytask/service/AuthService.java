@@ -89,7 +89,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .pictureUrl(user.getPictureUrl())
-                . families(families)
+                .families(families)
                 .build();
     }
 }

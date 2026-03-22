@@ -2,22 +2,6 @@
    TASKS LIST — Neon design system
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Layout (sidebar pattern from settings/family-members) ────────────── */
-.app-body {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.content-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-}
-
 .content {
   flex: 1;
   overflow-y: auto;
@@ -96,7 +80,14 @@
   background: rgba(var(--primary-rgb), 0.06);
 }
 
-.tab-icon { display: flex; opacity: 0.7; }
+.tab-icon {
+  display: flex;
+  opacity: 0.7;
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+}
 
 .tab-count {
   display: inline-flex;
@@ -188,6 +179,10 @@
   color: var(--text-sub);
   opacity: 0.5;
   flex-shrink: 0;
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
 }
 
 .search-input {
@@ -246,11 +241,12 @@
 .table-wrap {
   border: 1.5px solid rgba(var(--border-rgb), 0.12);
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .tasks-table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
 }
 
@@ -424,6 +420,13 @@
 .btn-icon:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-icon-danger:hover:not(:disabled) { border-color: var(--error); color: var(--error); }
 
+.btn-icon mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}
+
 /* ═════════════════════════════════════════════════════════════════════════
    MOBILE CARDS
    ═════════════════════════════════════════════════════════════════════════ */
@@ -593,6 +596,24 @@
 
 .btn-close:hover { color: var(--text); }
 
+.btn-close mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+/* ── Date input: make native calendar icon visible on dark theme ──────── */
+.field-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7) sepia(1) saturate(2) hue-rotate(160deg);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.field-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 /* ── Panel form ───────────────────────────────────────────────────────── */
 .panel-body {
   padding: 28px;
@@ -712,6 +733,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .btn-cancel { flex: 1; padding: 12px 16px; font-size: 13px; }
 .btn-create { flex: 2; padding: 12px 24px; font-size: 13px; }
 
+.btn-create mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+}
+
 @media (max-width: 767px) {
   .create-panel { width: 100vw; }
   .panel-body { padding: 20px 16px; }
@@ -736,6 +764,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .modal-icon { color: var(--text-sub); margin-bottom: 20px; }
+
+.modal-icon-svg {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  opacity: 0.6;
+}
 
 .modal-title {
   font-family: 'Rajdhani', sans-serif;

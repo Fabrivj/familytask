@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
+import { PermissionsService } from '../../../core/services/permissions.service';
 
 /**
  * Collapsible icon sidebar for full-width dashboard pages.
@@ -23,10 +24,11 @@ import { AuthService } from '../../../core/services/auth.service';
 export class SidebarComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly permissionsService = inject(PermissionsService);
 
   readonly activeUrl = computed(() => this.router.url);
 
-  readonly isParent = computed(() => this.authService.activeFamily()?.role === 'PARENT');
+  readonly isParent = this.permissionsService.isParent;
   readonly hasMultipleFamilies = computed(() => this.authService.families().length > 1);
 
   isActive(route: string): boolean {
