@@ -13,10 +13,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { TaskService } from '../../../core/services/task.service';
-import { MemberItemResponse, TaskPriority, TaskResponse } from '../../../core/models/task.model';
-import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
-import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
-import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { MembersService } from '../../../core/services/members.service';
+import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
+import { TaskPriority, TaskResponse } from '../../../core/models/task.model';
+import { MemberItem } from '../../../core/models/member.model';
+import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 
 @Component({
@@ -26,9 +27,7 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
     ReactiveFormsModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    PageLayoutComponent,
-    SidebarComponent,
-    TopBarComponent,
+    AppShellComponent,
     UserAvatarComponent,
   ],
   templateUrl: './tasks-list.component.html',
@@ -38,29 +37,19 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
 export class TasksListComponent {
   private readonly authService = inject(AuthService);
   private readonly taskService = inject(TaskService);
+  private readonly membersService = inject(MembersService);
   private readonly snackBar = inject(MatSnackBar);
 
-  // ─── Session ──────────────────────────────────────────────────────────────
-  readonly session = this.authService.session;
-
-  readonly shortName = computed(() => {
-    const name = this.session()?.name ?? '';
-    return name.split(' ')[0];
-  });
-
   readonly familyId = computed(() => this.authService.activeFamily()?.familyId ?? null);
-  readonly familyName = computed(() => this.authService.activeFamily()?.familyName ?? 'Tu familia');
   readonly isParent = computed(() => this.authService.activeFamily()?.role === 'PARENT');
 
-  readonly userRoleLabel = this.authService.activeRoleLabel;
-
-  // ─── Data ─────────────────────────────────────────────────────────────────
+  // ─── Datos ────────────────────────────────────────────────────────────────
   readonly tasks = signal<TaskResponse[]>([]);
-  readonly members = signal<MemberItemResponse[]>([]);
+  readonly members = signal<MemberItem[]>([]);
   readonly isLoading = signal(false);
   readonly error = signal('');
 
-  // ─── Filters ──────────────────────────────────────────────────────────────
+  // ─── Filtros ──────────────────────────────────────────────────────────────
   readonly filterPriority = signal<string | null>(null);
   readonly filterZone = signal<string | null>(null);
   readonly filterMemberId = signal<number | null>(null);
@@ -85,7 +74,7 @@ export class TasksListComponent {
     );
   });
 
-  // ─── Create panel ────────────────────────────────────────────────────────
+  // ─── Panel de creación ────────────────────────────────────────────────────
   readonly showCreatePanel = signal(false);
   readonly isCreating = signal(false);
   readonly createError = signal('');
@@ -113,7 +102,7 @@ export class TasksListComponent {
   readonly minDate = new Date().toISOString().slice(0, 10);
   readonly selectedAssignee = signal<number | null>(null);
 
-  // ─── Delete modal ─────────────────────────────────────────────────────────
+  // ─── Modal de borrado ─────────────────────────────────────────────────────
   readonly showDeleteModal = signal(false);
   readonly taskToDelete = signal<TaskResponse | null>(null);
 
@@ -124,7 +113,6 @@ export class TasksListComponent {
     });
   }
 
-  // ─── Load ─────────────────────────────────────────────────────────────────
   private loadData(familyId: number): void {
     this.isLoading.set(true);
     this.error.set('');
@@ -135,22 +123,21 @@ export class TasksListComponent {
         this.isLoading.set(false);
       },
       error: (err) => {
-        this.error.set(
-          err.error?.message ?? 'Error al cargar las tareas. Por favor, intente nuevamente.'
-        );
+        this.error.set(err.error?.message ?? 'Error al cargar las tareas. Por favor, intente nuevamente.');
         this.isLoading.set(false);
       },
     });
 
+    // Solo los padres pueden asignar tareas, así que no necesitamos la lista de miembros para hijos
     if (this.isParent()) {
-      this.taskService.getMembers(familyId).subscribe({
-        next: (members) => this.members.set(members),
+      this.membersService.getMembers(familyId).subscribe({
+        next: (res) => this.members.set(res.members),
         error: () => {},
       });
     }
   }
 
-  // ─── Filters ──────────────────────────────────────────────────────────────
+  // ─── Filtros ──────────────────────────────────────────────────────────────
   togglePriority(value: string): void {
     this.filterPriority.set(this.filterPriority() === value ? null : value);
   }
@@ -164,13 +151,8 @@ export class TasksListComponent {
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
-  priorityLabel(p: string): string {
-    return { HIGH: 'ALTA', MEDIUM: 'MEDIA', LOW: 'BAJA' }[p] ?? p;
-  }
-
-  statusLabel(s: string): string {
-    return { PENDING: 'Pendiente', IN_PROGRESS: 'En progreso', COMPLETED: 'Completada' }[s] ?? s;
-  }
+  readonly priorityLabel = priorityLabel;
+  readonly statusLabel = statusLabel;
 
   memberShortName(name: string): string {
     const parts = name.split(' ');
@@ -188,7 +170,7 @@ export class TasksListComponent {
     return d.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' });
   }
 
-  // ─── Error getters ────────────────────────────────────────────────────────
+  // ─── Validación del formulario ────────────────────────────────────────────
   getTitleError(): string {
     const c = this.titleCtrl;
     if (c.hasError('required')) return 'El campo Título es obligatorio.';
@@ -220,7 +202,7 @@ export class TasksListComponent {
     return '';
   }
 
-  // ─── Create panel ────────────────────────────────────────────────────────
+  // ─── Panel de creación ────────────────────────────────────────────────────
   openCreatePanel(): void {
     this.resetForm();
     this.showCreatePanel.set(true);
@@ -257,8 +239,6 @@ export class TasksListComponent {
     this.isCreating.set(true);
     this.createError.set('');
 
-    const dueDate = this.dueDateCtrl.value ?? null;
-
     this.taskService.create({
       familyId,
       title: this.titleCtrl.value.trim(),
@@ -267,7 +247,7 @@ export class TasksListComponent {
       xpReward: this.xpRewardCtrl.value!,
       coinsReward: this.coinsRewardCtrl.value!,
       location: this.locationCtrl.value.trim(),
-      dueDate,
+      dueDate: this.dueDateCtrl.value ?? null,
       assignedToId: this.selectedAssignee(),
     }).subscribe({
       next: () => {
@@ -280,9 +260,7 @@ export class TasksListComponent {
         this.loadData(familyId);
       },
       error: (err) => {
-        this.createError.set(
-          err.error?.message ?? 'Ocurrió un error al crear la tarea. Por favor, intente nuevamente.'
-        );
+        this.createError.set(err.error?.message ?? 'Ocurrió un error al crear la tarea. Por favor, intente nuevamente.');
         this.isCreating.set(false);
       },
     });
@@ -300,7 +278,7 @@ export class TasksListComponent {
     this.createError.set('');
   }
 
-  // ─── Delete modal ────────────────────────────────────────────────────────
+  // ─── Modal de borrado ─────────────────────────────────────────────────────
   openDeleteModal(task: TaskResponse): void {
     this.taskToDelete.set(task);
     this.showDeleteModal.set(true);
@@ -315,14 +293,4 @@ export class TasksListComponent {
     this.closeDeleteModal();
   }
 
-  // ─── Logout ───────────────────────────────────────────────────────────────
-  logout(): void {
-    this.authService.performLogout().subscribe({
-      error: () => {
-        this.snackBar.open('No se pudo cerrar sesión. Intenta de nuevo.', 'Cerrar', {
-          duration: 4000, panelClass: 'snack-error',
-        });
-      },
-    });
-  }
 }

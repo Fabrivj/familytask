@@ -43,20 +43,9 @@ export class CreateInvitationComponent {
   private readonly router = inject(Router);
 
   // ─── User info ─────────────────────────────────────────────────────────────
-  readonly shortName = computed(() => {
-    const name = this.authService.session()?.name ?? '';
-    return name.split(' ')[0];
-  });
-
-  readonly nameInitial = computed(() => {
-    return (this.authService.session()?.name?.[0] ?? '?').toUpperCase();
-  });
-
-  readonly familyName = computed(() => {
-    const families = this.authService.families();
-    const activeId = this.authService.getActiveFamilyId();
-    return families.find(f => f.familyId === activeId)?.familyName ?? 'Tu familia';
-  });
+  readonly shortName = this.authService.shortName;
+  readonly nameInitial = this.authService.nameInitial;
+  readonly familyName = this.authService.activeFamilyName;
 
   readonly familyRole = computed((): 'PARENT' | 'CHILD' => {
     const families = this.authService.families();

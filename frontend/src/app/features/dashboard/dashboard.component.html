@@ -1,57 +1,35 @@
-<app-page-layout variant="full">
+<app-shell>
+  <main class="content">
 
-  @if (session(); as s) {
+    @if (successMessage()) {
+      <p class="msg-success" role="status">✓ {{ successMessage() }}</p>
+    }
 
-    <div class="app-body">
-      <app-sidebar />
+    <app-page-header
+      tag="// DASHBOARD"
+      [title]="'Bienvenido, ' + shortName() + ' 👋'"
+    />
 
-      <div class="content-col">
-        <app-top-bar
-          [userName]="shortName()"
-          [userPictureUrl]="s.pictureUrl"
-          [familyName]="familyName()"
-          [userRole]="userRoleLabel()"
-          [showLogout]="true"
-          [logoutLoading]="isLoading()"
-          (logout)="logout()"
-        />
-
-        <main class="content">
-
-          @if (successMessage()) {
-            <p class="msg-success" role="status">✓ {{ successMessage() }}</p>
+    @if ((session()?.families ?? []).length > 0) {
+      <section class="section">
+        <h2 class="section-label">Tus familias</h2>
+        <div class="chips">
+          @for (familia of session()!.families; track familia.familyId) {
+            <div class="chip">
+              <strong class="chip-name">{{ familia.familyName }}</strong>
+              <span class="chip-role">
+                {{ familia.role === 'PARENT' ? '👑 Padre / Tutor' : '👦 Hijo' }}
+              </span>
+            </div>
           }
+        </div>
+      </section>
+    } @else {
+      <p class="empty-msg">
+        Aún no perteneces a ninguna familia.
+        <a class="empty-link" routerLink="/family/new">Crear una →</a>
+      </p>
+    }
 
-          <app-page-header
-            tag="// DASHBOARD"
-            [title]="'Bienvenido, ' + shortName() + ' 👋'"
-          />
-
-          @if (s.families.length > 0) {
-            <section class="section">
-              <h2 class="section-label">Tus familias</h2>
-              <div class="chips">
-                @for (familia of s.families; track familia.familyId) {
-                  <div class="chip">
-                    <strong class="chip-name">{{ familia.familyName }}</strong>
-                    <span class="chip-role">
-                      {{ familia.role === 'PARENT' ? '👑 Padre / Tutor' : '👦 Hijo' }}
-                    </span>
-                  </div>
-                }
-              </div>
-            </section>
-          } @else {
-            <p class="empty-msg">
-              Aún no perteneces a ninguna familia.
-              <a class="empty-link" routerLink="/family/new">Crear una →</a>
-            </p>
-          }
-
-        </main>
-      </div>
-    </div>
-
-  }
-
-</app-page-layout>
+  </main>
+</app-shell>

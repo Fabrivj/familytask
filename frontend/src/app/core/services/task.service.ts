@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { inject } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateTaskRequest, FamilyMembersResponse, MemberItemResponse, TaskResponse } from '../models/task.model';
+import { CreateTaskRequest, TaskResponse } from '../models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -17,11 +16,5 @@ export class TaskService {
 
   create(request: CreateTaskRequest): Observable<TaskResponse> {
     return this.http.post<TaskResponse>(`${environment.apiUrl}/tasks`, request);
-  }
-
-  getMembers(familyId: number): Observable<MemberItemResponse[]> {
-    return this.http.get<FamilyMembersResponse>(
-      `${environment.apiUrl}/families/${familyId}/members`
-    ).pipe(map(res => res.members));
   }
 }

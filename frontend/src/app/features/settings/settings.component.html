@@ -1,81 +1,58 @@
-<app-page-layout variant="full">
+<app-shell>
+  <main class="content">
 
-  @if (session(); as s) {
+    <app-page-header
+      tag="// CONFIGURACIÓN DEL GRUPO"
+      title="Configuración"
+      subtitle="Ajusta el nombre y las reglas de tu grupo familiar."
+    />
 
-    <div class="app-body">
-      <app-sidebar />
+    <section class="config-card" aria-label="Datos del grupo">
 
-      <div class="content-col">
-        <app-top-bar
-          [userName]="shortName()"
-          [userPictureUrl]="currentUserPictureUrl()"
-          [familyName]="familyName()"
-          [userRole]="userRole()"
-          [showLogout]="true"
-          [logoutLoading]="logoutLoading()"
-          (logout)="onLogout()"
-        />
+      <div class="config-card-header">
+        <mat-icon class="header-icon" aria-hidden="true">groups</mat-icon>
+        <span class="config-card-label">DATOS DEL GRUPO</span>
+      </div>
 
-        <main class="content">
+      <div class="config-card-body">
 
-      <app-page-header
-        tag="// CONFIGURACIÓN DEL GRUPO"
-        title="Configuración"
-        subtitle="Ajusta el nombre y las reglas de tu grupo familiar."
-      />
+        <label class="field-label" for="family-name-input">NOMBRE DEL GRUPO</label>
 
-      <section class="config-card" aria-label="Datos del grupo">
-
-        <div class="config-card-header">
-          <mat-icon class="header-icon" aria-hidden="true">groups</mat-icon>
-          <span class="config-card-label">DATOS DEL GRUPO</span>
-        </div>
-
-        <div class="config-card-body">
-
-          <label class="field-label" for="family-name-input">NOMBRE DEL GRUPO</label>
-
-          <mat-form-field appearance="outline" class="field-full">
-            <input
-              id="family-name-input"
-              matInput
-              type="text"
-              placeholder="Ej: Familia González"
-              [formControl]="nameCtrl"
-              (keyup.enter)="save()"
-              autocomplete="off"
-            />
-            @if (nameCtrl.touched && nameCtrl.invalid) {
-              <mat-error>{{ getNameError() }}</mat-error>
-            }
-          </mat-form-field>
-
-          @if (successMessage()) {
-            <div class="msg-success msg-success--box" role="status">{{ successMessage() }}</div>
+        <mat-form-field appearance="outline" class="field-full">
+          <input
+            id="family-name-input"
+            matInput
+            type="text"
+            placeholder="Ej: Familia González"
+            [formControl]="nameCtrl"
+            (keyup.enter)="save()"
+            autocomplete="off"
+          />
+          @if (nameCtrl.touched && nameCtrl.invalid) {
+            <mat-error>{{ getNameError() }}</mat-error>
           }
+        </mat-form-field>
 
-          @if (apiError()) {
-            <p class="api-error" role="alert">{{ apiError() }}</p>
+        @if (successMessage()) {
+          <div class="msg-success msg-success--box" role="status">{{ successMessage() }}</div>
+        }
+
+        @if (apiError()) {
+          <p class="api-error" role="alert">{{ apiError() }}</p>
+        }
+
+        <button class="btn-cta" type="button" (click)="save()" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Guardando cambios" />
+            Guardando...
+          } @else {
+            GUARDAR CAMBIOS
           }
-
-          <button class="btn-cta" type="button" (click)="save()" [disabled]="isLoading()">
-            @if (isLoading()) {
-              <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Guardando cambios" />
-              Guardando...
-            } @else {
-              GUARDAR CAMBIOS
-            }
-          </button>
-
-        </div>
-
-      </section>
-
-        </main>
+        </button>
 
       </div>
-    </div>
 
-  }
+    </section>
 
-</app-page-layout>
+  </main>
+</app-shell>

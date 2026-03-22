@@ -17,20 +17,6 @@ export interface TaskResponse {
   assignedToPictureUrl: string | null;
 }
 
-export interface MemberItemResponse {
-  id: number;
-  name: string;
-  email: string;
-  pictureUrl: string;
-  role: string;
-  joinedAt: string;
-}
-
-export interface FamilyMembersResponse {
-  members: MemberItemResponse[];
-  pendingInvitations: unknown[];
-}
-
 export interface CreateTaskRequest {
   familyId: number;
   title: string;

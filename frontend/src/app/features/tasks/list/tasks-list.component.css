@@ -2,22 +2,6 @@
    TASKS LIST — Neon design system
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Layout (sidebar pattern from settings/family-members) ────────────── */
-.app-body {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.content-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-}
-
 .content {
   flex: 1;
   overflow-y: auto;

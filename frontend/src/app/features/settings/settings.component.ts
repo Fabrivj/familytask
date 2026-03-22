@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,10 +6,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/services/auth.service';
 import { FamilyService } from '../../core/services/family.service';
-import { PageLayoutComponent } from '../../shared/components/page-layout/page-layout.component';
-import { TopBarComponent } from '../../shared/components/top-bar/top-bar.component';
+import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 
 const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
 
@@ -21,10 +19,8 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    PageLayoutComponent,
-    TopBarComponent,
+    AppShellComponent,
     PageHeaderComponent,
-    SidebarComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
@@ -33,13 +29,6 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
 export class SettingsComponent {
   private readonly authService = inject(AuthService);
   private readonly familyService = inject(FamilyService);
-
-  readonly session = this.authService.session;
-
-  readonly shortName = computed(() => this.authService.session()?.name?.split(' ')[0] ?? '');
-  readonly currentUserPictureUrl = computed(() => this.authService.session()?.pictureUrl ?? '');
-  readonly familyName = computed(() => this.authService.activeFamily()?.familyName ?? '');
-  readonly userRole = this.authService.activeRoleLabel;
 
   readonly nameCtrl = new FormControl('', {
     nonNullable: true,
@@ -54,7 +43,6 @@ export class SettingsComponent {
   readonly isLoading = signal(false);
   readonly apiError = signal('');
   readonly successMessage = signal('');
-  readonly logoutLoading = signal(false);
 
   constructor() {
     const familyId = this.authService.getActiveFamilyId();
@@ -64,15 +52,6 @@ export class SettingsComponent {
 
   getNameError(): string {
     return 'El nombre debe tener entre 3 y 50 caracteres y no puede contener caracteres inválidos.';
-  }
-
-  onLogout(): void {
-    this.logoutLoading.set(true);
-    this.authService.performLogout().subscribe({
-      error: () => {
-        this.logoutLoading.set(false);
-      },
-    });
   }
 
   save(): void {

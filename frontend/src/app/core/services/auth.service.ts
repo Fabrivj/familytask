@@ -31,6 +31,15 @@ export class AuthService {
     return '';
   });
 
+  /** First word of the user's display name, e.g. "Maria" from "Maria Torres" */
+  readonly shortName = computed(() => this._session()?.name?.split(' ')[0] ?? '');
+
+  /** First character of the user's name uppercased, e.g. "M". Falls back to "?" */
+  readonly nameInitial = computed(() => (this._session()?.name?.[0] ?? '?').toUpperCase());
+
+  /** familyName of the active family. Empty string if no active family. */
+  readonly activeFamilyName = computed(() => this.activeFamily()?.familyName ?? '');
+
   constructor(private http: HttpClient, private router: Router) {}
 
   // ─── Step 1: Redirect the user to Google ──────────────────────────────────

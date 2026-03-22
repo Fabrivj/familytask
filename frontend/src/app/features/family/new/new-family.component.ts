@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -48,14 +48,8 @@ export class NewFamilyComponent {
   readonly apiError = signal('');
   readonly showForm = signal(false);
 
-  readonly shortName = computed(() => {
-    const name = this.authService.session()?.name ?? '';
-    return name.split(' ')[0];
-  });
-
-  readonly nameInitial = computed(() => {
-    return (this.authService.session()?.name?.[0] ?? '?').toUpperCase();
-  });
+  readonly shortName = this.authService.shortName;
+  readonly nameInitial = this.authService.nameInitial;
 
   getNameError(): string {
     const c = this.nameCtrl;

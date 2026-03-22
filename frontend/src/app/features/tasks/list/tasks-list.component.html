@@ -1,21 +1,7 @@
-<app-page-layout variant="full">
+<app-shell>
+  <main class="content">
 
-  <div class="app-body">
-    <app-sidebar />
-
-    <div class="content-col">
-      <app-top-bar
-        [userName]="shortName()"
-        [userPictureUrl]="session()?.pictureUrl ?? ''"
-        [familyName]="familyName()"
-        [userRole]="userRoleLabel()"
-        [showLogout]="true"
-        (logout)="logout()"
-      />
-
-      <main class="content">
-
-    <!-- ── Header ────────────────────────────────────────────────── -->
+    <!-- Header -->
     <div class="header-row">
       <div class="header-info">
         <p class="tag">// GESTIÓN DE FAMILIA</p>
@@ -240,11 +226,8 @@
       </div>
 
     }
-      </main>
-    </div>
-  </div>
-
-</app-page-layout>
+  </main>
+</app-shell>
 
 <!-- ═══════════ CREATE PANEL ═══════════ -->
 @if (showCreatePanel()) {

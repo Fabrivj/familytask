@@ -27,13 +27,7 @@ export class SelectFamilyComponent implements OnInit {
 
   readonly families = computed(() => this.authService.session()?.families ?? []);
 
-  readonly userName = computed(() => {
-    return this.authService.session()?.name ?? '';
-  });
-
-  readonly shortName = computed(() => {
-    return this.userName().split(' ')[0];
-  });
+  readonly shortName = this.authService.shortName;
 
   readonly userEmail = computed(() => {
     return this.authService.session()?.email ?? '';

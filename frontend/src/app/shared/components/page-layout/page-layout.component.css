@@ -11,18 +11,6 @@
   padding: 24px 16px;
 }
 
-/* Scanlines overlay */
-.container::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    to bottom, transparent 0px, transparent 3px,
-    rgba(0, 0, 0, 0.10) 3px, rgba(0, 0, 0, 0.10) 4px
-  );
-  pointer-events: none;
-  z-index: 100;
-}
 
 .page {
   width: 100%;

@@ -16,6 +16,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './page-layout.component.html',
   styleUrl: './page-layout.component.css',
+  host: { class: 'scanlines' },
 })
 export class PageLayoutComponent {
   /** 'card' — centered narrow layout (default, for single-card pages).
