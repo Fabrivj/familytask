@@ -8,9 +8,7 @@
         [subtitle]="pageSubtitle()"
       />
       <button class="btn-invite" type="button" (click)="inviteMember()">
-        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+        <mat-icon aria-hidden="true">add</mat-icon>
         INVITAR MIEMBRO
       </button>
     </div>
@@ -24,11 +22,7 @@
 
     @else if (error()) {
       <div class="state-center" role="alert">
-        <svg class="error-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M12 7v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="12" cy="16.5" r="0.9" fill="currentColor"/>
-        </svg>
+        <mat-icon class="error-icon" aria-hidden="true">info</mat-icon>
         <span class="state-text error-text">{{ error() }}</span>
         @if (!isForbidden()) {
           <button class="btn-retry" type="button" (click)="retry()">Reintentar</button>
@@ -75,9 +69,7 @@
 
               @if (member.role === 'CHILD') {
                 <div class="xp-row" aria-label="Experiencia">
-                  <svg class="xp-bolt" viewBox="0 0 10 14" fill="none" aria-hidden="true">
-                    <path d="M6 1L1 8h4l-1 5 5-7H5l1-5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
-                  </svg>
+                  <mat-icon class="xp-bolt" aria-hidden="true">bolt</mat-icon>
                   <span class="xp-label">XP — NIVEL 1</span>
                   <div class="xp-track"><div class="xp-fill" style="width: 0%"></div></div>
                   <span class="xp-count">0 / 1000</span>
@@ -95,9 +87,7 @@
                             (click)="toggleDropdown(member.id)"
                             [disabled]="changingRoleId() === member.id">
                       {{ roleDropdownLabel(member.role) }}
-                      <svg viewBox="0 0 10 6" fill="none" aria-hidden="true">
-                        <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
+                      <mat-icon class="role-chevron" aria-hidden="true">expand_more</mat-icon>
                     </button>
                     @if (openDropdownId() === member.id) {
                       <ul class="role-menu" role="listbox" [attr.aria-label]="'Rol de ' + member.name">
@@ -111,9 +101,7 @@
                     }
                   </div>
                   <button class="btn-delete" type="button" aria-label="Eliminar miembro">
-                    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M3 5h10M5.5 5V3.5h5V5M6 5l.5 8h3l.5-8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <mat-icon aria-hidden="true">delete</mat-icon>
                   </button>
                 }
               </div>
@@ -131,10 +119,7 @@
             @for (inv of pendingInvitations(); track inv.email) {
               <li class="invite-row">
                 <div class="invite-icon" aria-hidden="true">
-                  <svg viewBox="0 0 20 20" fill="none">
-                    <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/>
-                    <path d="M2 7l8 5 8-5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
+                  <mat-icon aria-hidden="true">email</mat-icon>
                 </div>
                 <div class="invite-info">
                   <span class="invite-email">{{ inv.email }}</span>
@@ -148,9 +133,7 @@
                 <button class="btn-copy" type="button" (click)="copyLink(inv.token)"
                         [attr.aria-label]="'Copiar enlace de ' + inv.email">
                   @if (copiedToken() === inv.token) {
-                    <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                      <path d="M2 6.5l2.5 2.5 5.5-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <mat-icon aria-hidden="true">check</mat-icon>
                     COPIADO
                   } @else {
                     COPIAR
@@ -162,9 +145,7 @@
                   @if (cancelingToken() === inv.token) {
                     <div class="cancel-spinner" aria-hidden="true"></div>
                   } @else {
-                    <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                      <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
+                    <mat-icon aria-hidden="true">close</mat-icon>
                   }
                 </button>
               </li>

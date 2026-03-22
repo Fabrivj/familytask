@@ -47,9 +47,11 @@
   outline-offset: 3px;
 }
 
-.btn-invite svg {
+.btn-invite mat-icon {
+  font-size: 13px;
   width: 13px;
   height: 13px;
+  line-height: 13px;
 }
 
 /* ── SECTION LABEL ── */
@@ -183,8 +185,10 @@
 }
 
 .xp-bolt {
-  width: 9px;
+  font-size: 13px;
+  width: 13px;
   height: 13px;
+  line-height: 13px;
   color: #FFD700;
   flex-shrink: 0;
 }
@@ -266,9 +270,11 @@
   outline-offset: 1px;
 }
 
-.role-select svg {
-  width: 9px;
-  height: 6px;
+.role-chevron {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
   color: var(--text-sub);
   opacity: 0.55;
 }
@@ -345,9 +351,11 @@
   outline-offset: 1px;
 }
 
-.btn-delete svg {
+.btn-delete mat-icon {
+  font-size: 14px;
   width: 14px;
   height: 14px;
+  line-height: 14px;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -389,9 +397,11 @@
   border-radius: 8px;
 }
 
-.invite-icon svg {
+.invite-icon mat-icon {
+  font-size: 17px;
   width: 17px;
   height: 17px;
+  line-height: 17px;
   color: var(--secondary);
 }
 
@@ -447,9 +457,11 @@
   box-sizing: border-box;
 }
 
-.btn-copy svg {
+.btn-copy mat-icon {
+  font-size: 11px;
   width: 11px;
   height: 11px;
+  line-height: 11px;
 }
 
 .btn-copy:hover {
@@ -503,9 +515,11 @@
   outline-offset: 1px;
 }
 
-.btn-cancel-invite svg {
+.btn-cancel-invite mat-icon {
+  font-size: 11px;
   width: 11px;
   height: 11px;
+  line-height: 11px;
 }
 
 .cancel-spinner {
@@ -544,8 +558,10 @@
 }
 
 .error-icon {
+  font-size: 36px;
   width: 36px;
   height: 36px;
+  line-height: 36px;
   color: var(--primary);
 }
 

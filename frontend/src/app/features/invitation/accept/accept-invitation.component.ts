@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
@@ -19,7 +20,7 @@ type PageState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
 
 @Component({
   selector: 'app-accept-invitation',
-  imports: [MatProgressSpinnerModule, UserAvatarComponent, PageLayoutComponent, NeonCardComponent],
+  imports: [MatIconModule, MatProgressSpinnerModule, UserAvatarComponent, PageLayoutComponent, NeonCardComponent],
   templateUrl: './accept-invitation.component.html',
   styleUrl: './accept-invitation.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

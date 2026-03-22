@@ -66,9 +66,7 @@
 
     @if (!showForm()) {
       <button card-cta class="btn-cta" type="button" (click)="showForm.set(true)">
-        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-          <path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+        <mat-icon aria-hidden="true">add</mat-icon>
         Crear mi familia
       </button>
     } @else {
@@ -77,9 +75,7 @@
           <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Creando familia" />
           Creando...
         } @else {
-          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <mat-icon aria-hidden="true">arrow_forward</mat-icon>
           Confirmar
         }
       </button>

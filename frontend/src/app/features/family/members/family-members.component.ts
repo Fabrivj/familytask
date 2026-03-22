@@ -14,6 +14,7 @@ import { FamilyService } from '../../../core/services/family.service';
 import { MembersService } from '../../../core/services/members.service';
 import { InvitationService } from '../../../core/services/invitation.service';
 import { MemberItem, PendingInvitation } from '../../../core/models/member.model';
+import { MatIconModule } from '@angular/material/icon';
 import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
@@ -24,7 +25,7 @@ const POLL_INTERVAL_MS = 15_000;
 
 @Component({
   selector: 'app-family-members',
-  imports: [AppShellComponent, PageHeaderComponent, RoleBadgeComponent, UserAvatarComponent, ConfirmDialogComponent],
+  imports: [MatIconModule, AppShellComponent, PageHeaderComponent, RoleBadgeComponent, UserAvatarComponent, ConfirmDialogComponent],
   templateUrl: './family-members.component.html',
   styleUrl: './family-members.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
