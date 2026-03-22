@@ -10,6 +10,7 @@ import {
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
+import { PermissionsService } from '../../../core/services/permissions.service';
 import { FamilyService } from '../../../core/services/family.service';
 import { MembersService } from '../../../core/services/members.service';
 import { InvitationService } from '../../../core/services/invitation.service';
@@ -33,6 +34,7 @@ const POLL_INTERVAL_MS = 15_000;
 export class FamilyMembersComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly familyService = inject(FamilyService);
+  readonly permissions = inject(PermissionsService);
   private readonly membersService = inject(MembersService);
   private readonly invitationService = inject(InvitationService);
   private readonly snackBar = inject(MatSnackBar);
@@ -41,7 +43,6 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   // ─── Sesión ───────────────────────────────────────────────────────────────
-  readonly isAdmin = computed(() => this.authService.activeFamily()?.isAdmin === true);
 
   private readonly currentEmail = computed(() => this.authService.session()?.email ?? '');
 
@@ -141,6 +142,10 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
+  canEdit(member: MemberItem): boolean {
+    return this.permissions.canEditMemberRole(member);
+  }
+
   isCurrentUser(member: MemberItem): boolean {
     return member.email === this.currentEmail();
   }

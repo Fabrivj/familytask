@@ -79,7 +79,7 @@
               <div class="card-footer">
                 @if (isCurrentUser(member)) {
                   <span class="you-badge">TÚ</span>
-                } @else if (isAdmin()) {
+                } @else if (canEdit(member)) {
                   <div class="role-dropdown-wrap">
                     <button class="role-select" type="button"
                             [attr.aria-label]="'Cambiar rol: ' + roleDropdownLabel(member.role)"

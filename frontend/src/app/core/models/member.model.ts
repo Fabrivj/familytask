@@ -4,6 +4,7 @@ export interface MemberItem {
   email: string;
   pictureUrl: string;
   role: 'PARENT' | 'CHILD';
+  isAdmin: boolean;
   joinedAt: string;
 }
 

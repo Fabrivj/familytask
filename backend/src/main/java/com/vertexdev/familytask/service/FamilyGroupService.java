@@ -16,12 +16,11 @@ import com.vertexdev.familytask.model.enums.Role;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.InvitationRepository;
+import com.vertexdev.familytask.util.FamilyPermissions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,6 +33,7 @@ public class FamilyGroupService {
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final InvitationRepository invitationRepository;
+    private final FamilyPermissions familyPermissions;
 
     @Transactional
     public FamilyResponse createFamily(CreateFamilyRequest request, User creator) {
@@ -70,7 +70,7 @@ public class FamilyGroupService {
         FamilyMember member = familyMemberRepository.findByFamilyGroupIdAndUserId(familyId, authenticatedUser.getId())
                 .orElseThrow(() -> new FamilyException("FORBIDDEN", "No tienes permisos para modificar este grupo.", 403));
 
-        if (member.getRole() != Role.PARENT) {
+        if (!familyPermissions.isActiveParent(member)) {
             throw new FamilyException("FORBIDDEN", "No tienes permisos para modificar este grupo.", 403);
         }
 
@@ -89,7 +89,7 @@ public class FamilyGroupService {
     public FamilyMembersResponse getMembers(Long familyId, User requester) {
         familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyId, requester.getId())
-                .filter(m -> m.getIsActive() && m.getRole() == Role.PARENT)
+                .filter(familyPermissions::isActiveParent)
                 .orElseThrow(() -> new FamilyException("FORBIDDEN", "No tienes permisos para ver los miembros de esta familia.", 403));
 
 
@@ -102,6 +102,7 @@ public class FamilyGroupService {
                         .email(m.getUser().getEmail())
                         .pictureUrl(m.getUser().getPictureUrl())
                         .role(m.getRole().name())
+                        .isAdmin(m.getIsAdmin())
                         .joinedAt(m.getJoinedAt())
                         .build())
                 .toList();
@@ -126,16 +127,21 @@ public class FamilyGroupService {
 
     @Transactional
     public MessageResponse updateMemberRole(Long familyId, Long userId, UpdateRoleRequest request, User requester) {
-        // Verify requester is an active admin in this family
+        // Verify requester is an active PARENT in this family
         FamilyMember requesterMember = familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyId, requester.getId())
-                .filter(m -> m.getIsActive() && Boolean.TRUE.equals(m.getIsAdmin()))
+                .filter(familyPermissions::isActiveParent)
                 .orElseThrow(() -> new FamilyException("FORBIDDEN", "No tienes permisos para cambiar roles en esta familia.", 403));
 
         // Find target member
         FamilyMember targetMember = familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyId, userId)
                 .orElseThrow(() -> new FamilyException("MEMBER_NOT_FOUND", "Miembro no encontrado.", 404));
+
+        // Non-admin parents cannot modify the admin's role
+        if (!familyPermissions.canEditMemberRole(requesterMember, targetMember)) {
+            throw new FamilyException("FORBIDDEN", "No tienes permisos para cambiar el rol de este miembro.", 403);
+        }
 
         // Verify target is active
         if (!targetMember.getIsActive()) {

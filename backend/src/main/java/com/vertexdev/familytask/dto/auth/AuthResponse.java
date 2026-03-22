@@ -22,6 +22,5 @@ public class AuthResponse {
         private String role;
         private Boolean isAdmin;
         private Integer memberCount;
-        private Integer activeTaskCount;
     }
 }

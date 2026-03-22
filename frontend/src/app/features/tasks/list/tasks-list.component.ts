@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
+import { PermissionsService } from '../../../core/services/permissions.service';
 import { TaskService } from '../../../core/services/task.service';
 import { MembersService } from '../../../core/services/members.service';
 import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
@@ -39,9 +40,10 @@ export class TasksListComponent {
   private readonly taskService = inject(TaskService);
   private readonly membersService = inject(MembersService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly permissionsService = inject(PermissionsService);
 
   readonly familyId = computed(() => this.authService.activeFamily()?.familyId ?? null);
-  readonly isParent = computed(() => this.authService.activeFamily()?.role === 'PARENT');
+  readonly isParent = this.permissionsService.isParent;
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly tasks = signal<TaskResponse[]>([]);

@@ -13,5 +13,6 @@ public class MemberItemResponse {
     private String email;
     private String pictureUrl;
     private String role;
+    private Boolean isAdmin;
     private LocalDateTime joinedAt;
 }
