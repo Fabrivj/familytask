@@ -327,6 +327,7 @@
             type="number"
             [formControl]="xpRewardCtrl"
             min="1"
+            step="1"
             placeholder="Ej. 30"
           />
           @if (xpRewardCtrl.invalid && xpRewardCtrl.touched) {
@@ -342,6 +343,7 @@
             type="number"
             [formControl]="coinsRewardCtrl"
             min="1"
+            step="1"
             placeholder="Ej. 15"
           />
           @if (coinsRewardCtrl.invalid && coinsRewardCtrl.touched) {

@@ -112,10 +112,10 @@ export class TasksListComponent {
   });
   readonly selectedPriority = signal<TaskPriority>('MEDIUM');
   readonly xpRewardCtrl = new FormControl<number | null>(null, {
-    validators: [Validators.required, Validators.min(1)],
+    validators: [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)],
   });
   readonly coinsRewardCtrl = new FormControl<number | null>(null, {
-    validators: [Validators.required, Validators.min(1)],
+    validators: [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)],
   });
   readonly locationCtrl = new FormControl('', {
     nonNullable: true,
@@ -217,12 +217,14 @@ export class TasksListComponent {
 
   getXpError(): string {
     if (this.xpRewardCtrl.hasError('required')) return 'Requerido.';
+    if (this.xpRewardCtrl.hasError('pattern')) return 'Debe ser un número entero.';
     if (this.xpRewardCtrl.hasError('min')) return 'Mínimo 1.';
     return '';
   }
 
   getCoinsError(): string {
     if (this.coinsRewardCtrl.hasError('required')) return 'Requerido.';
+    if (this.coinsRewardCtrl.hasError('pattern')) return 'Debe ser un número entero.';
     if (this.coinsRewardCtrl.hasError('min')) return 'Mínimo 1.';
     return '';
   }
@@ -293,7 +295,7 @@ export class TasksListComponent {
       },
       error: (err) => {
         this.createError.set(
-          err.error?.message ?? 'Ocurrió un error al crear la tarea. Por favor, intente nuevamente.'
+          err.error?.message || 'Ocurrió un error al crear la tarea. Por favor, intente nuevamente.'
         );
         this.isCreating.set(false);
       },
