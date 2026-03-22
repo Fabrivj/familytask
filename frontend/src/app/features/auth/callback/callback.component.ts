@@ -54,12 +54,6 @@ export class CallbackComponent implements OnInit {
   }
 
   private processCallback(code: string): void {
-    const error = this.route.snapshot.queryParamMap.get('error');
-    if (error === 'access_denied') {
-      this.showError('Inicio de sesión cancelado.');
-      return;
-    }
-
     this.currentStep.set('Autenticando con Google...');
 
     this.authService.processGoogleCallback(code).subscribe({
@@ -110,7 +104,8 @@ export class CallbackComponent implements OnInit {
     const newFamily = families.find(f => !oldFamilyIds.has(f.familyId)) ?? families[0];
     if (newFamily) {
       this.authService.setActiveFamily(newFamily.familyId);
-      this.router.navigate(['/family/members']);
+      const dest = newFamily.role === 'PARENT' ? '/family/members' : '/dashboard';
+      this.router.navigate([dest]);
     } else {
       this.router.navigate(['/family/select']);
     }
@@ -122,16 +117,6 @@ export class CallbackComponent implements OnInit {
     if (families.length === 0) {
       this.router.navigate(['/family/new']);
     } else if (families.length === 1) {
-      this.authService.setActiveFamily(families[0].familyId);
-      this.router.navigate(['/dashboard']);
-    } else {
-      this.router.navigate(['/family/select']);
-    }
-  }
-
-  private redirectByFamilyCount(): void {
-    const families = this.authService.families();
-    if (families.length === 1) {
       this.authService.setActiveFamily(families[0].familyId);
       this.router.navigate(['/dashboard']);
     } else {

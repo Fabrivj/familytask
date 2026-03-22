@@ -4,7 +4,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { FamilyService } from '../../core/services/family.service';
 import { PageLayoutComponent } from '../../shared/components/page-layout/page-layout.component';
@@ -34,7 +33,6 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
 export class SettingsComponent {
   private readonly authService = inject(AuthService);
   private readonly familyService = inject(FamilyService);
-  private readonly router = inject(Router);
 
   readonly session = this.authService.session;
 
@@ -70,11 +68,7 @@ export class SettingsComponent {
 
   onLogout(): void {
     this.logoutLoading.set(true);
-    this.authService.logout().subscribe({
-      next: (res) => {
-        this.authService.clearLocalSession();
-        this.router.navigate(['/auth/login'], { state: { message: res.message } });
-      },
+    this.authService.performLogout().subscribe({
       error: () => {
         this.logoutLoading.set(false);
       },

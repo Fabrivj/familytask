@@ -82,6 +82,21 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/logout`, {});
   }
 
+  /** Performs the full logout flow: HTTP call → clear session → navigate to login.
+   *  Components subscribe only to handle the error case locally. */
+  performLogout(): Observable<never> {
+    return new Observable(observer => {
+      this.logout().subscribe({
+        next: (response) => {
+          this.clearLocalSession();
+          this.router.navigate(['/auth/login'], { state: { message: response.message } });
+          observer.complete();
+        },
+        error: (err) => observer.error(err),
+      });
+    });
+  }
+
   clearLocalSession(): void {
     this._session.set(null);
     localStorage.removeItem(SESSION_KEY);
@@ -139,9 +154,24 @@ export class AuthService {
   private loadSavedSession(): UserSession | null {
     try {
       const raw = localStorage.getItem(SESSION_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const session: UserSession = JSON.parse(raw);
+      if (this.isJwtExpired(session.token)) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+      return session;
     } catch {
       return null;
+    }
+  }
+
+  private isJwtExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return typeof payload.exp === 'number' && payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
     }
   }
 }

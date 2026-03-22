@@ -7,7 +7,6 @@ import {
   signal,
 } from '@angular/core';
 import { LowerCasePipe } from '@angular/common';
-import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -39,7 +38,6 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
 export class TasksListComponent {
   private readonly authService = inject(AuthService);
   private readonly taskService = inject(TaskService);
-  private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
   // ─── Session ──────────────────────────────────────────────────────────────
@@ -50,19 +48,9 @@ export class TasksListComponent {
     return name.split(' ')[0];
   });
 
-  readonly familyId = computed(() => this.authService.getActiveFamilyId());
-
-  readonly familyName = computed(() => {
-    const families = this.authService.families();
-    const activeId = this.familyId();
-    return families.find(f => f.familyId === activeId)?.familyName ?? 'Tu familia';
-  });
-
-  readonly isParent = computed(() => {
-    const families = this.authService.families();
-    const activeId = this.familyId();
-    return families.find(f => f.familyId === activeId)?.role === 'PARENT';
-  });
+  readonly familyId = computed(() => this.authService.activeFamily()?.familyId ?? null);
+  readonly familyName = computed(() => this.authService.activeFamily()?.familyName ?? 'Tu familia');
+  readonly isParent = computed(() => this.authService.activeFamily()?.role === 'PARENT');
 
   readonly userRoleLabel = this.authService.activeRoleLabel;
 
@@ -329,11 +317,7 @@ export class TasksListComponent {
 
   // ─── Logout ───────────────────────────────────────────────────────────────
   logout(): void {
-    this.authService.logout().subscribe({
-      next: (response) => {
-        this.authService.clearLocalSession();
-        this.router.navigate(['/auth/login'], { state: { message: response.message } });
-      },
+    this.authService.performLogout().subscribe({
       error: () => {
         this.snackBar.open('No se pudo cerrar sesión. Intenta de nuevo.', 'Cerrar', {
           duration: 4000, panelClass: 'snack-error',

@@ -21,7 +21,8 @@
       "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\features\\\\auth\\\\callback\\\\callback.component.ts\")",
       "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\styles.css\")",
       "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\features\\\\family\\\\select\\\\select-family.component.html\")",
-      "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\features\\\\invitation\\\\create\\\\create-invitation.component.html\")"
+      "Bash(\"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\features\\\\invitation\\\\create\\\\create-invitation.component.html\")",
+      "Bash(del \"D:\\\\Code\\\\REPO\\\\familytask\\\\frontend\\\\src\\\\app\\\\core\\\\interceptors\\\\skip-auth-redirect.token.ts\")"
     ]
   }
 }

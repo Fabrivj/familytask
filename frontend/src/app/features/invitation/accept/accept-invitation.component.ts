@@ -110,14 +110,23 @@ export class AcceptInvitationComponent implements OnInit {
             next: () => {
               const families = this.authService.families();
               const newFamily = families.find(f => !oldFamilyIds.has(f.familyId)) ?? families[0];
-              if (newFamily) this.authService.setActiveFamily(newFamily.familyId);
-              this.router.navigate(['/family/members']);
+              if (newFamily) {
+                this.authService.setActiveFamily(newFamily.familyId);
+                const dest = newFamily.role === 'PARENT' ? '/family/members' : '/dashboard';
+                this.router.navigate([dest]);
+              } else {
+                this.router.navigate(['/family/select']);
+              }
             },
-            error: () => this.router.navigate(['/family/members']),
+            error: () => this.router.navigate(['/family/select']),
           });
         },
         error: (err) => {
-          this.invitationService.clearToken();
+          // On 401 the errorInterceptor already redirects to login —
+          // keep the token so the re-authentication flow can pick it up.
+          if (err.status !== 401) {
+            this.invitationService.clearToken();
+          }
           const message = err.error?.message ?? 'No se pudo procesar la invitación. Intenta de nuevo.';
           this.showError(message);
         },

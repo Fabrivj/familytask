@@ -28,13 +28,15 @@
       </li>
     }
 
-    <li>
-      <button class="nav-item" type="button" (click)="navigate(null)"
-        [class.active]="isActive('/reports')" aria-label="Reportes" aria-disabled="true">
-        <mat-icon aria-hidden="true">bar_chart</mat-icon>
-        <span class="label">REPORTES</span>
-      </button>
-    </li>
+    @if (isParent()) {
+      <li>
+        <button class="nav-item" type="button" (click)="navigate(null)"
+          [class.active]="isActive('/reports')" aria-label="Reportes" aria-disabled="true">
+          <mat-icon aria-hidden="true">bar_chart</mat-icon>
+          <span class="label">REPORTES</span>
+        </button>
+      </li>
+    }
 
     <li>
       <button class="nav-item" type="button" (click)="navigate(null)"

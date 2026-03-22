@@ -1,8 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import {HttpClient, HttpContext} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { SKIP_AUTH_REDIRECT_ON_403 } from '../interceptors/skip-auth-redirect.token';
 
 
 export interface CreateFamilyRequest {
@@ -64,8 +63,7 @@ export class FamilyService {
   updateMemberRole(familyId: number, userId: number, role: 'PARENT' | 'CHILD'): Observable<{ message: string }> {
     return this.http.patch<{ message: string }>(
       `${environment.apiUrl}/families/${familyId}/members/${userId}/role`,
-      { role },
-      { context: new HttpContext().set(SKIP_AUTH_REDIRECT_ON_403, true) }
+      { role }
     );
   }
 }

@@ -169,11 +169,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
 
   onLogout(): void {
     this.logoutLoading.set(true);
-    this.authService.logout().subscribe({
-      next: (res) => {
-        this.authService.clearLocalSession();
-        this.router.navigate(['/auth/login'], { state: { message: res.message } });
-      },
+    this.authService.performLogout().subscribe({
       error: () => {
         this.logoutLoading.set(false);
       },

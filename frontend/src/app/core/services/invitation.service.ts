@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpContext } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -8,7 +8,6 @@ import {
   InviteResponse,
   ProcessInviteRequest,
 } from '../models/invitation.model';
-import { SKIP_AUTH_REDIRECT_ON_403 } from '../interceptors/skip-auth-redirect.token';
 
 @Injectable({ providedIn: 'root' })
 export class InvitationService {
@@ -41,8 +40,7 @@ export class InvitationService {
   process(request: ProcessInviteRequest): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
       `${environment.apiUrl}/invitations/process`,
-      request,
-      { context: new HttpContext().set(SKIP_AUTH_REDIRECT_ON_403, true) }
+      request
     );
   }
 

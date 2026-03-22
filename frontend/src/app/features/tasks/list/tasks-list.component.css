@@ -246,11 +246,12 @@
 .table-wrap {
   border: 1.5px solid rgba(var(--border-rgb), 0.12);
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .tasks-table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
 }
 

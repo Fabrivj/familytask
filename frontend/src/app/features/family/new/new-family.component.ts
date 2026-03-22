@@ -81,11 +81,10 @@ export class NewFamilyComponent {
           familyId: family.id,
           familyName: family.name,
           role: 'PARENT',
+          isAdmin: true,
         });
         this.authService.setActiveFamily(family.id);
-        this.router.navigate(['/family/members'], {
-          state: { message: 'Familia creada exitosamente.' },
-        });
+        this.router.navigate(['/invitation/create']);
       },
       error: (err) => {
         this.apiError.set(err.error?.message ?? 'No se pudo crear la familia. Intenta de nuevo.');
