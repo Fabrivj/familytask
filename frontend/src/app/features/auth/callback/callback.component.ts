@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { timeout, TimeoutError } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
@@ -56,12 +57,14 @@ export class CallbackComponent implements OnInit {
   private processCallback(code: string): void {
     this.currentStep.set('Autenticando con Google...');
 
-    this.authService.processGoogleCallback(code).subscribe({
+    this.authService.processGoogleCallback(code).pipe(timeout(15000)).subscribe({
       next: (authResponse) => this.postAuthentication(authResponse),
       error: (err) => {
         let message: string;
-        if (err.status === 0) {
-          message = 'No se pudo conectar con Google. Intenta de nuevo.';
+        if (err instanceof TimeoutError) {
+          message = 'La conexión tardó demasiado. Verifica tu conexión e intenta de nuevo.';
+        } else if (err.status === 0) {
+          message = 'No se pudo conectar con el servidor. Intenta de nuevo.';
         } else if (err.error?.code === 'EMAIL_NOT_FOUND') {
           message = 'No se pudo obtener tu correo. Reintenta el inicio de sesión.';
         } else {
