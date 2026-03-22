@@ -6,11 +6,11 @@
 
     <ng-container card-header>
       <div class="step-row" aria-hidden="true">
-        <div class="pip on"></div>
-        <div class="pip"></div>
+        <div [class]="showForm() ? 'pip done' : 'pip on'"></div>
+        <div [class]="showForm() ? 'pip on' : 'pip'"></div>
         <div class="pip"></div>
       </div>
-      <p class="tag">// PRIMER ACCESO</p>
+      <p class="tag">{{ showForm() ? '// PASO 2 DE 3' : '// PASO 1 DE 3' }}</p>
       <h1 class="card-title" role="heading" aria-level="1">¡Bienvenido, {{ shortName() }}!</h1>
       <p class="card-sub">Aún no perteneces a ningún grupo familiar.</p>
     </ng-container>
