@@ -9,6 +9,7 @@ import {
 import { LowerCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
@@ -24,6 +25,7 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
   imports: [
     LowerCasePipe,
     ReactiveFormsModule,
+    MatIconModule,
     MatProgressSpinnerModule,
     PageLayoutComponent,
     SidebarComponent,
@@ -62,6 +64,8 @@ export class TasksListComponent {
     return families.find(f => f.familyId === activeId)?.role === 'PARENT';
   });
 
+  readonly userRoleLabel = this.authService.activeRoleLabel;
+
   // ─── Data ─────────────────────────────────────────────────────────────────
   readonly tasks = signal<TaskResponse[]>([]);
   readonly members = signal<MemberItemResponse[]>([]);
@@ -72,6 +76,7 @@ export class TasksListComponent {
   readonly filterPriority = signal<string | null>(null);
   readonly filterZone = signal<string | null>(null);
   readonly filterMemberId = signal<number | null>(null);
+  readonly searchQuery = signal('');
 
   readonly zones = computed(() => {
     const locations = this.tasks().map(t => t.location).filter(Boolean);
@@ -83,10 +88,12 @@ export class TasksListComponent {
   );
 
   readonly filteredTasks = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
     return this.tasks().filter(t =>
       (!this.filterPriority() || t.priority === this.filterPriority()) &&
       (!this.filterZone() || t.location === this.filterZone()) &&
-      (!this.filterMemberId() || t.assignedToId === this.filterMemberId())
+      (!this.filterMemberId() || t.assignedToId === this.filterMemberId()) &&
+      (!q || t.title.toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q))
     );
   });
 

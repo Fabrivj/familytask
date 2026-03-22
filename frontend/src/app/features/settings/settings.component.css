@@ -41,8 +41,10 @@
 }
 
 .header-icon {
-  width: 14px;
-  height: 14px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
   flex-shrink: 0;
   color: var(--border);
 }
@@ -69,7 +71,10 @@
   letter-spacing: 0.18em;
   color: var(--text-sub);
   text-transform: uppercase;
-  margin-bottom: -6px;
+}
+
+.field-full {
+  width: 100%;
 }
 
 /* ── Success Box ── */

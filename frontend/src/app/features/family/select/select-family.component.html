@@ -3,6 +3,7 @@
   <app-top-bar
     [userName]="shortName()"
     [userEmail]="userEmail()"
+    [userPictureUrl]="pictureUrl()"
     [showLogout]="true"
     [logoutLoading]="logoutLoading()"
     (logout)="logout()"
@@ -38,7 +39,7 @@
         >
           <div class="card-top">
             <div class="family-avatar" [class.avatar-active]="isSelected(familia.familyId)" aria-hidden="true">
-              🏠
+              <mat-icon>home</mat-icon>
             </div>
             <h2 class="family-name" [class.name-active]="isSelected(familia.familyId)">{{ familia.familyName }}</h2>
             <app-role-badge [role]="familia.role" />

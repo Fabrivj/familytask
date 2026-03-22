@@ -21,10 +21,7 @@
 .content {
   flex: 1;
   overflow-y: auto;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 40px 28px 48px;
+  padding: 40px 36px 48px;
   position: relative;
   z-index: 1;
 }
@@ -170,6 +167,49 @@
 
 .filter-chip-member { gap: 5px; }
 
+/* ── Search ───────────────────────────────────────────────────────────── */
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  background: rgba(var(--border-rgb), 0.05);
+  border: 1.5px solid rgba(var(--border-rgb), 0.15);
+  border-radius: 20px;
+  padding: 6px 14px;
+  transition: border-color 0.2s;
+}
+
+.search-wrap:focus-within {
+  border-color: rgba(var(--border-rgb), 0.35);
+}
+
+.search-icon {
+  color: var(--text-sub);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  width: 160px;
+}
+
+.search-input::placeholder {
+  color: var(--text-sub);
+  opacity: 0.5;
+}
+
+.search-input::-webkit-search-cancel-button {
+  opacity: 0.4;
+  cursor: pointer;
+}
+
 /* ── Priority dots ────────────────────────────────────────────────────── */
 .priority-dot {
   display: inline-block;
@@ -229,24 +269,23 @@
 }
 
 .tasks-table td {
-  padding: 16px 16px;
+  padding: 16px;
   font-family: 'Rajdhani', sans-serif;
   font-size: 14px;
   color: var(--text);
   border-bottom: 1px solid rgba(var(--border-rgb), 0.07);
   vertical-align: middle;
+  height: 64px;
 }
 
 .tasks-table tbody tr:last-child td { border-bottom: none; }
 
 .col-task {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   min-width: 200px;
 }
-
-.col-task .priority-dot { margin-top: 6px; }
 
 .task-info {
   display: flex;
@@ -300,27 +339,42 @@
   color: var(--text-sub);
 }
 
-.col-reward { white-space: nowrap; }
+.col-reward {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .reward-xp {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: 2px 8px;
   border-radius: 4px;
   background: rgba(var(--border-rgb), 0.1);
   font-family: 'Share Tech Mono', monospace;
   font-size: 11px;
   color: var(--border);
-  margin-right: 4px;
 }
 
 .reward-coins {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   padding: 2px 8px;
   border-radius: 4px;
   background: rgba(var(--success-rgb), 0.08);
   font-family: 'Share Tech Mono', monospace;
   font-size: 11px;
   color: var(--success);
+}
+
+.coin-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .col-date {
@@ -331,8 +385,9 @@
 }
 
 .status-badge {
-  display: inline-block;
-  padding: 3px 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
   border-radius: 20px;
   font-family: 'Share Tech Mono', monospace;
   font-size: 10px;
@@ -347,6 +402,7 @@
 
 .col-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
@@ -441,6 +497,13 @@
     text-align: center;
     padding: 12px;
   }
+
+  .search-wrap {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .search-input { width: 100%; }
 
   .tabs { margin-bottom: 16px; }
 

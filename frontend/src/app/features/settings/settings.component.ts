@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
@@ -18,6 +19,7 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
   imports: [
     ReactiveFormsModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
     PageLayoutComponent,
@@ -39,11 +41,7 @@ export class SettingsComponent {
   readonly shortName = computed(() => this.authService.session()?.name?.split(' ')[0] ?? '');
   readonly currentUserPictureUrl = computed(() => this.authService.session()?.pictureUrl ?? '');
   readonly familyName = computed(() => this.authService.activeFamily()?.familyName ?? '');
-  readonly userRole = computed(() => {
-    const family = this.authService.activeFamily();
-    if (family?.role === 'PARENT') return family.isAdmin ? 'Padre · Admin' : 'Padre · Tutor';
-    return 'Hijo/a';
-  });
+  readonly userRole = this.authService.activeRoleLabel;
 
   readonly nameCtrl = new FormControl('', {
     nonNullable: true,

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { UserChipComponent } from '../user-chip/user-chip.component';
 
 /**
@@ -29,25 +30,28 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
 @Component({
   selector: 'app-top-bar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UserChipComponent],
+  imports: [MatIconModule, UserChipComponent],
   template: `
+    <!-- Left: logo -->
     <span class="logo" aria-label="FamilyTask">FamilyTask</span>
 
-    @if (familyName()) {
-      <div class="family-chip" aria-label="Familia activa">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M2 7.5L8 2l6 5.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V7.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-        </svg>
-        {{ familyName() }}
-      </div>
-    }
+    <!-- Center: family chip (truly centered via grid) -->
+    <div class="center">
+      @if (familyName()) {
+        <div class="family-chip" aria-label="Familia activa">
+          <mat-icon aria-hidden="true">groups</mat-icon>
+          {{ familyName() }}
+        </div>
+      }
+    </div>
 
+    <!-- Right: user + logout -->
     <div class="right">
       <app-user-chip
         [name]="userName()"
         [email]="userRole() || userEmail()"
         [pictureUrl]="userPictureUrl()"
-        [avatarSize]="36"
+        [avatarSize]="34"
       />
       @if (showLogout()) {
         <button
@@ -56,21 +60,28 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
           (click)="logout.emit()"
           [disabled]="logoutLoading()"
           aria-label="Cerrar sesión"
+          title="Cerrar sesión"
         >
-          {{ logoutLoading() ? 'Saliendo...' : 'Cerrar sesión' }}
+          @if (logoutLoading()) {
+            <mat-icon aria-hidden="true">hourglass_empty</mat-icon>
+          } @else {
+            <mat-icon aria-hidden="true">power_settings_new</mat-icon>
+          }
         </button>
       }
     </div>
   `,
   styles: [`
     :host {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      justify-content: space-between;
-      padding: 16px 28px;
+      height: 56px;
+      padding: 0 28px;
       border-bottom: 1px solid rgba(var(--border-rgb), 0.09);
       position: relative;
       z-index: 1;
+      box-sizing: border-box;
     }
 
     .logo {
@@ -80,31 +91,42 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
       text-shadow: -1px 0 0 var(--primary), 1px 0 0 var(--border);
     }
 
+    .center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     .right {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       gap: 12px;
     }
 
     .btn-logout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
       background: none;
-      border: 1px solid rgba(var(--primary-rgb), 0.27);
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      border: none;
       color: var(--primary);
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      white-space: nowrap;
+      transition: color 0.2s, opacity 0.2s;
+      flex-shrink: 0;
+    }
+
+    .btn-logout mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
     }
 
     .btn-logout:hover:not(:disabled) {
-      border-color: var(--primary);
-      background: rgba(var(--primary-rgb), 0.05);
+      opacity: 0.75;
     }
 
     .btn-logout:disabled {
@@ -120,29 +142,33 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
     .family-chip {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       background: rgba(var(--border-rgb), 0.06);
       border: 1.5px solid rgba(var(--border-rgb), 0.28);
       border-radius: 20px;
-      padding: 5px 14px 5px 10px;
+      padding: 0 14px 0 10px;
+      height: 34px;
       font-family: 'Rajdhani', sans-serif;
       font-size: 13px;
       font-weight: 600;
       color: var(--text);
       letter-spacing: 0.04em;
       white-space: nowrap;
+      box-sizing: border-box;
     }
 
-    .family-chip svg {
-      width: 14px;
-      height: 14px;
+    .family-chip mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
       color: var(--border);
       flex-shrink: 0;
     }
 
     @media (max-width: 600px) {
-      :host { padding: 12px 16px; }
-      .family-chip { display: none; }
+      :host { padding: 0 16px; }
+      .center { display: none; }
     }
   `],
 })
