@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
@@ -15,7 +16,7 @@ import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-b
 
 @Component({
   selector: 'app-select-family',
-  imports: [PageLayoutComponent, TopBarComponent, PageHeaderComponent, RoleBadgeComponent],
+  imports: [MatIconModule, PageLayoutComponent, TopBarComponent, PageHeaderComponent, RoleBadgeComponent],
   templateUrl: './select-family.component.html',
   styleUrl: './select-family.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +37,10 @@ export class SelectFamilyComponent implements OnInit {
 
   readonly userEmail = computed(() => {
     return this.authService.session()?.email ?? '';
+  });
+
+  readonly pictureUrl = computed(() => {
+    return this.authService.session()?.pictureUrl ?? '';
   });
 
   readonly selectedFamilyId = signal<number | null>(null);

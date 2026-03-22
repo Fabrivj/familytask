@@ -45,13 +45,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
 
   readonly familyName = computed(() => this.authService.activeFamily()?.familyName ?? '');
 
-  readonly userRole = computed(() => {
-    const family = this.authService.activeFamily();
-    if (family?.role === 'PARENT') {
-      return family.isAdmin ? 'Padre · Admin' : 'Padre · Tutor';
-    }
-    return 'Hijo/a';
-  });
+  readonly userRole = this.authService.activeRoleLabel;
 
   readonly isAdmin = computed(() => this.authService.activeFamily()?.isAdmin === true);
 
