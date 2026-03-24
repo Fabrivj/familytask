@@ -126,6 +126,34 @@ public class FamilyGroupService {
     }
 
     @Transactional
+    public MessageResponse removeMember(Long familyId, Long userId, User requester) {
+        FamilyMember requesterMember = familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyId, requester.getId())
+                .orElseThrow(() -> new FamilyException("FORBIDDEN", "No tienes permisos para remover miembros de esta familia.", 403));
+
+        FamilyMember targetMember = familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyId, userId)
+                .orElseThrow(() -> new FamilyException("MEMBER_NOT_FOUND", "Miembro no encontrado.", 404));
+
+        if (!familyPermissions.canRemoveMember(requesterMember, targetMember)) {
+            if (Boolean.TRUE.equals(targetMember.getIsAdmin())) {
+                throw new FamilyException("CANNOT_REMOVE_ADMIN", "No puedes remover al único Padre/Tutor de la familia.", 409);
+            }
+            throw new FamilyException("FORBIDDEN", "No tienes permisos para remover miembros de esta familia.", 403);
+        }
+
+        if (!targetMember.getIsActive()) {
+            throw new FamilyException("INACTIVE_MEMBER", "El miembro ya fue removido de la familia.", 400);
+        }
+
+        targetMember.setIsActive(false);
+        familyMemberRepository.save(targetMember);
+        log.info("Member {} removed from family {} by {}", userId, familyId, requester.getEmail());
+
+        return new MessageResponse("Miembro removido exitosamente.");
+    }
+
+    @Transactional
     public MessageResponse updateMemberRole(Long familyId, Long userId, UpdateRoleRequest request, User requester) {
         // Verify requester is an active PARENT in this family
         FamilyMember requesterMember = familyMemberRepository

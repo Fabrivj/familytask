@@ -49,6 +49,16 @@ public class FamilyController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{familyId}/members/{userId}")
+    public ResponseEntity<MessageResponse> removeMember(
+            @PathVariable Long familyId,
+            @PathVariable Long userId,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        MessageResponse response = familyGroupService.removeMember(familyId, userId, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
     @PatchMapping("/{familyId}/members/{userId}/role")
     public ResponseEntity<MessageResponse> updateMemberRole(
             @PathVariable Long familyId,
