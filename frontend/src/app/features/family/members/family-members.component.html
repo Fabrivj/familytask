@@ -103,7 +103,9 @@
                     </div>
                   }
                   @if (canRemove(member)) {
-                    <button class="btn-delete" type="button" aria-label="Eliminar miembro">
+                    <button class="btn-delete" type="button" aria-label="Eliminar miembro"
+                            [disabled]="isRemoving()"
+                            (click)="confirmRemove(member)">
                       <mat-icon aria-hidden="true">delete</mat-icon>
                     </button>
                   }
@@ -171,4 +173,16 @@
   cancelLabel="Cancelar"
   (confirmed)="onConfirmRoleChange()"
   (cancelled)="onCancelRoleChange()"
+/>
+
+<app-confirm-dialog
+  [open]="removeDialogOpen()"
+  title="¿Remover miembro?"
+  [message]="removeMessage()"
+  subMessage="Sus tareas pendientes quedarán sin asignar y perderá acceso al grupo."
+  variant="danger"
+  confirmLabel="Sí, remover"
+  cancelLabel="Cancelar"
+  (confirmed)="onConfirmRemove()"
+  (cancelled)="onCancelRemove()"
 />
