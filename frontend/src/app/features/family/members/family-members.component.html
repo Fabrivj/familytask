@@ -79,30 +79,34 @@
               <div class="card-footer">
                 @if (isCurrentUser(member)) {
                   <span class="you-badge">TÚ</span>
-                } @else if (canEdit(member)) {
-                  <div class="role-dropdown-wrap">
-                    <button class="role-select" type="button"
-                            [attr.aria-label]="'Cambiar rol: ' + roleDropdownLabel(member.role)"
-                            [attr.aria-expanded]="openDropdownId() === member.id"
-                            (click)="toggleDropdown(member.id)"
-                            [disabled]="changingRoleId() === member.id">
-                      {{ roleDropdownLabel(member.role) }}
-                      <mat-icon class="role-chevron" aria-hidden="true">expand_more</mat-icon>
+                } @else {
+                  @if (canEdit(member)) {
+                    <div class="role-dropdown-wrap">
+                      <button class="role-select" type="button"
+                              [attr.aria-label]="'Cambiar rol: ' + roleDropdownLabel(member.role)"
+                              [attr.aria-expanded]="openDropdownId() === member.id"
+                              (click)="toggleDropdown(member.id)"
+                              [disabled]="changingRoleId() === member.id">
+                        {{ roleDropdownLabel(member.role) }}
+                        <mat-icon class="role-chevron" aria-hidden="true">expand_more</mat-icon>
+                      </button>
+                      @if (openDropdownId() === member.id) {
+                        <ul class="role-menu" role="listbox" [attr.aria-label]="'Rol de ' + member.name">
+                          <li role="option" [attr.aria-selected]="member.role === 'PARENT'"
+                              [class.active]="member.role === 'PARENT'"
+                              (click)="selectRole(member, 'PARENT')">Tutor</li>
+                          <li role="option" [attr.aria-selected]="member.role === 'CHILD'"
+                              [class.active]="member.role === 'CHILD'"
+                              (click)="selectRole(member, 'CHILD')">Hijo/a</li>
+                        </ul>
+                      }
+                    </div>
+                  }
+                  @if (canRemove(member)) {
+                    <button class="btn-delete" type="button" aria-label="Eliminar miembro">
+                      <mat-icon aria-hidden="true">delete</mat-icon>
                     </button>
-                    @if (openDropdownId() === member.id) {
-                      <ul class="role-menu" role="listbox" [attr.aria-label]="'Rol de ' + member.name">
-                        <li role="option" [attr.aria-selected]="member.role === 'PARENT'"
-                            [class.active]="member.role === 'PARENT'"
-                            (click)="selectRole(member, 'PARENT')">Tutor</li>
-                        <li role="option" [attr.aria-selected]="member.role === 'CHILD'"
-                            [class.active]="member.role === 'CHILD'"
-                            (click)="selectRole(member, 'CHILD')">Hijo/a</li>
-                      </ul>
-                    }
-                  </div>
-                  <button class="btn-delete" type="button" aria-label="Eliminar miembro">
-                    <mat-icon aria-hidden="true">delete</mat-icon>
-                  </button>
+                  }
                 }
               </div>
 

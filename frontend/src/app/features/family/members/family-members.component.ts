@@ -146,6 +146,10 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     return this.permissions.canEditMemberRole(member);
   }
 
+  canRemove(member: MemberItem): boolean {
+    return this.permissions.canRemoveMember(member);
+  }
+
   isCurrentUser(member: MemberItem): boolean {
     return member.email === this.currentEmail();
   }
