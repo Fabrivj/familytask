@@ -1,6 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  HostListener,
   computed,
   effect,
   inject,
@@ -41,6 +43,19 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TasksListComponent {
+  private readonly el = inject(ElementRef);
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (this.spaceDropdownOpen() && !this.el.nativeElement.querySelector('.space-dropdown-wrap')?.contains(target)) {
+      this.spaceDropdownOpen.set(false);
+    }
+    if (this.spaceSelectOpen() && !this.el.nativeElement.querySelector('.panel-space-dropdown-wrap')?.contains(target)) {
+      this.spaceSelectOpen.set(false);
+    }
+  }
+
   private readonly authService = inject(AuthService);
   private readonly taskService = inject(TaskService);
   private readonly membersService = inject(MembersService);

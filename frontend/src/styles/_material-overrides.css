@@ -109,7 +109,7 @@
   background: rgba(var(--border-rgb), 0.08) !important;
 }
 
-/* ── Datepicker: calendar panel ── */
+/* ── Datepicker ── */
 .mat-datepicker-content {
   background: var(--panel) !important;
   border: 1.5px solid rgba(var(--border-rgb), 0.25) !important;
@@ -117,68 +117,31 @@
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Header (month/year title + arrows) */
-.mat-calendar-header {
-  background: transparent !important;
-  padding: 8px 8px 0 !important;
-}
+.mat-calendar-header { background: transparent !important; padding: 8px 8px 0 !important; }
 
-.mat-calendar-controls .mat-mdc-icon-button {
-  color: var(--border) !important;
-}
+.mat-calendar-period-button { color: var(--border) !important; font-family: 'Rajdhani', sans-serif !important; font-weight: 700 !important; font-size: 15px !important; }
 
-.mat-calendar-controls .mat-mdc-icon-button:hover {
-  background: rgba(var(--border-rgb), 0.08) !important;
-}
+.mat-calendar-arrow, .mat-calendar-arrow.mat-calendar-invert { border-top-color: var(--border) !important; fill: var(--border) !important; }
 
-.mat-calendar-period-button {
-  color: var(--text) !important;
-  font-family: 'Rajdhani', sans-serif !important;
-  font-weight: 700 !important;
-  font-size: 15px !important;
-}
+.mat-calendar-controls .mat-mdc-icon-button,
+.mat-calendar-controls .mat-mdc-icon-button.mat-mdc-button-disabled { color: var(--border) !important; }
+.mat-calendar-controls .mat-mdc-icon-button:hover { background: rgba(var(--border-rgb), 0.08) !important; }
 
-/* Day labels (M T W ...) */
-.mat-calendar-table-header th,
-.mat-calendar-body-label {
-  color: var(--text-sub) !important;
-  font-family: 'Share Tech Mono', monospace !important;
-  font-size: 11px !important;
-  opacity: 0.6;
-}
+.mat-calendar-table-header th { color: var(--text-sub) !important; font-family: 'Share Tech Mono', monospace !important; font-size: 11px !important; opacity: 0.6; text-transform: uppercase !important; }
 
-/* Day cells */
-.mat-calendar-body-cell-content {
-  color: var(--text) !important;
-  font-family: 'Rajdhani', sans-serif !important;
-  font-size: 13px !important;
-}
+td.mat-calendar-body-label { font-size: 0 !important; padding: 0 !important; }
 
-/* Disabled days (before minDate) */
-.mat-calendar-body-disabled .mat-calendar-body-cell-content {
-  color: var(--text-sub) !important;
-  opacity: 0.25 !important;
-}
+div.mat-mdc-tooltip-surface.mdc-tooltip__surface { color: var(--border) !important; font-family: 'Share Tech Mono', monospace !important; font-size: 11px !important; }
 
-/* Today highlight */
-.mat-calendar-body-today:not(.mat-calendar-body-selected) {
-  border-color: var(--border) !important;
-  color: var(--border) !important;
-}
+.mat-calendar-body-cell-content { color: var(--text) !important; font-family: 'Rajdhani', sans-serif !important; font-size: 13px !important; }
 
-/* Selected day */
-.mat-calendar-body-selected {
-  background: var(--primary) !important;
-  color: #fff !important;
-  border-radius: 50% !important;
-}
+.mat-calendar-body-disabled .mat-calendar-body-cell-content { color: var(--text-sub) !important; opacity: 0.25 !important; }
 
-/* Hover */
-.mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover
-  .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
-  background: rgba(var(--primary-rgb), 0.15) !important;
-  color: var(--primary) !important;
-}
+.mat-calendar-body-today:not(.mat-calendar-body-selected) { border-color: var(--border) !important; color: var(--border) !important; }
+
+.mat-calendar-body-selected { background: var(--primary) !important; color: #fff !important; border-radius: 50% !important; }
+
+.mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) { background: rgba(var(--primary-rgb), 0.15) !important; color: var(--primary) !important; }
 
 /* ── Progress Spinner ── */
 .mdc-circular-progress__indeterminate-circle-graphic {
