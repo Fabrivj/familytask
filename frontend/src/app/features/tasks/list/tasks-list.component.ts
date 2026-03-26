@@ -18,7 +18,6 @@ import { MembersService } from '../../../core/services/members.service';
 import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
 import { TaskPriority, TaskResponse } from '../../../core/models/task.model';
 import { MemberItem } from '../../../core/models/member.model';
-import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 
 @Component({
@@ -28,7 +27,6 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
     ReactiveFormsModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    AppShellComponent,
     UserAvatarComponent,
   ],
   templateUrl: './tasks-list.component.html',
