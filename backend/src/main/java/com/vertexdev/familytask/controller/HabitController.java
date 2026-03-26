@@ -11,12 +11,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/habits")
 @RequiredArgsConstructor
 public class HabitController {
 
     private final HabitService habitService;
+
+    @GetMapping
+    public ResponseEntity<List<HabitResponse>> getHabits(
+            @RequestParam Long familyId,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        List<HabitResponse> habits = habitService.getHabits(familyId, authenticatedUser);
+        return ResponseEntity.ok(habits);
+    }
 
     @PostMapping
     public ResponseEntity<HabitResponse> createHabit(
