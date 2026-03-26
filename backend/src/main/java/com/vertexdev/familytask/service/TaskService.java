@@ -5,6 +5,7 @@ import com.vertexdev.familytask.dto.task.TaskResponse;
 import com.vertexdev.familytask.exception.TaskException;
 import com.vertexdev.familytask.mapper.TaskMapper;
 import com.vertexdev.familytask.model.FamilyGroup;
+import com.vertexdev.familytask.model.Space;
 import com.vertexdev.familytask.model.Task;
 import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.User;
@@ -14,6 +15,7 @@ import com.vertexdev.familytask.model.enums.TaskStatus;
 import com.vertexdev.familytask.util.FamilyPermissions;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
+import com.vertexdev.familytask.repository.SpaceRepository;
 import com.vertexdev.familytask.repository.TaskRepository;
 import com.vertexdev.familytask.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
+    private final SpaceRepository spaceRepository;
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
     private final FamilyPermissions familyPermissions;
@@ -45,6 +48,9 @@ public class TaskService {
                 .findByFamilyGroupIdAndUserId(familyGroup.getId(), creator.getId())
                 .filter(familyPermissions::isActiveParent)
                 .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        Space homeSpace = spaceRepository.findById(request.getHomeSpaceId())
+                .orElseThrow(() -> new TaskException("SPACE_NOT_FOUND", "El espacio no existe.", 404));
 
         if (request.getDueDate() != null && request.getDueDate().isBefore(LocalDate.now())) {
             throw new TaskException("INVALID_DUE_DATE",
@@ -77,9 +83,9 @@ public class TaskService {
                     .familyGroup(familyGroup)
                     .createdBy(creator)
                     .assignedTo(assignedTo)
+                    .homeSpace(homeSpace)
                     .title(request.getTitle().trim())
                     .description(request.getDescription().trim())
-                    .location(request.getLocation().trim())
                     .priority(priority)
                     .status(TaskStatus.PENDING)
                     .xpReward(request.getXpReward())
@@ -88,7 +94,8 @@ public class TaskService {
                     .build();
 
             taskRepository.save(task);
-            log.info("Task '{}' created by user {} in family {}", task.getTitle(), creator.getEmail(), familyGroup.getName());
+            log.info("Task '{}' created by user {} in family {} at space '{}'",
+                    task.getTitle(), creator.getEmail(), familyGroup.getName(), homeSpace.getName());
 
             return taskMapper.toResponse(task);
         } catch (TaskException e) {
@@ -115,7 +122,7 @@ public class TaskService {
             if (member.getRole() == Role.CHILD) {
                 tasks = taskRepository.findVisibleTasksForChild(familyGroup.getId(), requester.getId());
             } else {
-                tasks = taskRepository.findByFamilyGroupIdAndIsDeletedFalse(familyGroup.getId());
+                tasks = taskRepository.findActiveByFamilyGroupId(familyGroup.getId());
             }
             return tasks.stream()
                     .map(taskMapper::toResponse)

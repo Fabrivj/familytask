@@ -11,6 +11,12 @@ import java.time.LocalDate;
 @Data
 public class CreateTaskRequest {
 
+    @NotNull(message = "El identificador de familia es obligatorio.")
+    private Long familyId;
+
+    @NotNull(message = "El espacio del hogar es obligatorio.")
+    private Long homeSpaceId;
+
     @NotBlank(message = "El campo Título es obligatorio.")
     @Size(max = 100, message = "El título no puede superar los 100 caracteres.")
     private String title;
@@ -29,11 +35,6 @@ public class CreateTaskRequest {
     @NotNull(message = "Las monedas deben ser un número entero mayor a cero.")
     @Min(value = 1, message = "Las monedas deben ser un número entero mayor a cero.")
     private Integer coinsReward;
-
-    @NotBlank(message = "El campo Ubicación es obligatorio.")
-    private String location;
-
-    private Long familyId;
 
     private LocalDate dueDate;
 

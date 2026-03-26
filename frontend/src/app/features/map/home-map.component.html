@@ -1,0 +1,168 @@
+<app-shell>
+  <main class="content">
+
+    <!-- Header -->
+    <div class="header-row">
+      <app-page-header
+        tag="// ORGANIZACIÓN DEL HOGAR"
+        title="Mapa del Hogar"
+        [subtitle]="spacesSubtitle()"
+      />
+      @if (isParent()) {
+        <button class="btn-cta btn-new-space" type="button" (click)="openCreatePanel()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          CREAR ESPACIO
+        </button>
+      }
+    </div>
+
+    <!-- ── States ─────────────────────────────────────────────────────── -->
+    @if (isLoading()) {
+      <div class="state-center" role="status" aria-label="Cargando">
+        <mat-spinner diameter="36" />
+      </div>
+    } @else if (error()) {
+      <p class="error-msg" role="alert">{{ error() }}</p>
+    } @else if (spaces().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon" aria-hidden="true">home</mat-icon>
+        <p class="empty-title">Sin espacios registrados</p>
+        <p class="empty-sub">
+          @if (isParent()) {
+            Crea el primer espacio del hogar con el botón superior.
+          } @else {
+            Aún no hay espacios definidos en el hogar.
+          }
+        </p>
+      </div>
+    } @else {
+
+      <!-- ── Space Grid ─────────────────────────────────────────────── -->
+      <div class="spaces-grid">
+        @for (space of spaces(); track space.id) {
+          <article class="space-card">
+            <div class="card-header">
+              <div class="card-meta">
+                <mat-icon class="space-icon" aria-hidden="true">{{ spaceTypeIcon(space.type) }}</mat-icon>
+                <div class="card-labels">
+                  <span class="space-type">{{ spaceTypeLabel(space.type) }}</span>
+                  <span class="space-name">{{ space.name }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-tasks">
+              @if (tasksForSpace(space.id).length === 0) {
+                <p class="placeholder-text">Sin tareas asignadas</p>
+              } @else {
+                @for (task of tasksForSpace(space.id); track task.id) {
+                  <div [class]="'task-pill priority-' + task.priority.toLowerCase()">
+                    <span class="task-pill-title">{{ task.title }}</span>
+                    <span [class]="'task-pill-status status-' + task.status.toLowerCase()">
+                      {{ statusLabel(task.status) }}
+                    </span>
+                  </div>
+                }
+              }
+            </div>
+            <div class="card-footer">
+              @if (isParent()) {
+                <button class="btn-icon" type="button" aria-label="Editar espacio" disabled>
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar espacio" disabled>
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              }
+              @if (isParent()) {
+                <button class="btn-assign" type="button" (click)="navigateToAssignTask(space)">
+                  <mat-icon aria-hidden="true">add</mat-icon>
+                  ASIGNAR TAREA
+                </button>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+    }
+  </main>
+</app-shell>
+
+<!-- ═══════════ CREATE PANEL ═══════════ -->
+@if (showCreatePanel()) {
+  <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
+
+  <aside class="create-panel" role="dialog" aria-label="Crear nuevo espacio" aria-modal="true">
+    <div class="panel-header">
+      <div class="panel-header-left">
+        <h2 class="panel-title">Nuevo espacio</h2>
+        <span class="panel-badge">MAPA DEL HOGAR</span>
+      </div>
+      <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </div>
+
+    <form class="panel-body" (submit)="$event.preventDefault(); submitCreate()" novalidate>
+
+      <!-- Nombre -->
+      <div class="field">
+        <label class="field-label" for="f-name">NOMBRE DEL ESPACIO <span class="req">*</span></label>
+        <input
+          id="f-name"
+          class="field-input"
+          [class.has-error]="nameCtrl.invalid && nameCtrl.touched"
+          type="text"
+          [formControl]="nameCtrl"
+          placeholder="Ej. Cocina Principal, Cuarto de Diego..."
+          autocomplete="off"
+          maxlength="50"
+        />
+        @if (nameCtrl.invalid && nameCtrl.touched) {
+          <span class="field-error" role="alert">{{ getNameError() }}</span>
+        }
+      </div>
+
+      <!-- Tipo de espacio -->
+      <div class="field">
+        <label class="field-label">TIPO DE ESPACIO <span class="req">*</span></label>
+        <div class="type-grid">
+          @for (opt of spaceTypeOptions; track opt.value) {
+            <button
+              class="type-btn"
+              [class.type-btn-active]="selectedType() === opt.value"
+              type="button"
+              (click)="selectType(opt.value)"
+              [attr.aria-pressed]="selectedType() === opt.value"
+            >
+              <mat-icon class="type-icon" aria-hidden="true">{{ opt.icon }}</mat-icon>
+              <span class="type-label">{{ opt.label }}</span>
+            </button>
+          }
+        </div>
+        @if (typeError()) {
+          <span class="field-error" role="alert">El tipo de espacio es obligatorio.</span>
+        }
+      </div>
+
+      <!-- Error global -->
+      @if (createError()) {
+        <p class="create-error-msg" role="alert">{{ createError() }}</p>
+      }
+
+      <!-- Actions -->
+      <div class="panel-actions">
+        <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
+        <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
+          @if (isCreating()) {
+            Creando...
+          } @else {
+            <mat-icon aria-hidden="true">check</mat-icon>
+            CREAR ESPACIO
+          }
+        </button>
+      </div>
+
+    </form>
+  </aside>
+}

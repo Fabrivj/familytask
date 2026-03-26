@@ -1,23 +1,29 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  HostListener,
   computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
 import { LowerCasePipe } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { AuthService } from '../../../core/services/auth.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
 import { TaskService } from '../../../core/services/task.service';
 import { MembersService } from '../../../core/services/members.service';
+import { SpaceService } from '../../../core/services/space.service';
 import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
 import { TaskPriority, TaskResponse } from '../../../core/models/task.model';
 import { MemberItem } from '../../../core/models/member.model';
+import { SpaceResponse, spaceTypeIcon } from '../../../core/models/space.model';
 import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 
@@ -28,6 +34,7 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
     ReactiveFormsModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatDatepickerModule,
     AppShellComponent,
     UserAvatarComponent,
   ],
@@ -36,31 +43,50 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TasksListComponent {
+  private readonly el = inject(ElementRef);
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (this.spaceDropdownOpen() && !this.el.nativeElement.querySelector('.space-dropdown-wrap')?.contains(target)) {
+      this.spaceDropdownOpen.set(false);
+    }
+    if (this.spaceSelectOpen() && !this.el.nativeElement.querySelector('.panel-space-dropdown-wrap')?.contains(target)) {
+      this.spaceSelectOpen.set(false);
+    }
+  }
+
   private readonly authService = inject(AuthService);
   private readonly taskService = inject(TaskService);
   private readonly membersService = inject(MembersService);
+  private readonly spaceService = inject(SpaceService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly permissionsService = inject(PermissionsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   readonly familyId = computed(() => this.authService.activeFamily()?.familyId ?? null);
   readonly isParent = this.permissionsService.isParent;
 
+  readonly spaceTypeIcon = spaceTypeIcon;
+
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly tasks = signal<TaskResponse[]>([]);
   readonly members = signal<MemberItem[]>([]);
+  readonly spaces = signal<SpaceResponse[]>([]);
   readonly isLoading = signal(false);
   readonly error = signal('');
 
   // ─── Filtros ──────────────────────────────────────────────────────────────
   readonly filterPriority = signal<string | null>(null);
-  readonly filterZone = signal<string | null>(null);
+  readonly filterSpaceId = signal<number | null>(null);
   readonly filterMemberId = signal<number | null>(null);
   readonly searchQuery = signal('');
+  readonly spaceDropdownOpen = signal(false);
 
-  readonly zones = computed(() => {
-    const locations = this.tasks().map(t => t.location).filter(Boolean);
-    return [...new Set(locations)];
-  });
+  readonly selectedFilterSpace = computed(() =>
+    this.spaces().find(s => s.id === this.filterSpaceId()) ?? null
+  );
 
   readonly childMembers = computed(() =>
     this.members().filter(m => m.role === 'CHILD')
@@ -70,7 +96,7 @@ export class TasksListComponent {
     const q = this.searchQuery().toLowerCase().trim();
     return this.tasks().filter(t =>
       (!this.filterPriority() || t.priority === this.filterPriority()) &&
-      (!this.filterZone() || t.location === this.filterZone()) &&
+      (!this.filterSpaceId() || t.homeSpaceId === this.filterSpaceId()) &&
       (!this.filterMemberId() || t.assignedToId === this.filterMemberId()) &&
       (!q || t.title.toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q))
     );
@@ -96,12 +122,11 @@ export class TasksListComponent {
   readonly coinsRewardCtrl = new FormControl<number | null>(null, {
     validators: [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)],
   });
-  readonly locationCtrl = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required],
-  });
-  readonly dueDateCtrl = new FormControl<string | null>(null);
-  readonly minDate = new Date().toISOString().slice(0, 10);
+  readonly selectedSpace = signal<SpaceResponse | null>(null);
+  readonly spaceError = signal(false);
+  readonly spaceSelectOpen = signal(false);
+  readonly dueDateCtrl = new FormControl<Date | null>(null);
+  readonly minDateObj = new Date();
   readonly selectedAssignee = signal<number | null>(null);
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────
@@ -130,10 +155,16 @@ export class TasksListComponent {
       },
     });
 
-    // Solo los padres pueden asignar tareas, así que no necesitamos la lista de miembros para hijos
     if (this.isParent()) {
       this.membersService.getMembers(familyId).subscribe({
         next: (res) => this.members.set(res.members),
+        error: () => {},
+      });
+      this.spaceService.getSpaces(familyId).subscribe({
+        next: (s) => {
+          this.spaces.set(s);
+          this.applyQueryParamPreselect();
+        },
         error: () => {},
       });
     }
@@ -144,8 +175,13 @@ export class TasksListComponent {
     this.filterPriority.set(this.filterPriority() === value ? null : value);
   }
 
-  toggleZone(value: string): void {
-    this.filterZone.set(this.filterZone() === value ? null : value);
+  toggleSpaceDropdown(): void {
+    this.spaceDropdownOpen.set(!this.spaceDropdownOpen());
+  }
+
+  selectSpaceFilter(id: number | null): void {
+    this.filterSpaceId.set(id);
+    this.spaceDropdownOpen.set(false);
   }
 
   toggleMember(id: number): void {
@@ -158,9 +194,7 @@ export class TasksListComponent {
 
   memberShortName(name: string): string {
     const parts = name.split(' ');
-    if (parts.length > 1) {
-      return `${parts[0]} ${parts[parts.length - 1][0]}.`;
-    }
+    if (parts.length > 1) return `${parts[0]} ${parts[parts.length - 1][0]}.`;
     return parts[0];
   }
 
@@ -201,11 +235,6 @@ export class TasksListComponent {
     return '';
   }
 
-  getLocationError(): string {
-    if (this.locationCtrl.hasError('required')) return 'El campo Zona es obligatorio.';
-    return '';
-  }
-
   // ─── Panel de creación ────────────────────────────────────────────────────
   openCreatePanel(): void {
     this.resetForm();
@@ -221,20 +250,33 @@ export class TasksListComponent {
     this.selectedPriority.set(p);
   }
 
+  selectSpace(space: SpaceResponse): void {
+    this.selectedSpace.set(space);
+    this.spaceError.set(false);
+    this.spaceSelectOpen.set(false);
+  }
+
+  toggleSpaceSelect(): void {
+    this.spaceSelectOpen.set(!this.spaceSelectOpen());
+  }
+
   selectAssignee(userId: number): void {
     this.selectedAssignee.set(this.selectedAssignee() === userId ? null : userId);
   }
 
   submitCreate(): void {
-    [this.titleCtrl, this.descriptionCtrl, this.xpRewardCtrl, this.coinsRewardCtrl, this.locationCtrl]
+    [this.titleCtrl, this.descriptionCtrl, this.xpRewardCtrl, this.coinsRewardCtrl]
       .forEach(c => c.markAllAsTouched());
+
+    const spaceValid = this.selectedSpace() !== null;
+    this.spaceError.set(!spaceValid);
 
     if (
       this.titleCtrl.invalid ||
       this.descriptionCtrl.invalid ||
       this.xpRewardCtrl.invalid ||
       this.coinsRewardCtrl.invalid ||
-      this.locationCtrl.invalid
+      !spaceValid
     ) return;
 
     const familyId = this.familyId();
@@ -245,13 +287,15 @@ export class TasksListComponent {
 
     this.taskService.create({
       familyId,
+      homeSpaceId: this.selectedSpace()!.id,
       title: this.titleCtrl.value.trim(),
       description: this.descriptionCtrl.value.trim(),
       priority: this.selectedPriority(),
       xpReward: this.xpRewardCtrl.value!,
       coinsReward: this.coinsRewardCtrl.value!,
-      location: this.locationCtrl.value.trim(),
-      dueDate: this.dueDateCtrl.value ?? null,
+      dueDate: this.dueDateCtrl.value
+        ? this.toIsoDate(this.dueDateCtrl.value)
+        : null,
       assignedToId: this.selectedAssignee(),
     }).subscribe({
       next: () => {
@@ -270,13 +314,30 @@ export class TasksListComponent {
     });
   }
 
+  private applyQueryParamPreselect(): void {
+    const params = this.route.snapshot.queryParamMap;
+    if (params.get('openCreate') !== '1') return;
+    const spaceId = Number(params.get('spaceId'));
+    const space = spaceId ? this.spaces().find(s => s.id === spaceId) : null;
+    this.resetForm();
+    if (space) this.selectedSpace.set(space);
+    this.showCreatePanel.set(true);
+    this.router.navigate([], { replaceUrl: true, queryParams: {} });
+  }
+
+  private toIsoDate(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
   private resetForm(): void {
     this.titleCtrl.reset('');
     this.descriptionCtrl.reset('');
     this.selectedPriority.set('MEDIUM');
     this.xpRewardCtrl.reset(null);
     this.coinsRewardCtrl.reset(null);
-    this.locationCtrl.reset('');
+    this.selectedSpace.set(null);
+    this.spaceError.set(false);
+    this.spaceSelectOpen.set(false);
     this.dueDateCtrl.reset(null);
     this.selectedAssignee.set(null);
     this.createError.set('');
@@ -296,5 +357,4 @@ export class TasksListComponent {
   confirmDelete(): void {
     this.closeDeleteModal();
   }
-
 }

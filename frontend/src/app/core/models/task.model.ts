@@ -7,7 +7,9 @@ export interface TaskResponse {
   description: string;
   priority: string;
   status: string;
-  location: string;
+  homeSpaceId: number;
+  homeSpaceName: string;
+  homeSpaceType: string;
   xpReward: number;
   coinsReward: number;
   dueDate: string | null;
@@ -19,12 +21,12 @@ export interface TaskResponse {
 
 export interface CreateTaskRequest {
   familyId: number;
+  homeSpaceId: number;
   title: string;
   description: string;
   priority: TaskPriority;
   xpReward: number;
   coinsReward: number;
-  location: string;
   dueDate?: string | null;
   assignedToId?: number | null;
 }
