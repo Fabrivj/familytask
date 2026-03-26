@@ -29,8 +29,5 @@ public class CreateHabitRequest {
     @Min(value = 1, message = "Las monedas deben ser un número entero mayor a cero.")
     private Integer coinsReward;
 
-    @NotBlank(message = "El campo Zona es obligatorio.")
-    private String location;
-
     private Long familyId;
 }

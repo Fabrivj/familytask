@@ -52,7 +52,6 @@ public class HabitService {
                     .frequency(frequency)
                     .xpReward(request.getXpReward())
                     .coinsReward(request.getCoinsReward())
-                    .location(request.getLocation().trim())
                     .build();
 
             habitRepository.save(habit);
@@ -75,7 +74,6 @@ public class HabitService {
                 .frequency(habit.getFrequency().name())
                 .xpReward(habit.getXpReward())
                 .coinsReward(habit.getCoinsReward())
-                .location(habit.getLocation())
                 .createdAt(habit.getCreatedAt())
                 .build();
     }

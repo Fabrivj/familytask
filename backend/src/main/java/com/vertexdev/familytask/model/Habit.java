@@ -46,9 +46,6 @@ public class Habit {
     private Integer coinsReward;
 
     @Column(nullable = false)
-    private String location;
-
-    @Column(nullable = false)
     @Builder.Default
     private Boolean isActive = true;
 

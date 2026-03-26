@@ -17,6 +17,5 @@ public class HabitResponse {
     private String frequency;
     private Integer xpReward;
     private Integer coinsReward;
-    private String location;
     private LocalDateTime createdAt;
 }
