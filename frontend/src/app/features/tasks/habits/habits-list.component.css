@@ -1,0 +1,419 @@
+/* ── Action row ──────────────────────────────────────────────────────── */
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.btn-new-habit {
+  width: auto;
+  padding: 12px 28px;
+  font-size: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Empty / error states ────────────────────────────────────────────── */
+.empty-msg {
+  text-align: center;
+  color: var(--text-sub);
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────── */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1.5px solid rgba(var(--border-rgb), 0.12);
+}
+
+.habits-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.habits-table thead tr {
+  background: rgba(var(--border-rgb), 0.05);
+  border-bottom: 1.5px solid rgba(var(--border-rgb), 0.12);
+}
+
+.habits-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.habits-table tbody tr {
+  border-bottom: 1px solid rgba(var(--border-rgb), 0.08);
+  transition: background 0.15s;
+}
+
+.habits-table tbody tr:last-child { border-bottom: none; }
+.habits-table tbody tr:hover { background: rgba(var(--border-rgb), 0.04); }
+
+.habits-table td {
+  padding: 14px 16px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+/* ── Columns ─────────────────────────────────────────────────────────── */
+.col-habit { min-width: 200px; }
+
+.habit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.habit-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.habit-desc {
+  font-size: 12px;
+  color: var(--text-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.col-zone {
+  color: var(--text-sub);
+  font-size: 13px;
+}
+
+.col-reward {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.reward-xp {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.reward-coins {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.coin-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #f59e0b;
+}
+
+/* ── Frequency badge ─────────────────────────────────────────────────── */
+.freq-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.freq-daily {
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+}
+
+.freq-weekly {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────── */
+.col-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: rgba(var(--border-rgb), 0.12);
+  color: var(--text);
+}
+
+.btn-icon:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-icon-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.btn-icon mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Mobile cards ────────────────────────────────────────────────────── */
+.cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.habit-card {
+  background: var(--surface);
+  border: 1.5px solid rgba(var(--border-rgb), 0.12);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-row-sub { color: var(--text-sub); font-size: 13px; }
+
+.card-row-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.zone-chip {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+/* ── Create panel ────────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+}
+
+.create-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 440px;
+  max-width: 100vw;
+  height: 100dvh;
+  background: var(--surface);
+  border-left: 1.5px solid rgba(var(--border-rgb), 0.15);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(var(--border-rgb), 0.1);
+  flex-shrink: 0;
+}
+
+.panel-header-left { display: flex; align-items: center; gap: 12px; }
+
+.panel-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.panel-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+  letter-spacing: 0.05em;
+}
+
+.btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-close:hover { background: rgba(var(--border-rgb), 0.1); }
+
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Form fields ─────────────────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.field-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-sub);
+  text-transform: uppercase;
+}
+
+.req { color: var(--primary); }
+.optional { color: var(--text-sub); font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+.field-input {
+  background: rgba(var(--border-rgb), 0.06);
+  border: 1.5px solid rgba(var(--border-rgb), 0.15);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.field-input:focus { border-color: var(--primary); }
+.field-input.has-error { border-color: #ef4444; }
+
+.field-textarea { resize: vertical; min-height: 80px; }
+
+.field-error {
+  font-size: 12px;
+  color: #ef4444;
+}
+
+/* ── Frequency toggle ────────────────────────────────────────────────── */
+.freq-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.freq-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1.5px solid rgba(var(--border-rgb), 0.2);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-sub);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.freq-btn mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.freq-btn-active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.06);
+}
+
+/* ── Panel actions ───────────────────────────────────────────────────── */
+.create-error-msg {
+  font-size: 13px;
+  color: #ef4444;
+  margin: 0;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+.btn-cancel { color: var(--text-sub); }
+.btn-create { gap: 6px; display: flex; align-items: center; }
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+.desktop-only { display: block; }
+.mobile-only  { display: none; }
+
+@media (max-width: 767px) {
+  .desktop-only { display: none; }
+  .mobile-only  { display: flex; }
+
+  .btn-new-habit {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+  }
+
+  .create-panel { width: 100vw; }
+
+  .panel-actions { flex-direction: column; }
+  .panel-actions button { width: 100%; }
+}

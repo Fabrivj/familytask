@@ -1,0 +1,243 @@
+<!-- ── Action row ────────────────────────────────────────────── -->
+@if (isParent()) {
+  <div class="action-row">
+    <button class="btn-cta btn-new-habit" type="button" (click)="openCreatePanel()">
+      + NUEVO HÁBITO
+    </button>
+  </div>
+}
+
+<!-- ── Empty state ───────────────────────────────────────────── -->
+@if (habits().length === 0) {
+  <p class="empty-msg">No hay hábitos registrados.</p>
+} @else {
+
+  <!-- ── Desktop Table ─────────────────────────────────────── -->
+  <div class="table-wrap desktop-only">
+    <table class="habits-table" aria-label="Lista de hábitos">
+      <thead>
+        <tr>
+          <th>HÁBITO</th>
+          <th>FRECUENCIA</th>
+          <th>ZONA</th>
+          <th>RECOMPENSA</th>
+          @if (isParent()) {<th>ACCIONES</th>}
+        </tr>
+      </thead>
+      <tbody>
+        @for (habit of habits(); track habit.id) {
+          <tr>
+            <td class="col-habit">
+              <div class="habit-info">
+                <span class="habit-name">{{ habit.title }}</span>
+                @if (habit.description) {
+                  <span class="habit-desc">{{ habit.description }}</span>
+                }
+              </div>
+            </td>
+            <td>
+              <span class="freq-badge freq-{{ habit.frequency | lowercase }}">
+                {{ frequencyLabel(habit.frequency) }}
+              </span>
+            </td>
+            <td class="col-zone">{{ habit.location }}</td>
+            <td class="col-reward">
+              <span class="reward-xp">+{{ habit.xpReward }} XP</span>
+              <span class="reward-coins">
+                <mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon>
+                {{ habit.coinsReward }}
+              </span>
+            </td>
+            @if (isParent()) {
+              <td class="col-actions">
+                <button class="btn-icon" type="button" aria-label="Editar hábito" disabled>
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" disabled>
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Mobile Cards ──────────────────────────────────────── -->
+  <div class="cards mobile-only">
+    @for (habit of habits(); track habit.id) {
+      <article class="habit-card">
+        <div class="card-row-top">
+          <span class="habit-name">{{ habit.title }}</span>
+          <span class="freq-badge freq-{{ habit.frequency | lowercase }}">
+            {{ frequencyLabel(habit.frequency) }}
+          </span>
+        </div>
+        @if (habit.description) {
+          <div class="card-row-sub">
+            <span class="habit-desc">{{ habit.description }}</span>
+          </div>
+        }
+        <div class="card-row-meta">
+          <span class="zone-chip">📍 {{ habit.location }}</span>
+          <span class="reward-xp">+{{ habit.xpReward }} XP</span>
+          <span class="reward-coins">
+            <mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon>
+            {{ habit.coinsReward }}
+          </span>
+        </div>
+      </article>
+    }
+  </div>
+
+}
+
+<!-- ═══════════ CREATE PANEL ═══════════ -->
+@if (showCreatePanel()) {
+  <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
+
+  <aside class="create-panel" role="dialog" aria-label="Crear nuevo hábito">
+    <div class="panel-header">
+      <div class="panel-header-left">
+        <h2 class="panel-title">Nuevo hábito</h2>
+        <span class="panel-badge">HÁBITO</span>
+      </div>
+      <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </div>
+
+    <form class="panel-body" (submit)="$event.preventDefault(); submitCreate()" novalidate>
+
+      <!-- Título -->
+      <div class="field">
+        <label class="field-label" for="h-title">TÍTULO <span class="req">*</span></label>
+        <input
+          id="h-title"
+          class="field-input"
+          [class.has-error]="titleCtrl.invalid && titleCtrl.touched"
+          type="text"
+          [formControl]="titleCtrl"
+          placeholder="Ej. Lavar los dientes"
+          autocomplete="off"
+        />
+        @if (titleCtrl.invalid && titleCtrl.touched) {
+          <span class="field-error" role="alert">{{ getTitleError() }}</span>
+        }
+      </div>
+
+      <!-- Descripción -->
+      <div class="field">
+        <label class="field-label" for="h-desc">DESCRIPCIÓN <span class="optional">(OPCIONAL)</span></label>
+        <textarea
+          id="h-desc"
+          class="field-input field-textarea"
+          [class.has-error]="descriptionCtrl.invalid && descriptionCtrl.touched"
+          [formControl]="descriptionCtrl"
+          rows="3"
+        ></textarea>
+        @if (descriptionCtrl.invalid && descriptionCtrl.touched) {
+          <span class="field-error" role="alert">{{ getDescriptionError() }}</span>
+        }
+      </div>
+
+      <!-- Frecuencia -->
+      <div class="field">
+        <label class="field-label">FRECUENCIA <span class="req">*</span></label>
+        <div class="freq-toggle">
+          <button
+            class="freq-btn"
+            [class.freq-btn-active]="selectedFrequency() === 'DAILY'"
+            type="button"
+            (click)="selectFrequency('DAILY')"
+          >
+            <mat-icon aria-hidden="true">wb_sunny</mat-icon>
+            DIARIO
+          </button>
+          <button
+            class="freq-btn"
+            [class.freq-btn-active]="selectedFrequency() === 'WEEKLY'"
+            type="button"
+            (click)="selectFrequency('WEEKLY')"
+          >
+            <mat-icon aria-hidden="true">date_range</mat-icon>
+            SEMANAL
+          </button>
+        </div>
+      </div>
+
+      <!-- XP y Monedas -->
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="h-xp">XP <span class="req">*</span></label>
+          <input
+            id="h-xp"
+            class="field-input"
+            [class.has-error]="xpRewardCtrl.invalid && xpRewardCtrl.touched"
+            type="number"
+            [formControl]="xpRewardCtrl"
+            min="1"
+            step="1"
+            placeholder="Ej. 10"
+          />
+          @if (xpRewardCtrl.invalid && xpRewardCtrl.touched) {
+            <span class="field-error" role="alert">{{ getXpError() }}</span>
+          }
+        </div>
+        <div class="field">
+          <label class="field-label" for="h-coins">MONEDAS <span class="req">*</span></label>
+          <input
+            id="h-coins"
+            class="field-input"
+            [class.has-error]="coinsRewardCtrl.invalid && coinsRewardCtrl.touched"
+            type="number"
+            [formControl]="coinsRewardCtrl"
+            min="1"
+            step="1"
+            placeholder="Ej. 5"
+          />
+          @if (coinsRewardCtrl.invalid && coinsRewardCtrl.touched) {
+            <span class="field-error" role="alert">{{ getCoinsError() }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- Zona / Ubicación -->
+      <div class="field">
+        <label class="field-label" for="h-zone">ZONA / UBICACIÓN <span class="req">*</span></label>
+        <input
+          id="h-zone"
+          class="field-input"
+          [class.has-error]="locationCtrl.invalid && locationCtrl.touched"
+          type="text"
+          [formControl]="locationCtrl"
+          placeholder="Ej. Baño, Cocina, Sala..."
+          autocomplete="off"
+        />
+        @if (locationCtrl.invalid && locationCtrl.touched) {
+          <span class="field-error" role="alert">{{ getLocationError() }}</span>
+        }
+      </div>
+
+      <!-- Error -->
+      @if (createError()) {
+        <p class="create-error-msg" role="alert">{{ createError() }}</p>
+      }
+
+      <!-- Actions -->
+      <div class="panel-actions">
+        <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
+        <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
+          @if (isCreating()) {
+            Creando...
+          } @else {
+            <mat-icon aria-hidden="true">check</mat-icon>
+            CREAR HÁBITO
+          }
+        </button>
+      </div>
+
+    </form>
+  </aside>
+}
