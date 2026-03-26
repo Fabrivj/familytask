@@ -22,17 +22,50 @@
         </button>
       }
 
-      @if (zones().length > 0) {
-        <span class="filter-label">ZONA</span>
-        @for (z of zones(); track z) {
+      @if (spaces().length > 0) {
+        <div class="space-dropdown-wrap">
           <button
-            class="filter-chip"
-            [class.filter-active]="filterZone() === z"
+            class="filter-chip space-dropdown-trigger"
+            [class.filter-active]="filterSpaceId() !== null"
             type="button"
-            (click)="toggleZone(z)"
-            [attr.aria-pressed]="filterZone() === z"
-          >{{ z }}</button>
-        }
+            (click)="toggleSpaceDropdown()"
+            [attr.aria-expanded]="spaceDropdownOpen()"
+            aria-haspopup="listbox"
+          >
+            <mat-icon class="chip-space-icon" aria-hidden="true">
+              {{ filterSpaceId() ? spaceTypeIcon(selectedFilterSpace()?.type ?? '') : 'home' }}
+            </mat-icon>
+            {{ selectedFilterSpace()?.name ?? 'ESPACIO' }}
+            <mat-icon class="dropdown-chevron" aria-hidden="true">
+              {{ spaceDropdownOpen() ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+
+          @if (spaceDropdownOpen()) {
+            <ul class="space-dropdown-menu" role="listbox" aria-label="Filtrar por espacio">
+              <li
+                class="space-dropdown-item"
+                role="option"
+                [class.active]="filterSpaceId() === null"
+                (click)="selectSpaceFilter(null)"
+              >
+                <mat-icon class="chip-space-icon" aria-hidden="true">home</mat-icon>
+                Todos los espacios
+              </li>
+              @for (s of spaces(); track s.id) {
+                <li
+                  class="space-dropdown-item"
+                  role="option"
+                  [class.active]="filterSpaceId() === s.id"
+                  (click)="selectSpaceFilter(s.id)"
+                >
+                  <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(s.type) }}</mat-icon>
+                  {{ s.name }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
       }
 
       @if (members().length > 0) {
@@ -124,8 +157,13 @@
                     <span class="text-muted">Sin asignar</span>
                   }
                 </td>
-                <!-- ZONA -->
-                <td class="col-zone">{{ task.location }}</td>
+                <!-- ESPACIO -->
+                <td class="col-zone">
+                  <span class="space-chip-inline">
+                    <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(task.homeSpaceType) }}</mat-icon>
+                    {{ task.homeSpaceName }}
+                  </span>
+                </td>
                 <!-- RECOMPENSA -->
                 <td class="col-reward">
                   <span class="reward-xp">+{{ task.xpReward }} XP</span>
@@ -183,7 +221,10 @@
                   {{ task.assignedToName.split(' ')[0] }}
                 </span>
               }
-              <span class="zone-chip">📍 {{ task.location }}</span>
+              <span class="zone-chip">
+                <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(task.homeSpaceType) }}</mat-icon>
+                {{ task.homeSpaceName }}
+              </span>
               <span class="reward-xp">+{{ task.xpReward }} XP</span>
               <span class="reward-coins"><mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon> {{ task.coinsReward }}</span>
             </div>
@@ -259,19 +300,19 @@
         <div class="priority-toggle">
           <button
             class="priority-btn"
-            [class.priority-btn-active]="selectedPriority() === 'HIGH'"
+            [class.priority-btn-active-high]="selectedPriority() === 'HIGH'"
             type="button"
             (click)="selectPriority('HIGH')"
           ><span class="priority-dot priority-dot-high"></span> ALTA</button>
           <button
             class="priority-btn"
-            [class.priority-btn-active]="selectedPriority() === 'MEDIUM'"
+            [class.priority-btn-active-medium]="selectedPriority() === 'MEDIUM'"
             type="button"
             (click)="selectPriority('MEDIUM')"
           ><span class="priority-dot priority-dot-medium"></span> MEDIA</button>
           <button
             class="priority-btn"
-            [class.priority-btn-active]="selectedPriority() === 'LOW'"
+            [class.priority-btn-active-low]="selectedPriority() === 'LOW'"
             type="button"
             (click)="selectPriority('LOW')"
           ><span class="priority-dot priority-dot-low"></span> BAJA</button>
@@ -314,33 +355,69 @@
         </div>
       </div>
 
-      <!-- Zona / Ubicación -->
+      <!-- Espacio del hogar -->
       <div class="field">
-        <label class="field-label" for="f-zone">ZONA / UBICACIÓN <span class="req">*</span></label>
-        <input
-          id="f-zone"
-          class="field-input"
-          [class.has-error]="locationCtrl.invalid && locationCtrl.touched"
-          type="text"
-          [formControl]="locationCtrl"
-          placeholder="Ej. Cocina, Sala, Patio..."
-          autocomplete="off"
-        />
-        @if (locationCtrl.invalid && locationCtrl.touched) {
-          <span class="field-error" role="alert">{{ getLocationError() }}</span>
+        <label class="field-label">ESPACIO DEL HOGAR <span class="req">*</span></label>
+        <div class="panel-space-dropdown-wrap">
+          <button
+            class="field-input panel-space-trigger"
+            [class.has-error]="spaceError()"
+            [class.has-value]="selectedSpace() !== null"
+            type="button"
+            (click)="toggleSpaceSelect()"
+            [attr.aria-expanded]="spaceSelectOpen()"
+            [disabled]="spaces().length === 0"
+          >
+            @if (selectedSpace()) {
+              <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(selectedSpace()!.type) }}</mat-icon>
+              {{ selectedSpace()!.name }}
+            } @else {
+              <span class="panel-space-placeholder">
+                {{ spaces().length === 0 ? 'Sin espacios creados' : 'Selecciona un espacio...' }}
+              </span>
+            }
+            <mat-icon class="panel-space-chevron" aria-hidden="true">
+              {{ spaceSelectOpen() ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+
+          @if (spaceSelectOpen()) {
+            <ul class="panel-space-menu" role="listbox" aria-label="Seleccionar espacio">
+              @for (s of spaces(); track s.id) {
+                <li
+                  class="panel-space-item"
+                  role="option"
+                  [class.active]="selectedSpace()?.id === s.id"
+                  (click)="selectSpace(s)"
+                >
+                  <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(s.type) }}</mat-icon>
+                  {{ s.name }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
+        @if (spaceError()) {
+          <span class="field-error" role="alert">El espacio del hogar es obligatorio.</span>
         }
       </div>
 
       <!-- Fecha límite -->
       <div class="field">
         <label class="field-label" for="f-due">FECHA LÍMITE <span class="optional">(OPCIONAL)</span></label>
-        <input
-          id="f-due"
-          class="field-input"
-          type="date"
-          [min]="minDate"
-          [formControl]="dueDateCtrl"
-        />
+        <div class="date-input-wrap">
+          <input
+            id="f-due"
+            class="field-input date-input"
+            [matDatepicker]="picker"
+            [min]="minDateObj"
+            [formControl]="dueDateCtrl"
+            placeholder="dd/mm/aaaa"
+            readonly
+          />
+          <mat-datepicker-toggle class="date-toggle" [for]="picker" aria-label="Abrir calendario" />
+          <mat-datepicker #picker />
+        </div>
       </div>
 
       <!-- Asignar a -->

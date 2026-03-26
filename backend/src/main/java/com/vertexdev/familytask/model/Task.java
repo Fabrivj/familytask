@@ -35,14 +35,15 @@ public class Task {
     @JoinColumn(name = "assigned_to")
     private User assignedTo;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "home_space_id", nullable = false)
+    private Space homeSpace;
+
     @Column(name = "title", nullable = false, length = 100)
     private String title;
 
     @Column(nullable = false, length = 500)
     private String description;
-
-    @Column(nullable = false)
-    private String location;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -61,10 +62,6 @@ public class Task {
 
     @Column(name = "due_date")
     private LocalDate dueDate;
-
-    @Column(name = "is_deleted", nullable = false)
-    @Builder.Default
-    private Boolean isDeleted = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
