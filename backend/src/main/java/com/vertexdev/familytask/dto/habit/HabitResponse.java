@@ -19,7 +19,4 @@ public class HabitResponse {
     private Integer coinsReward;
     private String location;
     private LocalDateTime createdAt;
-    private Long assignedToId;
-    private String assignedToName;
-    private String assignedToPictureUrl;
 }

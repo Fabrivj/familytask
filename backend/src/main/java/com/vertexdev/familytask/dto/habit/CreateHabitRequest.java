@@ -33,5 +33,4 @@ public class CreateHabitRequest {
     private String location;
 
     private Long familyId;
-    private Long assignedToId;
 }

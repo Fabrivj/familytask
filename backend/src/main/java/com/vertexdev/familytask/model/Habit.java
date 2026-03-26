@@ -29,10 +29,6 @@ public class Habit {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_to")
-    private User assignedTo;
-
     @Column(nullable = false, length = 100)
     private String title;
 
