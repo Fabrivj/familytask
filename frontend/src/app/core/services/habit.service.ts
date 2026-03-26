@@ -8,6 +8,12 @@ import { CreateHabitRequest, HabitResponse } from '../models/habit.model';
 export class HabitService {
   private readonly http = inject(HttpClient);
 
+  getHabits(familyId: number): Observable<HabitResponse[]> {
+    return this.http.get<HabitResponse[]>(`${environment.apiUrl}/habits`, {
+      params: { familyId },
+    });
+  }
+
   create(request: CreateHabitRequest): Observable<HabitResponse> {
     return this.http.post<HabitResponse>(`${environment.apiUrl}/habits`, request);
   }
