@@ -19,33 +19,6 @@
   margin-bottom: 32px;
 }
 
-.tag { margin: 0 0 10px; }
-
-.page-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: clamp(1.6rem, 4vw, 2.2rem);
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.02em;
-  margin: 0 0 6px;
-}
-
-.title-icon {
-  font-size: 1em !important;
-  width: 1em !important;
-  height: 1em !important;
-  vertical-align: middle;
-  margin-left: 6px;
-  color: var(--primary);
-  opacity: 0.85;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: var(--text-sub);
-  margin: 0;
-}
-
 .btn-new-space {
   display: inline-flex;
   align-items: center;

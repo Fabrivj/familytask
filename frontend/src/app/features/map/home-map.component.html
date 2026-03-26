@@ -3,11 +3,11 @@
 
     <!-- Header -->
     <div class="header-row">
-      <div class="header-info">
-        <p class="tag">// ORGANIZACIÓN DEL HOGAR</p>
-        <h1 class="page-title">Mapa del Hogar <mat-icon class="title-icon" aria-hidden="true">home</mat-icon></h1>
-        <p class="page-subtitle">{{ spaces().length }} espacio{{ spaces().length !== 1 ? 's' : '' }} registrado{{ spaces().length !== 1 ? 's' : '' }}</p>
-      </div>
+      <app-page-header
+        tag="// ORGANIZACIÓN DEL HOGAR"
+        title="Mapa del Hogar"
+        [subtitle]="spacesSubtitle()"
+      />
       @if (isParent()) {
         <button class="btn-cta btn-new-space" type="button" (click)="openCreatePanel()">
           <mat-icon aria-hidden="true">add</mat-icon>

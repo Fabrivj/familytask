@@ -26,6 +26,7 @@ import {
 import { TaskResponse } from '../../core/models/task.model';
 import { priorityLabel, statusLabel } from '../../core/utils/task-labels';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-home-map',
@@ -34,6 +35,7 @@ import { AppShellComponent } from '../../shared/components/app-shell/app-shell.c
     MatIconModule,
     MatProgressSpinnerModule,
     AppShellComponent,
+    PageHeaderComponent,
   ],
   templateUrl: './home-map.component.html',
   styleUrl: './home-map.component.css',
@@ -62,6 +64,11 @@ export class HomeMapComponent {
   readonly tasks = signal<TaskResponse[]>([]);
   readonly isLoading = signal(false);
   readonly error = signal('');
+
+  readonly spacesSubtitle = computed(() => {
+    const n = this.spaces().length;
+    return `${n} espacio${n !== 1 ? 's' : ''} registrado${n !== 1 ? 's' : ''}`;
+  });
 
   readonly tasksBySpace = computed(() => {
     const map = new Map<number, TaskResponse[]>();
