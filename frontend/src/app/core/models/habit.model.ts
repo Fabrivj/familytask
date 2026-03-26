@@ -1,4 +1,4 @@
-export type HabitFrequency = 'DAILY' | 'WEEKLY';
+export type HabitFrequency = 'DAILY' | 'WEEKLY' | 'WEEKDAYS' | 'WEEKENDS' | 'MONTHLY';
 
 export interface HabitResponse {
   id: number;
@@ -7,7 +7,6 @@ export interface HabitResponse {
   frequency: HabitFrequency;
   xpReward: number;
   coinsReward: number;
-  location: string;
   createdAt: string;
 }
 
@@ -18,5 +17,4 @@ export interface CreateHabitRequest {
   frequency: HabitFrequency;
   xpReward: number;
   coinsReward: number;
-  location: string;
 }

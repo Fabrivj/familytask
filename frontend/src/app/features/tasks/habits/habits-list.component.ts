@@ -53,14 +53,16 @@ export class HabitsListComponent {
   readonly coinsRewardCtrl = new FormControl<number | null>(null, {
     validators: [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)],
   });
-  readonly locationCtrl = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required],
-  });
-
   // ─── Helpers ──────────────────────────────────────────────────────────────
   frequencyLabel(f: string): string {
-    return f === 'DAILY' ? 'Diario' : 'Semanal';
+    const labels: Record<string, string> = {
+      DAILY: 'Diario',
+      WEEKLY: 'Semanal',
+      WEEKDAYS: 'Lunes a Viernes',
+      WEEKENDS: 'Fines de Semana',
+      MONTHLY: 'Mensual',
+    };
+    return labels[f] ?? f;
   }
 
   // ─── Validación del formulario ────────────────────────────────────────────
@@ -90,11 +92,6 @@ export class HabitsListComponent {
     return '';
   }
 
-  getLocationError(): string {
-    if (this.locationCtrl.hasError('required')) return 'El campo Zona es obligatorio.';
-    return '';
-  }
-
   // ─── Panel de creación ────────────────────────────────────────────────────
   openCreatePanel(): void {
     this.resetForm();
@@ -111,7 +108,7 @@ export class HabitsListComponent {
   }
 
   submitCreate(): void {
-    [this.titleCtrl, this.xpRewardCtrl, this.coinsRewardCtrl, this.locationCtrl]
+    [this.titleCtrl, this.xpRewardCtrl, this.coinsRewardCtrl]
       .forEach(c => c.markAllAsTouched());
     this.descriptionCtrl.markAllAsTouched();
 
@@ -119,8 +116,7 @@ export class HabitsListComponent {
       this.titleCtrl.invalid ||
       this.descriptionCtrl.invalid ||
       this.xpRewardCtrl.invalid ||
-      this.coinsRewardCtrl.invalid ||
-      this.locationCtrl.invalid
+      this.coinsRewardCtrl.invalid
     ) return;
 
     const familyId = this.familyId();
@@ -136,7 +132,6 @@ export class HabitsListComponent {
       frequency: this.selectedFrequency(),
       xpReward: this.xpRewardCtrl.value!,
       coinsReward: this.coinsRewardCtrl.value!,
-      location: this.locationCtrl.value.trim(),
     }).subscribe({
       next: (habit) => {
         this.isCreating.set(false);
@@ -160,7 +155,6 @@ export class HabitsListComponent {
     this.selectedFrequency.set('DAILY');
     this.xpRewardCtrl.reset(null);
     this.coinsRewardCtrl.reset(null);
-    this.locationCtrl.reset('');
     this.createError.set('');
   }
 }

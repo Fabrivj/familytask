@@ -19,7 +19,6 @@
         <tr>
           <th>HÁBITO</th>
           <th>FRECUENCIA</th>
-          <th>ZONA</th>
           <th>RECOMPENSA</th>
           @if (isParent()) {<th>ACCIONES</th>}
         </tr>
@@ -40,7 +39,6 @@
                 {{ frequencyLabel(habit.frequency) }}
               </span>
             </td>
-            <td class="col-zone">{{ habit.location }}</td>
             <td class="col-reward">
               <span class="reward-xp">+{{ habit.xpReward }} XP</span>
               <span class="reward-coins">
@@ -80,7 +78,6 @@
           </div>
         }
         <div class="card-row-meta">
-          <span class="zone-chip">📍 {{ habit.location }}</span>
           <span class="reward-xp">+{{ habit.xpReward }} XP</span>
           <span class="reward-coins">
             <mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon>
@@ -146,23 +143,25 @@
       <div class="field">
         <label class="field-label">FRECUENCIA <span class="req">*</span></label>
         <div class="freq-toggle">
-          <button
-            class="freq-btn"
-            [class.freq-btn-active]="selectedFrequency() === 'DAILY'"
-            type="button"
-            (click)="selectFrequency('DAILY')"
-          >
-            <mat-icon aria-hidden="true">wb_sunny</mat-icon>
-            DIARIO
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'DAILY'"
+                  type="button" (click)="selectFrequency('DAILY')">
+            <mat-icon aria-hidden="true">wb_sunny</mat-icon> DIARIO
           </button>
-          <button
-            class="freq-btn"
-            [class.freq-btn-active]="selectedFrequency() === 'WEEKLY'"
-            type="button"
-            (click)="selectFrequency('WEEKLY')"
-          >
-            <mat-icon aria-hidden="true">date_range</mat-icon>
-            SEMANAL
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKDAYS'"
+                  type="button" (click)="selectFrequency('WEEKDAYS')">
+            <mat-icon aria-hidden="true">view_week</mat-icon> LUN–VIE
+          </button>
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKENDS'"
+                  type="button" (click)="selectFrequency('WEEKENDS')">
+            <mat-icon aria-hidden="true">weekend</mat-icon> FIN DE SEMANA
+          </button>
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKLY'"
+                  type="button" (click)="selectFrequency('WEEKLY')">
+            <mat-icon aria-hidden="true">date_range</mat-icon> SEMANAL
+          </button>
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'MONTHLY'"
+                  type="button" (click)="selectFrequency('MONTHLY')">
+            <mat-icon aria-hidden="true">calendar_month</mat-icon> MENSUAL
           </button>
         </div>
       </div>
@@ -201,23 +200,6 @@
             <span class="field-error" role="alert">{{ getCoinsError() }}</span>
           }
         </div>
-      </div>
-
-      <!-- Zona / Ubicación -->
-      <div class="field">
-        <label class="field-label" for="h-zone">ZONA / UBICACIÓN <span class="req">*</span></label>
-        <input
-          id="h-zone"
-          class="field-input"
-          [class.has-error]="locationCtrl.invalid && locationCtrl.touched"
-          type="text"
-          [formControl]="locationCtrl"
-          placeholder="Ej. Baño, Cocina, Sala..."
-          autocomplete="off"
-        />
-        @if (locationCtrl.invalid && locationCtrl.touched) {
-          <span class="field-error" role="alert">{{ getLocationError() }}</span>
-        }
       </div>
 
       <!-- Error -->
