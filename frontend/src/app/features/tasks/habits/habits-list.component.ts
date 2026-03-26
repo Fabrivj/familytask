@@ -2,12 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
 import { LowerCasePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
@@ -16,7 +18,7 @@ import { HabitFrequency, HabitResponse } from '../../../core/models/habit.model'
 
 @Component({
   selector: 'app-habits-list',
-  imports: [LowerCasePipe, ReactiveFormsModule, MatIconModule],
+  imports: [LowerCasePipe, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './habits-list.component.html',
   styleUrl: './habits-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,7 +33,47 @@ export class HabitsListComponent {
   readonly isParent = this.permissionsService.isParent;
 
   // ─── Datos ────────────────────────────────────────────────────────────────
-  readonly habits = signal<HabitResponse[]>([]);
+  readonly habits        = signal<HabitResponse[]>([]);
+  readonly isLoading     = signal(false);
+  readonly error         = signal('');
+
+  // ─── Filtros ───────────────────────────────────────────────────────────────
+  readonly filterFrequency = signal<string | null>(null);
+  readonly searchQuery     = signal('');
+
+  readonly filteredHabits = computed(() => {
+    const freq = this.filterFrequency();
+    const q    = this.searchQuery().toLowerCase().trim();
+    return this.habits().filter(h => {
+      if (freq && h.frequency !== freq) return false;
+      if (q && !h.title.toLowerCase().includes(q) &&
+          !(h.description ?? '').toLowerCase().includes(q)) return false;
+      return true;
+    });
+  });
+
+  constructor() {
+    effect(() => {
+      const id = this.familyId();
+      if (id) this.loadData(id);
+    });
+  }
+
+  private loadData(familyId: number): void {
+    this.isLoading.set(true);
+    this.error.set('');
+
+    this.habitService.getHabits(familyId).subscribe({
+      next: (habits) => {
+        this.habits.set(habits);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Error al cargar los hábitos. Por favor, intente nuevamente.');
+        this.isLoading.set(false);
+      },
+    });
+  }
 
   // ─── Panel de creación ────────────────────────────────────────────────────
   readonly showCreatePanel = signal(false);
@@ -105,6 +147,10 @@ export class HabitsListComponent {
 
   selectFrequency(f: HabitFrequency): void {
     this.selectedFrequency.set(f);
+  }
+
+  toggleFrequency(f: string): void {
+    this.filterFrequency.update(cur => cur === f ? null : f);
   }
 
   submitCreate(): void {
