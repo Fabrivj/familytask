@@ -1,0 +1,58 @@
+<app-shell>
+  <main class="content">
+
+    <app-page-header
+      tag="// CONFIGURACIÓN DEL GRUPO"
+      title="Configuración"
+      subtitle="Ajusta el nombre y las reglas de tu grupo familiar."
+    />
+
+    <section class="config-card" aria-label="Datos del grupo">
+
+      <div class="config-card-header">
+        <mat-icon class="header-icon" aria-hidden="true">groups</mat-icon>
+        <span class="config-card-label">DATOS DEL GRUPO</span>
+      </div>
+
+      <div class="config-card-body">
+
+        <label class="field-label" for="family-name-input">NOMBRE DEL GRUPO</label>
+
+        <mat-form-field appearance="outline" class="field-full">
+          <input
+            id="family-name-input"
+            matInput
+            type="text"
+            placeholder="Ej: Familia González"
+            [formControl]="nameCtrl"
+            (keyup.enter)="save()"
+            autocomplete="off"
+          />
+          @if (nameCtrl.touched && nameCtrl.invalid) {
+            <mat-error>{{ getNameError() }}</mat-error>
+          }
+        </mat-form-field>
+
+        @if (successMessage()) {
+          <div class="msg-success msg-success--box" role="status">{{ successMessage() }}</div>
+        }
+
+        @if (apiError()) {
+          <p class="api-error" role="alert">{{ apiError() }}</p>
+        }
+
+        <button class="btn-cta" type="button" (click)="save()" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Guardando cambios" />
+            Guardando...
+          } @else {
+            GUARDAR CAMBIOS
+          }
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+</app-shell>

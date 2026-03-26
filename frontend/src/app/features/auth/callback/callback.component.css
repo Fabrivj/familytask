@@ -1,0 +1,14 @@
+.tag-error { color: var(--error); }
+
+.error-icon {
+  display: block;
+  font-size: 40px;
+  margin: 8px 0 12px;
+}
+
+.step-text {
+  font-size: 13px;
+  color: var(--text-sub);
+  text-align: center;
+  margin: 0;
+}

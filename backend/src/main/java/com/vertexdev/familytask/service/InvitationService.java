@@ -1,8 +1,10 @@
 package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.dto.invite.CreateInviteRequest;
+import com.vertexdev.familytask.dto.invite.InvitePreviewResponse;
 import com.vertexdev.familytask.dto.invite.InviteResponse;
 import com.vertexdev.familytask.dto.invite.ProcessInviteRequest;
+import com.vertexdev.familytask.exception.InvitationException;
 import com.vertexdev.familytask.mapper.InviteMapper;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
@@ -10,6 +12,7 @@ import com.vertexdev.familytask.model.Invitation;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.Role;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
+import com.vertexdev.familytask.util.FamilyPermissions;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.InvitationRepository;
 import com.vertexdev.familytask.repository.UserRepository;
@@ -36,119 +39,179 @@ public class InvitationService {
     private final InvitationRepository invitationRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
-    private final InviteMapper invitacionMapper;
+    private final InviteMapper invitationMapper;
     private final UserRepository userRepository;
+    private final FamilyPermissions familyPermissions;
 
     /**
-     * Paso 2 del flujo: el Padre/Tutor genera la invitación.
+     * Step 2 of the flow: Parent/Guardian generates the invitation.
      */
     @Transactional
-    public InviteResponse crearInvitacion(CreateInviteRequest request, User solicitante) {
+    public InviteResponse createInvitation(CreateInviteRequest request, User requester) {
         FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
-                .orElseThrow(() -> new RuntimeException("Familia no encontrada"));
+                .orElseThrow(() -> new InvitationException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
 
-        // Verificar que el solicitante es PADRE_TUTOR en esa familia
+        // Verify that the requester is PARENT in this family
         familyMemberRepository
-                .findByFamilyGroupIdAndUserId(familyGroup.getId(), solicitante.getId())
-                .filter(m -> m.getRole() == Role.PARENT && m.getIsActive())
-                .orElseThrow(() -> new RuntimeException("No tienes permisos para invitar miembros a esta familia"));
+                .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new InvitationException("ACCESS_DENIED",
+                        "No tienes permisos para invitar miembros a esta familia.", 403));
 
-        // Validar que el email no sea ya miembro activo ni tenga invitación pendiente
-        boolean yaMiembro = userRepository.findByEmail(request.getInvitedEmail())
-                .map(usuarioExistente -> familyMemberRepository
-                        .existsByFamilyGroupIdAndUserId(familyGroup.getId(), usuarioExistente.getId()))
+        // Validate that the email is not already an active member or has a pending invitation
+        boolean alreadyMember = userRepository.findByEmail(request.getInvitedEmail())
+                .map(existingUser -> familyMemberRepository
+                        .existsByFamilyGroupIdAndUserId(familyGroup.getId(), existingUser.getId()))
                 .orElse(false);
 
-        if (yaMiembro) {
-            throw new RuntimeException(
-                    "Este correo ya es miembro activo de esta familia.");
-        }
-
-
-        boolean tieneInvitacionPendiente = invitationRepository
+        boolean hasPendingInvitation = invitationRepository
                 .existsByInvitedEmailAndFamilyGroupIdAndIsUsedFalseAndExpirationDateAfter(
                         request.getInvitedEmail(), familyGroup.getId(), LocalDateTime.now()
                 );
 
-        if (yaMiembro || tieneInvitacionPendiente) {
-            throw new RuntimeException("Este correo ya tiene una invitación pendiente para esta familia.");
+        if (alreadyMember || hasPendingInvitation) {
+            throw new InvitationException("ALREADY_MEMBER_OR_PENDING",
+                    "Este correo ya pertenece a la familia o tiene una invitación pendiente.", 409);
         }
 
-        // Crear la invitación
-        UUID token = UUID.randomUUID();
-        LocalDateTime expiracion = LocalDateTime.now().plusDays(expirationDays);
+        // Create the invitation
+        UUID invitationCode = UUID.randomUUID();
+        LocalDateTime expirationDate = LocalDateTime.now().plusDays(expirationDays);
 
         Invitation invitation = Invitation.builder()
-                .token(token)
+                .token(invitationCode)
                 .invitedEmail(request.getInvitedEmail())
                 .role(request.getRole())
                 .familyGroup(familyGroup)
-                .expirationDate(expiracion)
+                .expirationDate(expirationDate)
                 .isUsed(false)
+                .createdBy(requester)
                 .build();
 
         invitationRepository.save(invitation);
-        log.info("Invitación creada para {} en familia {}", request.getInvitedEmail(), familyGroup.getNombre());
+        log.info("Invitation created for {} in family {}", request.getInvitedEmail(), familyGroup.getName());
 
-        // Construir la respuesta con el link
-        InviteResponse response = invitacionMapper.toResponse(invitation);
-        response.setInviteLink(baseUrl + "?token=" + token);
+        // Build the response with the link
+        InviteResponse response = invitationMapper.toResponse(invitation);
+        response.setInviteLink(baseUrl + "?token=" + invitationCode);
         return response;
     }
 
     /**
-     * Paso 4 del flujo: el invitado, ya autenticado con Google, procesa el token.
+     * Public preview: returns invitation details without authentication.
+     * Used by the frontend to display family/role info before the user logs in.
+     */
+    public InvitePreviewResponse getPreview(String tokenStr) {
+        Invitation invitation = resolveActiveInvitation(tokenStr);
+
+        String invitedByName = invitation.getCreatedBy() != null
+                ? invitation.getCreatedBy().getName()
+                : null;
+
+        return InvitePreviewResponse.builder()
+                .familyName(invitation.getFamilyGroup().getName())
+                .invitedByName(invitedByName)
+                .invitedEmail(invitation.getInvitedEmail())
+                .role(invitation.getRole().name())
+                .expirationDate(invitation.getExpirationDate())
+                .build();
+    }
+
+    /**
+     * Step 4 of the flow: The invitee, already authenticated with Google, processes the token.
      */
     @Transactional
-    public void procesarInvitacion(ProcessInviteRequest request, User userAutenticado) {
+    public void processInvitation(ProcessInviteRequest request, User authenticatedUser) {
+        Invitation invitation = resolveActiveInvitation(request.getToken());
+
+        // Validate that the Google email matches the invitation email
+        if (!invitation.getInvitedEmail().equalsIgnoreCase(authenticatedUser.getEmail())) {
+            throw new InvitationException("EMAIL_MISMATCH", "Esta invitación no pertenece a tu cuenta de Google.", 403);
+        }
+
+        // Verify that user is not already a member
+        if (familyMemberRepository.existsByFamilyGroupIdAndUserId(
+                invitation.getFamilyGroup().getId(), authenticatedUser.getId())) {
+            throw new InvitationException("ALREADY_MEMBER", "Ya eres miembro de esta familia.", 409);
+        }
+
+        // Add user as a member of the family with the invitation role
+        try {
+            FamilyMember newMember = FamilyMember.builder()
+                    .familyGroup(invitation.getFamilyGroup())
+                    .user(authenticatedUser)
+                    .role(invitation.getRole())
+                    .isActive(true)
+                    .build();
+
+            familyMemberRepository.save(newMember);
+
+            // Mark invitation as used
+            invitation.setIsUsed(true);
+            invitationRepository.save(invitation);
+        } catch (Exception e) {
+            log.error("Failed to add user {} to family {}: {}",
+                    authenticatedUser.getEmail(),
+                    invitation.getFamilyGroup().getName(),
+                    e.getMessage());
+            throw new InvitationException("ASSOCIATION_FAILED",
+                    "No se pudo completar la incorporación. Intenta de nuevo.", 500);
+        }
+
+        log.info("User {} added to family {} with role {}",
+                authenticatedUser.getEmail(),
+                invitation.getFamilyGroup().getName(),
+                invitation.getRole());
+    }
+
+    /**
+     * Cancels a pending invitation. Only a PARENT of the family can cancel it.
+     */
+    @Transactional
+    public void cancelInvitation(String tokenStr, User requester) {
         UUID tokenUUID;
         try {
-            tokenUUID = UUID.fromString(request.getToken());
+            tokenUUID = UUID.fromString(tokenStr);
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("La invitación no es válida o expiró");
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida.", 400);
         }
 
         Invitation invitation = invitationRepository.findByToken(tokenUUID)
-                .orElseThrow(() -> new RuntimeException("La invitación no es válida o expiró"));
+                .orElseThrow(() -> new InvitationException("NOT_FOUND", "La invitación no existe.", 404));
 
-        // Validar que no esté usada
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(invitation.getFamilyGroup().getId(), requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new InvitationException("ACCESS_DENIED",
+                        "No tienes permisos para cancelar esta invitación.", 403));
+
+        invitationRepository.delete(invitation);
+        log.info("Invitation for {} cancelled by {}", invitation.getInvitedEmail(), requester.getEmail());
+    }
+
+    /**
+     * Parses and validates a token string, returning the active Invitation.
+     * Throws INVALID_TOKEN (400) if the token is malformed, not found, already used, or expired.
+     */
+    private Invitation resolveActiveInvitation(String tokenStr) {
+        UUID tokenUUID;
+        try {
+            tokenUUID = UUID.fromString(tokenStr);
+        } catch (IllegalArgumentException e) {
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
+        }
+
+        Invitation invitation = invitationRepository.findByToken(tokenUUID)
+                .orElseThrow(() -> new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400));
+
         if (invitation.getIsUsed()) {
-            throw new RuntimeException("La invitación no es válida o expiró");
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
         }
 
-        // Validar que no haya expirado
         if (LocalDateTime.now().isAfter(invitation.getExpirationDate())) {
-            throw new RuntimeException("La invitación no es válida o expiró");
+            throw new InvitationException("INVALID_TOKEN", "La invitación no es válida o expiró.", 400);
         }
 
-        // Validar que el email de Google coincide con el email de la invitación
-        if (!invitation.getInvitedEmail().equalsIgnoreCase(userAutenticado.getEmail())) {
-            throw new RuntimeException("Esta invitación no pertenece a tu cuenta de Google");
-        }
-
-        // Verificar que no sea ya miembro
-        if (familyMemberRepository.existsByFamilyGroupIdAndUserId(
-                invitation.getFamilyGroup().getId(), userAutenticado.getId())) {
-            throw new RuntimeException("Ya eres miembro de esta familia");
-        }
-
-        // Agregar al usuario como miembro de la familia con el rol de la invitación
-        FamilyMember nuevoMiembro = FamilyMember.builder()
-                .familyGroup(invitation.getFamilyGroup())
-                .user(userAutenticado)
-                .role(invitation.getRole())
-                .isActive(true)
-                .build();
-
-        familyMemberRepository.save(nuevoMiembro);
-
-        // Marcar invitación como usada
-        invitation.setIsUsed(true);
-        invitationRepository.save(invitation);
-
-        log.info("Usuario {} incorporado a familia {} con rol {}",
-                userAutenticado.getEmail(),
-                invitation.getFamilyGroup().getNombre(),
-                invitation.getRole());
+        return invitation;
     }
 }

@@ -1,0 +1,133 @@
+<app-page-layout>
+
+  <app-top-bar [userName]="shortName()" />
+
+  <app-neon-card>
+
+    <ng-container card-header>
+      <div class="step-row" aria-hidden="true">
+        <div class="pip done"></div>
+        <div class="pip done"></div>
+        <div class="pip on"></div>
+      </div>
+      <p class="tag">// PASO 3 DE 3</p>
+      <h1 class="card-title" role="heading" aria-level="1">Invita a tu familia</h1>
+      <p class="card-sub">
+        Genera un link para que cada miembro se una a
+        <strong class="family-highlight">{{ familyName() }}</strong>
+      </p>
+    </ng-container>
+
+    <div class="family-badge">
+      <div class="family-icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
+      <div class="family-info">
+        <span class="family-name">{{ familyName() }}</span>
+        <app-role-badge [role]="familyRole()" />
+      </div>
+    </div>
+
+    @if (!generatedLink()) {
+
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Email del invitado</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon" aria-hidden="true">email</mat-icon>
+        <input
+          matInput
+          type="email"
+          placeholder="correo@ejemplo.com"
+          [formControl]="emailCtrl"
+          (keyup.enter)="generateLink()"
+          autocomplete="email"
+        />
+        @if (emailCtrl.touched && emailCtrl.invalid) {
+          <mat-error>{{ getEmailError() }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Rol del invitado</mat-label>
+        <mat-icon matPrefix class="field-prefix-icon" aria-hidden="true">person</mat-icon>
+        <mat-select [formControl]="roleCtrl">
+          <mat-option value="CHILD">Hijo / a</mat-option>
+          <mat-option value="PARENT">Padre / Tutor</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      @if (error()) {
+        <p class="api-error" role="alert">{{ error() }}</p>
+      }
+
+    } @else {
+
+      <div class="success-section">
+        @if (successMessage()) {
+          <div class="success-toast" role="status">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            {{ successMessage() }}
+          </div>
+        }
+
+        <div class="link-box">
+          <span class="link-text">{{ generatedLink() }}</span>
+          <button
+            class="btn-copy"
+            type="button"
+            (click)="copyLink()"
+            [attr.aria-label]="linkCopied() ? 'Copiado' : 'Copiar link'"
+          >
+            @if (linkCopied()) { ✓ } @else { Copiar }
+          </button>
+        </div>
+
+        <div class="link-info">
+          <mat-icon aria-hidden="true">info</mat-icon>
+          El link es de <strong>uso único</strong> y expira en 7 días.
+        </div>
+      </div>
+
+    }
+
+    <ng-container card-cta>
+      @if (!generatedLink()) {
+        <button
+          class="btn-cta"
+          type="button"
+          (click)="generateLink()"
+          [disabled]="isLoading()"
+        >
+          @if (isLoading()) {
+            <mat-progress-spinner diameter="16" mode="indeterminate" aria-label="Generando link" />
+            Generando...
+          } @else {
+            <mat-icon aria-hidden="true">save</mat-icon>
+            Generar link
+          }
+        </button>
+      } @else {
+        <button
+          class="btn-cta btn-secondary"
+          type="button"
+          (click)="inviteAnother()"
+        >
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Invitar a otro miembro
+        </button>
+      }
+    </ng-container>
+
+    <p card-footer class="footer-note">
+      @if (inviteCount() > 0) {
+        <span class="invite-count">{{ inviteCount() }} invitación{{ inviteCount() > 1 ? 'es' : '' }} generada{{ inviteCount() > 1 ? 's' : '' }}</span>
+        <span class="separator">·</span>
+      }
+      <button class="skip-link" type="button" (click)="goToDashboard()">
+        Saltar por ahora → ir al inicio
+      </button>
+    </p>
+
+  </app-neon-card>
+
+  <app-help-chip>Podrás invitar más miembros después desde la configuración de tu familia.</app-help-chip>
+
+</app-page-layout>
+

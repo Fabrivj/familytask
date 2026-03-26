@@ -10,17 +10,40 @@ const SESSION_KEY = 'ft_session';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private readonly _sesion = signal<UserSession | null>(this.cargarSesionGuardada());
+  private readonly _session = signal<UserSession | null>(this.loadSavedSession());
 
-  // Signal público de solo lectura
-  readonly sesion = this._sesion.asReadonly();
-  readonly estaAutenticado = computed(() => this._sesion() !== null);
-  readonly families = computed(() => this._sesion()?.families ?? []);
+  // Public read-only signal
+  readonly session = this._session.asReadonly();
+  readonly isAuthenticated = computed(() => this._session() !== null);
+  readonly families = computed(() => this._session()?.families ?? []);
+
+  /** The FamilySummary for the currently active family, if any. */
+  readonly activeFamily = computed(() => {
+    const activeId = this._session()?.activeFamilyId;
+    return this.families().find(f => f.familyId === activeId);
+  });
+
+  /** Human-readable role label for the active family, e.g. "Padre · Admin" */
+  readonly activeRoleLabel = computed(() => {
+    const family = this.activeFamily();
+    if (family?.role === 'PARENT') return family.isAdmin ? 'Padre · Admin' : 'Padre · Tutor';
+    if (family?.role === 'CHILD') return 'Hijo/a';
+    return '';
+  });
+
+  /** First word of the user's display name, e.g. "Maria" from "Maria Torres" */
+  readonly shortName = computed(() => this._session()?.name?.split(' ')[0] ?? '');
+
+  /** First character of the user's name uppercased, e.g. "M". Falls back to "?" */
+  readonly nameInitial = computed(() => (this._session()?.name?.[0] ?? '?').toUpperCase());
+
+  /** familyName of the active family. Empty string if no active family. */
+  readonly activeFamilyName = computed(() => this.activeFamily()?.familyName ?? '');
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  // ─── Paso 1: Redirigir al usuario a Google ───────────────────────────────────
-  redirigirAGoogle(): void {
+  // ─── Step 1: Redirect the user to Google ──────────────────────────────────
+  redirectToGoogle(invitationToken?: string): void {
     const { clientId, redirectUri, scope, authEndpoint } = environment.google;
 
     const params = new URLSearchParams({
@@ -30,86 +53,134 @@ export class AuthService {
       scope,
       access_type: 'online',
       prompt: 'select_account',
+      ...(invitationToken ? { state: invitationToken } : {}),
     });
 
     window.location.href = `${authEndpoint}?${params.toString()}`;
   }
 
-  // ─── Paso 2: Enviar el código al backend ─────────────────────────────────────
-  procesarGoogleCallback(code: string): Observable<AuthResponse> {
+  // ─── Step 2: Send the code to the backend ─────────────────────────────────
+  processGoogleCallback(code: string): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${environment.apiUrl}/auth/google/callback`, { code })
       .pipe(
-        tap(response => this.guardarSesion(response))
+        tap(response => this.saveSession(response))
       );
   }
 
-  // ─── Getters de conveniencia ─────────────────────────────────────────────────
+  // ─── Convenience getters ──────────────────────────────────────────────────
   getToken(): string | null {
-    return this._sesion()?.token ?? null;
+    return this._session()?.token ?? null;
   }
 
-  getFamiliaActivaId(): number | null {
-    return this._sesion()?.activeFamilyId ?? null;
+  getActiveFamilyId(): number | null {
+    return this._session()?.activeFamilyId ?? null;
   }
 
-  setFamiliaActiva(familiaId: number): void {
-    const sesionActual = this._sesion();
-    if (!sesionActual) return;
+  setActiveFamily(familyId: number): void {
+    const currentSession = this._session();
+    if (!currentSession) return;
 
-    const actualizada: UserSession = { ...sesionActual, activeFamilyId: familiaId };
-    this._sesion.set(actualizada);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
+    const updated: UserSession = { ...currentSession, activeFamilyId: familyId };
+    this._session.set(updated);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
   }
 
-  // ─── Cerrar sesión ───────────────────────────────────────────────────────────
-  cerrarSesion(): void {
-    this._sesion.set(null);
+  // ─── Logout ───────────────────────────────────────────────────────────────
+  logout(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/logout`, {});
+  }
+
+  /** Performs the full logout flow: HTTP call → clear session → navigate to login.
+   *  Components subscribe only to handle the error case locally. */
+  performLogout(): Observable<never> {
+    return new Observable(observer => {
+      this.logout().subscribe({
+        next: (response) => {
+          this.clearLocalSession();
+          this.router.navigate(['/auth/login'], { state: { message: response.message } });
+          observer.complete();
+        },
+        error: (err) => observer.error(err),
+      });
+    });
+  }
+
+  clearLocalSession(): void {
+    this._session.set(null);
     localStorage.removeItem(SESSION_KEY);
-    this.router.navigate(['/auth/login']);
   }
 
-  // ─── Internos ────────────────────────────────────────────────────────────────
-  private guardarSesion(response: AuthResponse): void {
-    const sesion: UserSession = { ...response };
-    this._sesion.set(sesion);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sesion));
+  // ─── Internal ─────────────────────────────────────────────────────────────
+  private saveSession(response: AuthResponse): void {
+    const session: UserSession = { ...response };
+    this._session.set(session);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   }
 
-  agregarFamilia(familia: FamilySummary): void {
-    const sesionActual = this._sesion();
-    if (!sesionActual) return;
+  updateFamilyName(familyId: number, newName: string): void {
+    const currentSession = this._session();
+    if (!currentSession) return;
 
-    const actualizada: UserSession = {
-      ...sesionActual,
-      families: [...sesionActual.families, familia],
+    const updated: UserSession = {
+      ...currentSession,
+      families: currentSession.families.map(f =>
+        f.familyId === familyId ? { ...f, familyName: newName } : f
+      ),
     };
-    this._sesion.set(actualizada);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
+    this._session.set(updated);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
   }
 
-  refrescarSesion(): Observable<void> {
+  addFamily(family: FamilySummary): void {
+    const currentSession = this._session();
+    if (!currentSession) return;
+
+    const updated: UserSession = {
+      ...currentSession,
+      families: [...currentSession.families, family],
+    };
+    this._session.set(updated);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
+  }
+
+  refreshSession(): Observable<void> {
     return this.http.get<AuthResponse>(`${environment.apiUrl}/auth/me`).pipe(
       tap(response => {
-        const sesionActual = this._sesion();
-        if (!sesionActual) return;
-        const actualizada: UserSession = {
-          ...sesionActual,
+        const currentSession = this._session();
+        if (!currentSession) return;
+        const updated: UserSession = {
+          ...currentSession,
           families: response.families,
         };
-        this._sesion.set(actualizada);
-        localStorage.setItem(SESSION_KEY, JSON.stringify(actualizada));
+        this._session.set(updated);
+        localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
       }),
       map(() => void 0)
     );
   }
 
-  private cargarSesionGuardada(): UserSession | null {
+  private loadSavedSession(): UserSession | null {
     try {
       const raw = localStorage.getItem(SESSION_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const session: UserSession = JSON.parse(raw);
+      if (this.isJwtExpired(session.token)) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+      return session;
     } catch {
       return null;
+    }
+  }
+
+  private isJwtExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return typeof payload.exp === 'number' && payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
     }
   }
 }

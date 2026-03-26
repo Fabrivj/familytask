@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -15,12 +15,26 @@ export interface FamilyResponse {
 
 @Injectable({ providedIn: 'root' })
 export class FamilyService {
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
-  crear(request: CreateFamilyRequest): Observable<FamilyResponse> {
+  create(request: CreateFamilyRequest): Observable<FamilyResponse> {
     return this.http.post<FamilyResponse>(
-      `${environment.apiUrl}/familias`,
+      `${environment.apiUrl}/families`,
       request
+    );
+  }
+
+  updateName(familyId: number, request: CreateFamilyRequest): Observable<FamilyResponse> {
+    return this.http.patch<FamilyResponse>(
+      `${environment.apiUrl}/families/${familyId}`,
+      request
+    );
+  }
+
+  updateMemberRole(familyId: number, userId: number, role: 'PARENT' | 'CHILD'): Observable<{ message: string }> {
+    return this.http.patch<{ message: string }>(
+      `${environment.apiUrl}/families/${familyId}/members/${userId}/role`,
+      { role }
     );
   }
 }

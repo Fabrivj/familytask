@@ -1,0 +1,35 @@
+/* ============================================================
+   DESIGN VARIABLES — CSS Custom Properties
+   Source of truth for the neon design system.
+   Colors are defined as both hex (for direct use) and as RGB
+   channel triplets (to enable alpha: rgba(var(--primary-rgb), 0.27))
+   ============================================================ */
+:root {
+  /* ── Colors ── */
+  --bg:        #0A0033;
+  --panel:     #0F004D;
+  --primary:   #FF2EBE;
+  --secondary: #0048FF;
+  --border:    #00EFFF;
+  --text:      #CFFFFF;
+  --text-sub:  #8AD8FF;
+  --success:   #3CFF5A;
+  --warning:   #FFE600;
+  --error:     #FF3B3B;
+
+  /* ── Spacing & Shape ── */
+  --radius:    8px;
+  --radius-lg: 16px;
+
+  /* ── RGB channel decomposition (for alpha blending) ── */
+  --primary-rgb:   255, 46, 190;
+  --secondary-rgb: 0, 72, 255;
+  --border-rgb:    0, 239, 255;
+  --success-rgb:   60, 255, 90;
+  --warning-rgb:   255, 230, 0;
+  --error-rgb:     255, 59, 59;
+  --text-rgb:      207, 255, 255;
+  --text-sub-rgb:  138, 216, 255;
+  --panel-rgb:     15, 0, 77;
+  --bg-rgb:        10, 0, 51;
+}

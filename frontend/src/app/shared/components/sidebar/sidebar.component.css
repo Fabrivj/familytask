@@ -1,0 +1,94 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 64px;
+  flex-shrink: 0;
+  background: rgba(7, 0, 37, 0.98);
+  border-right: 1px solid rgba(var(--border-rgb), 0.12);
+  padding: 14px 0 12px;
+  z-index: 10;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+:host::-webkit-scrollbar { display: none; }
+
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nav-list li {
+  width: 100%;
+}
+
+.nav-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 9px 4px;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  color: rgba(138, 216, 255, 0.35);
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+}
+
+.nav-item:hover {
+  color: var(--text-sub);
+  background: rgba(var(--border-rgb), 0.06);
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 1px;
+}
+
+.nav-item mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  flex-shrink: 0;
+}
+
+.label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 6.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ── Bottom spacer ── */
+.nav-fill { flex: 1; }
+
+/* ── Active state ── */
+.nav-item.active {
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.14);
+}
+
+.nav-item.active:hover {
+  background: rgba(var(--primary-rgb), 0.2);
+}
+
+
+@media (max-width: 520px) {
+  :host { width: 52px; }
+  .label { display: none; }
+  .nav-item { padding: 10px 4px; }
+}

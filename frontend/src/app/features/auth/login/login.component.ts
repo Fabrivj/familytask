@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -10,7 +10,9 @@ import { AuthService } from '../../../core/services/auth.service';
 export class LoginComponent {
   private readonly authService = inject(AuthService);
 
-  iniciarSesionConGoogle(): void {
-    this.authService.redirigirAGoogle();
+  readonly logoutMessage = signal<string | null>(history.state?.message ?? null);
+
+  loginWithGoogle(): void {
+    this.authService.redirectToGoogle();
   }
 }

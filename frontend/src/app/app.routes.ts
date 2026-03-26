@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { parentGuard } from './core/guards/parent.guard';
 
 export const routes: Routes = [
   {
@@ -25,7 +26,15 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'familia/nueva',
+    path: 'invitation/create',
+    canActivate: [authGuard, parentGuard],
+    loadComponent: () =>
+      import('./features/invitation/create/create-invitation.component').then(
+        m => m.CreateInvitationComponent
+      ),
+  },
+  {
+    path: 'family/new',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/family/new/new-family.component').then(
@@ -33,7 +42,7 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'familia/seleccionar',
+    path: 'family/select',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/family/select/select-family.component').then(
@@ -41,10 +50,30 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'family/members',
+    canActivate: [authGuard, parentGuard],
+    loadComponent: () =>
+      import('./features/family/members/family-members.component').then(
+        m => m.FamilyMembersComponent
+      ),
+  },
+  {
     path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+  },
+  {
+    path: 'settings',
+    canActivate: [authGuard, parentGuard],
+    loadComponent: () =>
+      import('./features/settings/settings.component').then(m => m.SettingsComponent),
+  },
+  {
+    path: 'tasks',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/tasks/list/tasks-list.component').then(m => m.TasksListComponent),
   },
   {
     path: '**',

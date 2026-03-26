@@ -1,80 +1,151 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitationService } from '../../../core/services/invitation.service';
+import { InviteDetailsResponse } from '../../../core/models/invitation.model';
+import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
+import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
 
-type EstadoPagina = 'cargando' | 'listo' | 'procesando' | 'error';
+type PageState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
 
 @Component({
   selector: 'app-accept-invitation',
-  standalone: true,
+  imports: [MatIconModule, MatProgressSpinnerModule, UserAvatarComponent, PageLayoutComponent, NeonCardComponent],
   templateUrl: './accept-invitation.component.html',
+  styleUrl: './accept-invitation.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AcceptInvitationComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly invitationService = inject(InvitationService);
 
-  readonly estado = signal<EstadoPagina>('cargando');
-  readonly mensajeError = signal('');
+  readonly state = signal<PageState>('loading');
+  readonly errorMessage = signal('');
+  readonly details = signal<InviteDetailsResponse | null>(null);
+
   private token = '';
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService,
-    private invitationService: InvitationService,
-  ) {}
+  // ─── Computed helpers ──────────────────────────────────────────────────────
+  readonly rolLabel = computed(() => {
+    const role = this.details()?.role;
+    return role === 'PARENT' ? 'Padre / Tutor' : 'Hijo / a';
+  });
 
+  readonly rolEmoji = computed(() => {
+    return this.details()?.role === 'PARENT' ? '👑' : '👧';
+  });
+
+  readonly expirationText = computed(() => {
+    const exp = this.details()?.expirationDate;
+    if (!exp) return '';
+
+    const now = new Date();
+    const expDate = new Date(exp);
+    const diffMs = expDate.getTime() - now.getTime();
+
+    if (diffMs <= 0) return 'Este link ha expirado';
+
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    if (days > 0) {
+      return `Este link expira en ${days} día${days > 1 ? 's' : ''} y ${hours} hora${hours !== 1 ? 's' : ''}`;
+    }
+    return `Este link expira en ${hours} hora${hours !== 1 ? 's' : ''}`;
+  });
+
+  readonly inviterInitial = computed(() => {
+    const name = this.details()?.invitedByName;
+    return name ? name[0].toUpperCase() : '?';
+  });
+
+  // ─── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('token');
 
     if (!token) {
-      this.mostrarError('El enlace de invitación no es válido.');
+      this.showError('El enlace de invitación no es válido.');
       return;
     }
 
     this.token = token;
-    // Guardar siempre en localStorage por si necesita pasar por Google
-    this.invitationService.guardarToken(token);
-
-    if (this.authService.estaAutenticado()) {
-      // Ya tiene sesión → procesar directo sin pasar por Google
-      this.estado.set('procesando');
-      this.procesarDirecto(token);
-    } else {
-      // Sin sesión → mostrar pantalla de confirmación
-      this.estado.set('listo');
-    }
+    this.invitationService.saveToken(token);
+    this.loadDetails(token);
   }
 
-  private procesarDirecto(token: string): void {
-    this.invitationService.procesar({ token }).subscribe({
-      next: () => {
-        this.invitationService.limpiarToken();
-        // Refrescar sesión para que el dashboard vea la nueva familia
-        this.authService.refrescarSesion().subscribe({
-          next: () => this.router.navigate(['/dashboard']),
-          error: () => this.router.navigate(['/dashboard']),
-        });
+  // ─── Load invitation details (public endpoint, no JWT needed) ──────────────
+  private loadDetails(token: string): void {
+    this.invitationService.getDetails(token).subscribe({
+      next: (details) => {
+        this.details.set(details);
+        this.state.set('ready');
       },
       error: (err) => {
-        this.invitationService.limpiarToken();
-        const mensaje = err.error?.message ?? 'La invitación no es válida o expiró.';
-        this.mostrarError(mensaje);
+        const message = err.error?.message ?? 'La invitación no es válida o expiró.';
+        this.showError(message);
       },
     });
   }
 
-  aceptarInvitacion(): void {
-    // Sin sesión → ir a Google, el callback se encarga del resto
-    this.authService.redirigirAGoogle();
+  // ─── Accept invitation ─────────────────────────────────────────────────────
+  acceptInvitation(): void {
+    if (this.authService.isAuthenticated()) {
+      this.state.set('processing');
+      const oldFamilyIds = new Set<number>(this.authService.families().map(f => f.familyId));
+      this.invitationService.process({ token: this.token }).subscribe({
+        next: () => {
+          this.invitationService.clearToken();
+          this.authService.refreshSession().subscribe({
+            next: () => {
+              const families = this.authService.families();
+              const newFamily = families.find(f => !oldFamilyIds.has(f.familyId)) ?? families[0];
+              if (newFamily) {
+                this.authService.setActiveFamily(newFamily.familyId);
+                const dest = newFamily.role === 'PARENT' ? '/family/members' : '/dashboard';
+                this.router.navigate([dest]);
+              } else {
+                this.router.navigate(['/family/select']);
+              }
+            },
+            error: () => this.router.navigate(['/family/select']),
+          });
+        },
+        error: (err) => {
+          // On 401 the errorInterceptor already redirects to login —
+          // keep the token so the re-authentication flow can pick it up.
+          if (err.status !== 401) {
+            this.invitationService.clearToken();
+          }
+          const message = err.error?.message ?? 'No se pudo procesar la invitación. Intenta de nuevo.';
+          this.showError(message);
+        },
+      });
+    } else {
+      this.authService.redirectToGoogle(this.token);
+    }
   }
 
-  rechazar(): void {
-    this.invitationService.limpiarToken();
-    this.router.navigate(['/dashboard']);
+  // ─── Reject / decline ─────────────────────────────────────────────────────
+  decline(): void {
+    this.invitationService.clearToken();
+    this.router.navigate(['/']);
   }
 
-  private mostrarError(mensaje: string): void {
-    this.estado.set('error');
-    this.mensajeError.set(mensaje);
+  // ─── Error helper ──────────────────────────────────────────────────────────
+  private showError(message: string): void {
+    this.state.set('error');
+    this.errorMessage.set(message);
   }
 }

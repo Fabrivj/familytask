@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CreateInviteRequest,
+  InviteDetailsResponse,
   InviteResponse,
   ProcessInviteRequest,
 } from '../models/invitation.model';
@@ -15,33 +16,47 @@ export class InvitationService {
 
   constructor(private http: HttpClient) {}
 
-  crear(request: CreateInviteRequest): Observable<InviteResponse> {
+  create(request: CreateInviteRequest): Observable<InviteResponse> {
     return this.http.post<InviteResponse>(
-      `${environment.apiUrl}/invitaciones`,
+      `${environment.apiUrl}/invitations`,
       request
     );
   }
 
-  procesar(request: ProcessInviteRequest): Observable<void> {
-    return this.http.post<void>(
-      `${environment.apiUrl}/invitaciones/procesar`,
+  /** Obtiene detalles de la invitación para preview (sin JWT). */
+  getDetails(token: string): Observable<InviteDetailsResponse> {
+    return this.http.get<InviteDetailsResponse>(
+      `${environment.apiUrl}/invitations/preview`,
+      { params: { token } }
+    );
+  }
+
+  cancel(token: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `${environment.apiUrl}/invitations/${token}`
+    );
+  }
+
+  process(request: ProcessInviteRequest): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/invitations/process`,
       request
     );
   }
 
-  guardarToken(token: string): void {
+  saveToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
   }
 
-  obtenerToken(): string | null {
+  getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
 
-  limpiarToken(): void {
+  clearToken(): void {
     localStorage.removeItem(this.tokenKey);
   }
 
-  hayTokenPendiente(): boolean {
-    return !!this.obtenerToken();
+  hasPendingToken(): boolean {
+    return !!this.getToken();
   }
 }

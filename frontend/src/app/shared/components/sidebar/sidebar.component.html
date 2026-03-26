@@ -1,0 +1,91 @@
+<nav class="sidebar" aria-label="Navegación principal">
+
+  <ul class="nav-list" role="list">
+
+    <li>
+      <button class="nav-item" type="button" (click)="navigate('/dashboard')"
+        [class.active]="isActive('/dashboard')" aria-label="Inicio">
+        <mat-icon aria-hidden="true">home</mat-icon>
+        <span class="label">INICIO</span>
+      </button>
+    </li>
+
+    <li>
+      <button class="nav-item" type="button" (click)="navigate(null)"
+        [class.active]="isActive('/map')" aria-label="Mapa" aria-disabled="true">
+        <mat-icon aria-hidden="true">map</mat-icon>
+        <span class="label">MAPA</span>
+      </button>
+    </li>
+
+    @if (isParent()) {
+      <li>
+        <button class="nav-item" type="button" (click)="navigate(null)"
+          [class.active]="isActive('/ai')" aria-label="IA" aria-disabled="true">
+          <mat-icon aria-hidden="true">auto_awesome</mat-icon>
+          <span class="label">IA</span>
+        </button>
+      </li>
+    }
+
+    @if (isParent()) {
+      <li>
+        <button class="nav-item" type="button" (click)="navigate(null)"
+          [class.active]="isActive('/reports')" aria-label="Reportes" aria-disabled="true">
+          <mat-icon aria-hidden="true">bar_chart</mat-icon>
+          <span class="label">REPORTES</span>
+        </button>
+      </li>
+    }
+
+    <li>
+      <button class="nav-item" type="button" (click)="navigate(null)"
+        [class.active]="isActive('/store')" aria-label="Tienda" aria-disabled="true">
+        <mat-icon aria-hidden="true">store</mat-icon>
+        <span class="label">TIENDA</span>
+      </button>
+    </li>
+
+    <li>
+      <button class="nav-item" type="button" (click)="navigate('/tasks')"
+        [class.active]="isActive('/tasks')" aria-label="Tareas">
+        <mat-icon aria-hidden="true">task_alt</mat-icon>
+        <span class="label">TAREAS</span>
+      </button>
+    </li>
+
+    @if (isParent()) {
+      <li>
+        <button class="nav-item" type="button" (click)="navigate('/family/members')"
+          [class.active]="isActive('/family/members')" aria-label="Miembros">
+          <mat-icon aria-hidden="true">group</mat-icon>
+          <span class="label">MIEMBROS</span>
+        </button>
+      </li>
+    }
+
+    <li class="nav-fill" aria-hidden="true"></li>
+
+    @if (hasMultipleFamilies()) {
+      <li>
+        <button class="nav-item" type="button" (click)="navigate('/family/select')"
+          [class.active]="isActive('/family/select')" aria-label="Cambiar familia">
+          <mat-icon aria-hidden="true">switch_account</mat-icon>
+          <span class="label">FAMILIA</span>
+        </button>
+      </li>
+    }
+
+    @if (isParent()) {
+      <li>
+        <button class="nav-item" type="button" (click)="navigate('/settings')"
+          [class.active]="isActive('/settings')" aria-label="Configuración">
+          <mat-icon aria-hidden="true">settings</mat-icon>
+          <span class="label">CONFIG</span>
+        </button>
+      </li>
+    }
+
+  </ul>
+
+</nav>

@@ -2,6 +2,9 @@ export interface FamilySummary {
   familyId: number;
   familyName: string;
   role: 'PARENT' | 'CHILD';
+  isAdmin?: boolean;
+  memberCount?: number;
+  activeTaskCount?: number;
 }
 
 export interface AuthResponse {

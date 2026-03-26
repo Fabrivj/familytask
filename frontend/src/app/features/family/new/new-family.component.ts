@@ -1,12 +1,32 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { FamilyService } from '../../../core/services/family.service';
+import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
+import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
+import { HelpChipComponent } from '../../../shared/components/help-chip/help-chip.component';
+
+const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
 
 @Component({
   selector: 'app-new-family',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    PageLayoutComponent,
+    NeonCardComponent,
+    TopBarComponent,
+    HelpChipComponent,
+  ],
   templateUrl: './new-family.component.html',
   styleUrl: './new-family.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,51 +36,63 @@ export class NewFamilyComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly nombreCtrl = new FormControl('', { nonNullable: true });
-  readonly cargando = signal(false);
-  readonly error = signal('');
-  readonly mostrarFormulario = signal(false);
-
-  readonly nombreCorto = computed(() => {
-    const nombre = this.authService.sesion()?.name ?? '';
-    return nombre.split(' ')[0];
+  readonly nameCtrl = new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(50),
+      Validators.pattern(VALID_NAME),
+    ],
   });
 
-  readonly inicialNombre = computed(() => {
-    return (this.authService.sesion()?.name?.[0] ?? '?').toUpperCase();
-  });
+  readonly isLoading = signal(false);
+  readonly apiError = signal('');
+  readonly showForm = signal(false);
 
-  crear(): void {
-    const nombre = this.nombreCtrl.value.trim();
-    if (!nombre) {
-      this.error.set('El nombre es obligatorio.');
-      return;
-    }
-    this.cargando.set(true);
-    this.error.set('');
-    this.nombreCtrl.disable();
+  readonly shortName = this.authService.shortName;
+  readonly nameInitial = this.authService.nameInitial;
 
-    this.familyService.crear({ name: nombre }).subscribe({
-      next: (familia) => {
-        this.authService.agregarFamilia({
-          familyId: familia.id,
-          familyName: familia.name,
+  getNameError(): string {
+    const c = this.nameCtrl;
+    if (c.hasError('required')) return 'El nombre es obligatorio.';
+    if (c.hasError('minlength')) return 'Mínimo 3 caracteres.';
+    if (c.hasError('maxlength')) return 'Máximo 50 caracteres.';
+    if (c.hasError('pattern')) return 'El nombre contiene caracteres inválidos.';
+    return '';
+  }
+
+  create(): void {
+    this.nameCtrl.markAllAsTouched();
+    if (this.nameCtrl.invalid) return;
+
+    const name = this.nameCtrl.value.trim();
+    this.isLoading.set(true);
+    this.apiError.set('');
+    this.nameCtrl.disable();
+
+    this.familyService.create({ name }).subscribe({
+      next: (family) => {
+        this.authService.addFamily({
+          familyId: family.id,
+          familyName: family.name,
           role: 'PARENT',
+          isAdmin: true,
         });
-        this.authService.setFamiliaActiva(familia.id);
-        this.router.navigate(['/dashboard']);
+        this.authService.setActiveFamily(family.id);
+        this.router.navigate(['/invitation/create']);
       },
       error: (err) => {
-        this.error.set(err.error?.message ?? 'No se pudo crear la familia.');
-        this.cargando.set(false);
-        this.nombreCtrl.enable();
+        this.apiError.set(err.error?.message ?? 'No se pudo crear la familia. Intenta de nuevo.');
+        this.isLoading.set(false);
+        this.nameCtrl.enable();
       },
     });
   }
 
-  volver(): void {
-    this.nombreCtrl.reset();
-    this.error.set('');
-    this.mostrarFormulario.set(false);
+  goBack(): void {
+    this.nameCtrl.reset();
+    this.apiError.set('');
+    this.showForm.set(false);
   }
 }

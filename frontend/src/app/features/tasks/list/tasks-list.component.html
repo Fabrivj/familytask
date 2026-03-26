@@ -1,0 +1,433 @@
+<app-shell>
+  <main class="content">
+
+    <!-- Header -->
+    <div class="header-row">
+      <div class="header-info">
+        <p class="tag">// GESTIÓN DE FAMILIA</p>
+        <h1 class="page-title">Tareas y Hábitos</h1>
+        <p class="page-subtitle">{{ filteredTasks().length }} tareas activas</p>
+      </div>
+      @if (isParent()) {
+        <button class="btn-cta btn-new-task" type="button" (click)="openCreatePanel()">
+          + NUEVA TAREA
+        </button>
+      }
+    </div>
+
+    <!-- ── Tabs ──────────────────────────────────────────────────── -->
+    <div class="tabs" role="tablist">
+      <button class="tab tab-active" role="tab" aria-selected="true">
+        <mat-icon class="tab-icon" aria-hidden="true">task_alt</mat-icon>
+        TAREAS
+        <span class="tab-count">{{ tasks().length }}</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" disabled>
+        <mat-icon class="tab-icon" aria-hidden="true">schedule</mat-icon>
+        HÁBITOS
+        <span class="tab-count">0</span>
+      </button>
+    </div>
+
+    <!-- ── Filters ───────────────────────────────────────────────── -->
+    <div class="filters-bar" role="group" aria-label="Filtros de tareas">
+      <span class="filter-label">PRIORIDAD</span>
+      @for (p of ['HIGH', 'MEDIUM', 'LOW']; track p) {
+        <button
+          class="filter-chip"
+          [class.filter-active]="filterPriority() === p"
+          type="button"
+          (click)="togglePriority(p)"
+          [attr.aria-pressed]="filterPriority() === p"
+        >
+          <span class="priority-dot priority-dot-{{ p | lowercase }}"></span>
+          {{ priorityLabel(p) }}
+        </button>
+      }
+
+      @if (zones().length > 0) {
+        <span class="filter-label">ZONA</span>
+        @for (z of zones(); track z) {
+          <button
+            class="filter-chip"
+            [class.filter-active]="filterZone() === z"
+            type="button"
+            (click)="toggleZone(z)"
+            [attr.aria-pressed]="filterZone() === z"
+          >{{ z }}</button>
+        }
+      }
+
+      @if (members().length > 0) {
+        <span class="filter-label">MIEMBRO</span>
+        @for (m of members(); track m.id) {
+          <button
+            class="filter-chip filter-chip-member"
+            [class.filter-active]="filterMemberId() === m.id"
+            type="button"
+            (click)="toggleMember(m.id)"
+            [attr.aria-pressed]="filterMemberId() === m.id"
+          >
+            <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="18" />
+            {{ m.name.split(' ')[0] }}
+          </button>
+        }
+      }
+
+      <div class="search-wrap">
+        <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
+        <input
+          class="search-input"
+          type="search"
+          placeholder="Buscar tarea..."
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value)"
+          aria-label="Buscar tarea"
+        />
+      </div>
+    </div>
+
+    <!-- ── States ────────────────────────────────────────────────── -->
+    @if (isLoading()) {
+      <div class="state-center" role="status" aria-label="Cargando">
+        <mat-spinner diameter="36" />
+      </div>
+    } @else if (error()) {
+      <p class="error-msg" role="alert">{{ error() }}</p>
+    } @else if (filteredTasks().length === 0) {
+      <p class="empty-msg">No hay tareas registradas.</p>
+    } @else {
+
+      <!-- ── Desktop Table ─────────────────────────────────────── -->
+      <div class="table-wrap desktop-only">
+        <table class="tasks-table" aria-label="Lista de tareas">
+          <thead>
+            <tr>
+              <th>TAREA</th>
+              <th>PRIORIDAD</th>
+              <th>ASIGNADO A</th>
+              <th>ZONA</th>
+              <th>RECOMPENSA</th>
+              <th>VENCE</th>
+              <th>ESTADO</th>
+              @if (isParent()) {<th>ACCIONES</th>}
+            </tr>
+          </thead>
+          <tbody>
+            @for (task of filteredTasks(); track task.id) {
+              <tr>
+                <!-- TAREA -->
+                <td class="col-task">
+                  <span class="priority-dot priority-dot-{{ task.priority | lowercase }}"></span>
+                  <div class="task-info">
+                    <span class="task-name">{{ task.title }}</span>
+                    @if (task.description) {
+                      <span class="task-desc">{{ task.description }}</span>
+                    }
+                  </div>
+                </td>
+                <!-- PRIORIDAD -->
+                <td>
+                  <span class="priority-text priority-text-{{ task.priority | lowercase }}">
+                    {{ priorityLabel(task.priority) }}
+                  </span>
+                </td>
+                <!-- ASIGNADO A -->
+                <td>
+                  @if (task.assignedToName) {
+                    <span class="member-chip-inline">
+                      <app-user-avatar
+                        [name]="task.assignedToName"
+                        [pictureUrl]="task.assignedToPictureUrl ?? ''"
+                        [size]="24"
+                      />
+                      {{ task.assignedToName.split(' ')[0] }}
+                    </span>
+                  } @else {
+                    <span class="text-muted">Sin asignar</span>
+                  }
+                </td>
+                <!-- ZONA -->
+                <td class="col-zone">{{ task.location }}</td>
+                <!-- RECOMPENSA -->
+                <td class="col-reward">
+                  <span class="reward-xp">+{{ task.xpReward }} XP</span>
+                  <span class="reward-coins"><mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon> {{ task.coinsReward }}</span>
+                </td>
+                <!-- VENCE -->
+                <td class="col-date">{{ formatDate(task.dueDate) }}</td>
+                <!-- ESTADO -->
+                <td>
+                  <span class="status-badge status-{{ task.status | lowercase }}">
+                    {{ statusLabel(task.status) }}
+                  </span>
+                </td>
+                <!-- ACCIONES -->
+                @if (isParent()) {
+                  <td class="col-actions">
+                    <button class="btn-icon" type="button" aria-label="Editar tarea" disabled>
+                      <mat-icon aria-hidden="true">edit</mat-icon>
+                    </button>
+                    <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar tarea" (click)="openDeleteModal(task)">
+                      <mat-icon aria-hidden="true">delete</mat-icon>
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Mobile Cards ──────────────────────────────────────── -->
+      <div class="cards mobile-only">
+        @for (task of filteredTasks(); track task.id) {
+          <article class="task-card">
+            <div class="card-row-top">
+              <span class="task-name">{{ task.title }}</span>
+              <span class="status-badge status-{{ task.status | lowercase }}">
+                {{ statusLabel(task.status) }}
+              </span>
+            </div>
+
+            <div class="card-row-sub">
+              <span class="task-desc">{{ task.description }}</span>
+              <span class="col-date">{{ formatDate(task.dueDate) }}</span>
+            </div>
+
+            <div class="card-row-meta">
+              @if (task.assignedToName) {
+                <span class="member-chip-inline">
+                  <app-user-avatar
+                    [name]="task.assignedToName"
+                    [pictureUrl]="task.assignedToPictureUrl ?? ''"
+                    [size]="20"
+                  />
+                  {{ task.assignedToName.split(' ')[0] }}
+                </span>
+              }
+              <span class="zone-chip">📍 {{ task.location }}</span>
+              <span class="reward-xp">+{{ task.xpReward }} XP</span>
+              <span class="reward-coins"><mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon> {{ task.coinsReward }}</span>
+            </div>
+
+            @if (isParent()) {
+              <div class="card-row-actions">
+                <button class="btn-icon" type="button" aria-label="Editar tarea" disabled>
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar tarea" (click)="openDeleteModal(task)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            }
+          </article>
+        }
+      </div>
+
+    }
+  </main>
+</app-shell>
+
+<!-- ═══════════ CREATE PANEL ═══════════ -->
+@if (showCreatePanel()) {
+  <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
+
+  <aside class="create-panel" role="dialog" aria-label="Crear nueva tarea">
+    <div class="panel-header">
+      <div class="panel-header-left">
+        <h2 class="panel-title">Nueva tarea</h2>
+        <span class="panel-badge">TAREA</span>
+      </div>
+      <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </div>
+
+    <form class="panel-body" (submit)="$event.preventDefault(); submitCreate()" novalidate>
+
+      <!-- Título -->
+      <div class="field">
+        <label class="field-label" for="f-title">TÍTULO <span class="req">*</span></label>
+        <input
+          id="f-title"
+          class="field-input"
+          [class.has-error]="titleCtrl.invalid && titleCtrl.touched"
+          type="text"
+          [formControl]="titleCtrl"
+          placeholder="Ej. Lavar los platos del almuerzo"
+          autocomplete="off"
+        />
+        @if (titleCtrl.invalid && titleCtrl.touched) {
+          <span class="field-error" role="alert">{{ getTitleError() }}</span>
+        }
+      </div>
+
+      <!-- Descripción -->
+      <div class="field">
+        <label class="field-label" for="f-desc">DESCRIPCIÓN <span class="req">*</span></label>
+        <textarea
+          id="f-desc"
+          class="field-input field-textarea"
+          [class.has-error]="descriptionCtrl.invalid && descriptionCtrl.touched"
+          [formControl]="descriptionCtrl"
+          rows="3"
+        ></textarea>
+        @if (descriptionCtrl.invalid && descriptionCtrl.touched) {
+          <span class="field-error" role="alert">{{ getDescriptionError() }}</span>
+        }
+      </div>
+
+      <!-- Prioridad -->
+      <div class="field">
+        <label class="field-label">PRIORIDAD <span class="req">*</span></label>
+        <div class="priority-toggle">
+          <button
+            class="priority-btn"
+            [class.priority-btn-active]="selectedPriority() === 'HIGH'"
+            type="button"
+            (click)="selectPriority('HIGH')"
+          ><span class="priority-dot priority-dot-high"></span> ALTA</button>
+          <button
+            class="priority-btn"
+            [class.priority-btn-active]="selectedPriority() === 'MEDIUM'"
+            type="button"
+            (click)="selectPriority('MEDIUM')"
+          ><span class="priority-dot priority-dot-medium"></span> MEDIA</button>
+          <button
+            class="priority-btn"
+            [class.priority-btn-active]="selectedPriority() === 'LOW'"
+            type="button"
+            (click)="selectPriority('LOW')"
+          ><span class="priority-dot priority-dot-low"></span> BAJA</button>
+        </div>
+      </div>
+
+      <!-- XP y Monedas -->
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="f-xp">XP <span class="req">*</span></label>
+          <input
+            id="f-xp"
+            class="field-input"
+            [class.has-error]="xpRewardCtrl.invalid && xpRewardCtrl.touched"
+            type="number"
+            [formControl]="xpRewardCtrl"
+            min="1"
+            step="1"
+            placeholder="Ej. 30"
+          />
+          @if (xpRewardCtrl.invalid && xpRewardCtrl.touched) {
+            <span class="field-error" role="alert">{{ getXpError() }}</span>
+          }
+        </div>
+        <div class="field">
+          <label class="field-label" for="f-coins">MONEDAS <span class="req">*</span></label>
+          <input
+            id="f-coins"
+            class="field-input"
+            [class.has-error]="coinsRewardCtrl.invalid && coinsRewardCtrl.touched"
+            type="number"
+            [formControl]="coinsRewardCtrl"
+            min="1"
+            step="1"
+            placeholder="Ej. 15"
+          />
+          @if (coinsRewardCtrl.invalid && coinsRewardCtrl.touched) {
+            <span class="field-error" role="alert">{{ getCoinsError() }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- Zona / Ubicación -->
+      <div class="field">
+        <label class="field-label" for="f-zone">ZONA / UBICACIÓN <span class="req">*</span></label>
+        <input
+          id="f-zone"
+          class="field-input"
+          [class.has-error]="locationCtrl.invalid && locationCtrl.touched"
+          type="text"
+          [formControl]="locationCtrl"
+          placeholder="Ej. Cocina, Sala, Patio..."
+          autocomplete="off"
+        />
+        @if (locationCtrl.invalid && locationCtrl.touched) {
+          <span class="field-error" role="alert">{{ getLocationError() }}</span>
+        }
+      </div>
+
+      <!-- Fecha límite -->
+      <div class="field">
+        <label class="field-label" for="f-due">FECHA LÍMITE <span class="optional">(OPCIONAL)</span></label>
+        <input
+          id="f-due"
+          class="field-input"
+          type="date"
+          [min]="minDate"
+          [formControl]="dueDateCtrl"
+        />
+      </div>
+
+      <!-- Asignar a -->
+      <div class="field">
+        <label class="field-label">ASIGNAR A</label>
+        <div class="assignee-chips">
+          <button
+            class="assignee-chip"
+            [class.assignee-active]="selectedAssignee() === null"
+            type="button"
+            (click)="selectedAssignee.set(null)"
+          >Sin asignar</button>
+          @for (m of childMembers(); track m.id) {
+            <button
+              class="assignee-chip"
+              [class.assignee-active]="selectedAssignee() === m.id"
+              type="button"
+              (click)="selectAssignee(m.id)"
+            >
+              <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="22" />
+              {{ memberShortName(m.name) }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Error -->
+      @if (createError()) {
+        <p class="create-error-msg" role="alert">{{ createError() }}</p>
+      }
+
+      <!-- Actions -->
+      <div class="panel-actions">
+        <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
+        <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
+          @if (isCreating()) {
+            Creando...
+          } @else {
+            <mat-icon aria-hidden="true">check</mat-icon>
+            CREAR TAREA
+          }
+        </button>
+      </div>
+
+    </form>
+  </aside>
+}
+
+<!-- ═══════════ DELETE MODAL ═══════════ -->
+@if (showDeleteModal()) {
+  <div class="overlay modal-overlay" (click)="closeDeleteModal()" aria-hidden="true"></div>
+
+  <div class="delete-modal" role="dialog" aria-label="Confirmar eliminación">
+    <div class="modal-icon">
+      <mat-icon class="modal-icon-svg" aria-hidden="true">delete</mat-icon>
+    </div>
+    <h3 class="modal-title">¿Eliminar tarea/<br>hábito?</h3>
+    <p class="modal-text">Vas a eliminar <strong>"{{ taskToDelete()?.title }}"</strong>.</p>
+    <p class="modal-text-sub">Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn-cta btn-outline btn-modal-cancel" type="button" (click)="closeDeleteModal()">CANCELAR</button>
+      <button class="btn-cta btn-modal-delete" type="button" (click)="confirmDelete()">ELIMINAR</button>
+    </div>
+  </div>
+}
