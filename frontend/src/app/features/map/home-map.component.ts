@@ -1,16 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   computed,
   effect,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { PermissionsService } from '../../core/services/permissions.service';
 import { SpaceService } from '../../core/services/space.service';
@@ -48,6 +51,7 @@ export class HomeMapComponent {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly permissionsService = inject(PermissionsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly familyId = computed(() => this.authService.activeFamily()?.familyId ?? null);
   readonly isParent = this.permissionsService.isParent;
@@ -110,22 +114,25 @@ export class HomeMapComponent {
   private loadSpaces(familyId: number): void {
     this.isLoading.set(true);
     this.error.set('');
+    this.spaces.set([]);
+    this.tasks.set([]);
 
-    this.spaceService.getSpaces(familyId).subscribe({
-      next: (spaces) => {
-        this.spaces.set(spaces);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message || 'No se pudo cargar los espacios. Intenta de nuevo.');
-        this.isLoading.set(false);
-      },
-    });
-
-    this.taskService.getTasks(familyId).subscribe({
-      next: (tasks) => this.tasks.set(tasks),
-      error: () => {},
-    });
+    forkJoin({
+      spaces: this.spaceService.getSpaces(familyId),
+      tasks: this.taskService.getTasks(familyId),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ spaces, tasks }) => {
+          this.spaces.set(spaces);
+          this.tasks.set(tasks);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'No se pudo cargar los espacios. Intenta de nuevo.');
+          this.isLoading.set(false);
+        },
+      });
   }
 
   // ─── Panel ───────────────────────────────────────────────────────────────
