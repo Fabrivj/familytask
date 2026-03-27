@@ -69,7 +69,9 @@
                 <button class="btn-icon" type="button" aria-label="Editar espacio" disabled>
                   <mat-icon aria-hidden="true">edit</mat-icon>
                 </button>
-                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar espacio" disabled>
+                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar espacio"
+                  (click)="requestDeleteSpace(space)"
+                  [disabled]="isDeleting() || isMigrating()">
                   <mat-icon aria-hidden="true">delete</mat-icon>
                 </button>
               }
@@ -165,4 +167,93 @@
 
     </form>
   </aside>
+}
+
+<!-- ═══════════ MODAL 1: DELETE CONFIRMATION ═══════════ -->
+<app-confirm-dialog
+  [open]="showDeleteConfirm()"
+  title="Eliminar espacio"
+  message="¿Deseas eliminar este espacio del mapa?"
+  confirmLabel="Eliminar"
+  cancelLabel="Cancelar"
+  (confirmed)="confirmDeleteSpace()"
+  (cancelled)="cancelDeleteSpace()"
+/>
+
+<!-- ═══════════ MODAL 2: MIGRATE TASKS ═══════════ -->
+@if (showMigrateModal()) {
+  <div class="overlay migrate-overlay" (click)="cancelMigrate()" aria-hidden="true"></div>
+  <div class="migrate-modal" role="dialog" aria-label="Migrar tareas" aria-modal="true">
+    <h3 class="migrate-title">Espacio con tareas asignadas</h3>
+
+    @if (hasTargetSpaces()) {
+      <p class="migrate-message">
+        Para eliminar este espacio, primero selecciona a dónde migrar sus tareas.
+      </p>
+
+      <div class="field">
+        <label class="field-label">ESPACIO DEL HOGAR <span class="req">*</span></label>
+        <div class="migrate-space-dropdown-wrap">
+          <button
+            class="field-input migrate-space-trigger"
+            [class.has-value]="selectedTargetSpace() !== null"
+            type="button"
+            (click)="toggleMigrateSpaceSelect()"
+            [attr.aria-expanded]="migrateSpaceSelectOpen()"
+          >
+            @if (selectedTargetSpace()) {
+              <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(selectedTargetSpace()!.type) }}</mat-icon>
+              {{ selectedTargetSpace()!.name }}
+            } @else {
+              <span class="migrate-space-placeholder">Selecciona un espacio...</span>
+            }
+            <mat-icon class="migrate-space-chevron" aria-hidden="true">
+              {{ migrateSpaceSelectOpen() ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+
+          @if (migrateSpaceSelectOpen()) {
+            <ul class="migrate-space-menu" role="listbox" aria-label="Seleccionar espacio destino">
+              @for (s of availableTargetSpaces(); track s.id) {
+                <li
+                  class="migrate-space-item"
+                  role="option"
+                  [class.active]="selectedTargetSpace()?.id === s.id"
+                  (click)="selectMigrateSpace(s)"
+                >
+                  <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(s.type) }}</mat-icon>
+                  {{ s.name }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+
+      <div class="migrate-actions">
+        <button class="btn-cta btn-outline btn-migrate-cancel" type="button" (click)="cancelMigrate()">
+          CANCELAR
+        </button>
+        <button class="btn-cta btn-migrate-confirm" type="button"
+          (click)="confirmMigrate()"
+          [disabled]="!selectedTargetSpace() || isMigrating()">
+          @if (isMigrating()) {
+            Migrando...
+          } @else {
+            MIGRAR Y ELIMINAR
+          }
+        </button>
+      </div>
+    } @else {
+      <p class="migrate-message">
+        No hay un espacio vacío disponible para migrar las tareas.
+        Crea un nuevo espacio sin tareas para poder continuar.
+      </p>
+      <div class="migrate-actions">
+        <button class="btn-cta btn-migrate-confirm" type="button" (click)="cancelMigrate()">
+          ENTENDIDO
+        </button>
+      </div>
+    }
+  </div>
 }
