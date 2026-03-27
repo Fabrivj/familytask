@@ -30,3 +30,16 @@ export interface CreateTaskRequest {
   dueDate?: string | null;
   assignedToId?: number | null;
 }
+
+export interface UpdateTaskRequest {
+  familyId: number;
+  homeSpaceId: number;
+  title: string;
+  description: string;
+  priority: TaskPriority;
+  status: TaskStatus;
+  xpReward: number;
+  coinsReward: number;
+  dueDate?: string | null;
+  assignedToId?: number | null;
+}

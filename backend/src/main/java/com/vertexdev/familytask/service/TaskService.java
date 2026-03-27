@@ -23,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vertexdev.familytask.dto.task.UpdateTaskRequest;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -104,6 +106,84 @@ public class TaskService {
             log.error("Failed to create task for user {}: {}", creator.getEmail(), e.getMessage());
             throw new TaskException("TASK_CREATION_FAILED",
                     "Ocurrió un error al crear la tarea. Por favor, intente nuevamente.", 500);
+        }
+    }
+
+    public TaskResponse updateTask(Long taskId, UpdateTaskRequest request, User editor) {
+        FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
+                .orElseThrow(() -> new TaskException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyGroup.getId(), editor.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        Task task = taskRepository.findById(taskId)
+                .filter(t -> t.getDeletedAt() == null)
+                .orElseThrow(() -> new TaskException("TASK_NOT_FOUND", "La tarea no existe.", 404));
+
+        if (!task.getFamilyGroup().getId().equals(familyGroup.getId())) {
+            throw new TaskException("ACCESS_DENIED", "La tarea no pertenece a esta familia.", 403);
+        }
+
+        Space homeSpace = spaceRepository.findById(request.getHomeSpaceId())
+                .orElseThrow(() -> new TaskException("SPACE_NOT_FOUND", "El espacio no existe.", 404));
+
+        if (request.getDueDate() != null && request.getDueDate().isBefore(LocalDate.now())) {
+            throw new TaskException("INVALID_DUE_DATE",
+                    "La fecha límite debe ser igual o posterior a la fecha actual.", 400);
+        }
+
+        Priority priority;
+        try {
+            priority = Priority.valueOf(request.getPriority());
+        } catch (IllegalArgumentException e) {
+            throw new TaskException("INVALID_PRIORITY", "El campo Prioridad es obligatorio.", 400);
+        }
+
+        TaskStatus status;
+        try {
+            status = TaskStatus.valueOf(request.getStatus());
+        } catch (IllegalArgumentException e) {
+            throw new TaskException("INVALID_STATUS", "El campo Estado es obligatorio.", 400);
+        }
+
+        User assignedTo = null;
+        if (request.getAssignedToId() != null) {
+            assignedTo = userRepository.findById(request.getAssignedToId())
+                    .orElseThrow(() -> new TaskException("USER_NOT_FOUND", "El usuario asignado no existe.", 404));
+            final User finalAssignedTo = assignedTo;
+            boolean isMember = familyMemberRepository
+                    .findByFamilyGroupIdAndIsActiveTrue(familyGroup.getId())
+                    .stream()
+                    .anyMatch(m -> m.getUser().getId().equals(finalAssignedTo.getId()));
+            if (!isMember) {
+                throw new TaskException("NOT_A_MEMBER", "El usuario asignado no pertenece a esta familia.", 400);
+            }
+        }
+
+        try {
+            task.setTitle(request.getTitle().trim());
+            task.setDescription(request.getDescription().trim());
+            task.setPriority(priority);
+            task.setStatus(status);
+            task.setHomeSpace(homeSpace);
+            task.setXpReward(request.getXpReward());
+            task.setCoinsReward(request.getCoinsReward());
+            task.setDueDate(request.getDueDate());
+            task.setAssignedTo(assignedTo);
+
+            taskRepository.save(task);
+            log.info("Task '{}' updated by user {} in family {}",
+                    task.getTitle(), editor.getEmail(), familyGroup.getName());
+
+            return taskMapper.toResponse(task);
+        } catch (TaskException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to update task {} for user {}: {}", taskId, editor.getEmail(), e.getMessage());
+            throw new TaskException("TASK_UPDATE_FAILED",
+                    "Ocurrió un error al actualizar la tarea. Por favor, intente nuevamente.", 500);
         }
     }
 
