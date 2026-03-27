@@ -1,5 +1,6 @@
 package com.vertexdev.familytask.service;
 
+import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.task.CreateTaskRequest;
 import com.vertexdev.familytask.dto.task.TaskResponse;
 import com.vertexdev.familytask.exception.TaskException;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -105,6 +107,22 @@ public class TaskService {
             throw new TaskException("TASK_CREATION_FAILED",
                     "Ocurrió un error al crear la tarea. Por favor, intente nuevamente.", 500);
         }
+    }
+
+    public MessageResponse deleteTask(Long taskId, User requester) {
+        Task task = taskRepository.findById(taskId)
+                .filter(t -> t.getDeletedAt() == null)
+                .orElseThrow(() -> new TaskException("TASK_NOT_FOUND", "Tarea no encontrada.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(task.getFamilyGroup().getId(), requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        task.setDeletedAt(LocalDateTime.now());
+        taskRepository.save(task);
+        log.info("Task '{}' deleted by user {}", task.getTitle(), requester.getEmail());
+        return new MessageResponse("Tarea eliminada correctamente.");
     }
 
     @Transactional(readOnly = true)

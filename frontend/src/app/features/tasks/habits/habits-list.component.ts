@@ -15,10 +15,11 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
 import { HabitService } from '../../../core/services/habit.service';
 import { HabitFrequency, HabitResponse } from '../../../core/models/habit.model';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-habits-list',
-  imports: [LowerCasePipe, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [LowerCasePipe, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, ConfirmDialogComponent],
   templateUrl: './habits-list.component.html',
   styleUrl: './habits-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +35,10 @@ export class HabitsListComponent {
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly habits        = signal<HabitResponse[]>([]);
+
+  // ─── Modal de borrado ─────────────────────────────────────────────────────
+  readonly showDeleteModal = signal(false);
+  readonly habitToDelete = signal<HabitResponse | null>(null);
   readonly isLoading     = signal(false);
   readonly error         = signal('');
 
@@ -191,6 +196,40 @@ export class HabitsListComponent {
       error: (err) => {
         this.createError.set(err.error?.message || 'Ocurrió un error al crear el hábito. Por favor, intente nuevamente.');
         this.isCreating.set(false);
+      },
+    });
+  }
+
+  // ─── Modal de borrado ─────────────────────────────────────────────────────
+  openDeleteModal(habit: HabitResponse): void {
+    this.habitToDelete.set(habit);
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal.set(false);
+    this.habitToDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const habit = this.habitToDelete();
+    if (!habit) return;
+    this.habitService.delete(habit.id).subscribe({
+      next: () => {
+        this.habits.update(list => list.filter(h => h.id !== habit.id));
+        this.closeDeleteModal();
+        this.snackBar.open('Hábito eliminado correctamente', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'snack-success',
+        });
+      },
+      error: (err) => {
+        this.closeDeleteModal();
+        this.snackBar.open(
+          err.error?.message || 'Ocurrió un error al eliminar el hábito. Por favor, intente nuevamente.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-error' },
+        );
       },
     });
   }
