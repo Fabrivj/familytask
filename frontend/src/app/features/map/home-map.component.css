@@ -449,6 +449,159 @@
   line-height: 14px;
 }
 
+/* ═════════════════════════════════════════════════════════════════════════
+   MIGRATE MODAL (Modal 2 — task migration)
+   ═════════════════════════════════════════════════════════════════════════ */
+.migrate-overlay { z-index: 200; }
+
+.migrate-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 201;
+  width: 90vw;
+  max-width: 460px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 0 40px rgba(var(--border-rgb), 0.15),
+              0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: scaleIn 0.18s ease;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.migrate-title {
+  margin: 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.migrate-message {
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+
+/* ── Migrate space custom dropdown (matches tasks-list panel-space pattern) */
+.migrate-space-dropdown-wrap {
+  position: relative;
+}
+
+.migrate-space-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-sub);
+}
+
+.migrate-space-trigger.has-value {
+  color: var(--text);
+}
+
+.migrate-space-placeholder {
+  flex: 1;
+  font-style: italic;
+  opacity: 0.5;
+}
+
+.migrate-space-chevron {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin-left: auto;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.migrate-space-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--panel, var(--bg));
+  border: 1.5px solid rgba(var(--border-rgb), 0.2);
+  border-radius: 10px;
+  padding: 6px;
+  list-style: none;
+  margin: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.15s ease;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.migrate-space-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.migrate-space-item:hover {
+  background: rgba(var(--border-rgb), 0.08);
+  color: var(--text);
+}
+
+.migrate-space-item.active {
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
+}
+
+.chip-space-icon {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  opacity: 0.7;
+}
+
+.migrate-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.btn-migrate-cancel {
+  padding: 8px 22px;
+  font-size: 13px;
+}
+
+.btn-migrate-confirm {
+  padding: 8px 22px;
+  font-size: 13px;
+}
+
+.btn-migrate-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
   .content { padding: 20px 16px 40px; }
