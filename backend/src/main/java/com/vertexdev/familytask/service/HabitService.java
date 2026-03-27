@@ -4,6 +4,7 @@ import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
 import com.vertexdev.familytask.exception.HabitException;
 import com.vertexdev.familytask.model.FamilyGroup;
+import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.Habit;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.HabitFrequency;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +66,27 @@ public class HabitService {
         } catch (Exception e) {
             log.error("Error creating habit: {}", e.getMessage());
             throw new HabitException("HABIT_CREATION_FAILED", "Ocurrió un error al crear el hábito. Por favor, intente nuevamente.", 500);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<HabitResponse> getHabits(Long familyId, User requester) {
+        FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
+                .orElseThrow(() -> new HabitException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
+                .filter(FamilyMember::getIsActive)
+                .orElseThrow(() -> new HabitException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        try {
+            return habitRepository.findByFamilyGroupIdAndIsActiveTrue(familyGroup.getId())
+                    .stream()
+                    .map(this::toResponse)
+                    .toList();
+        } catch (Exception e) {
+            log.error("Failed to fetch habits for family {}: {}", familyId, e.getMessage());
+            throw new HabitException("FETCH_FAILED", "Error al cargar los hábitos. Por favor, intente nuevamente.", 500);
         }
     }
 

@@ -7,8 +7,41 @@
   </div>
 }
 
-<!-- ── Empty state ───────────────────────────────────────────── -->
-@if (habits().length === 0) {
+<!-- ── Filters ────────────────────────────────────────────────── -->
+<div class="filters-bar" role="group" aria-label="Filtros de hábitos">
+  <span class="filter-label">FRECUENCIA</span>
+  @for (f of ['DAILY', 'WEEKDAYS', 'WEEKENDS', 'WEEKLY', 'MONTHLY']; track f) {
+    <button
+      class="filter-chip"
+      [class.filter-active]="filterFrequency() === f"
+      type="button"
+      (click)="toggleFrequency(f)"
+      [attr.aria-pressed]="filterFrequency() === f"
+    >
+      {{ frequencyLabel(f) }}
+    </button>
+  }
+  <div class="search-wrap">
+    <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
+    <input
+      class="search-input"
+      type="search"
+      placeholder="Buscar hábito..."
+      [value]="searchQuery()"
+      (input)="searchQuery.set($any($event.target).value)"
+      aria-label="Buscar hábito"
+    />
+  </div>
+</div>
+
+<!-- ── States ────────────────────────────────────────────────── -->
+@if (isLoading()) {
+  <div class="state-center" role="status" aria-label="Cargando">
+    <mat-spinner diameter="36" />
+  </div>
+} @else if (error()) {
+  <p class="error-msg" role="alert">{{ error() }}</p>
+} @else if (filteredHabits().length === 0) {
   <p class="empty-msg">No hay hábitos registrados.</p>
 } @else {
 
@@ -19,12 +52,13 @@
         <tr>
           <th>HÁBITO</th>
           <th>FRECUENCIA</th>
+          <th>ASIGNADO A</th>
           <th>RECOMPENSA</th>
           @if (isParent()) {<th>ACCIONES</th>}
         </tr>
       </thead>
       <tbody>
-        @for (habit of habits(); track habit.id) {
+        @for (habit of filteredHabits(); track habit.id) {
           <tr>
             <td class="col-habit">
               <div class="habit-info">
@@ -39,21 +73,28 @@
                 {{ frequencyLabel(habit.frequency) }}
               </span>
             </td>
-            <td class="col-reward">
-              <span class="reward-xp">+{{ habit.xpReward }} XP</span>
-              <span class="reward-coins">
-                <mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon>
-                {{ habit.coinsReward }}
-              </span>
+            <td>
+              <span class="text-muted">Sin asignar</span>
+            </td>
+            <td>
+              <div class="col-reward">
+                <span class="reward-xp">+{{ habit.xpReward }} XP</span>
+                <span class="reward-coins">
+                  <mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon>
+                  {{ habit.coinsReward }}
+                </span>
+              </div>
             </td>
             @if (isParent()) {
-              <td class="col-actions">
-                <button class="btn-icon" type="button" aria-label="Editar hábito" disabled>
-                  <mat-icon aria-hidden="true">edit</mat-icon>
-                </button>
-                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" disabled>
-                  <mat-icon aria-hidden="true">delete</mat-icon>
-                </button>
+              <td>
+                <div class="col-actions">
+                  <button class="btn-icon" type="button" aria-label="Editar hábito" disabled>
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" disabled>
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
+                </div>
               </td>
             }
           </tr>
@@ -64,7 +105,7 @@
 
   <!-- ── Mobile Cards ──────────────────────────────────────── -->
   <div class="cards mobile-only">
-    @for (habit of habits(); track habit.id) {
+    @for (habit of filteredHabits(); track habit.id) {
       <article class="habit-card">
         <div class="card-row-top">
           <span class="habit-name">{{ habit.title }}</span>
