@@ -79,7 +79,7 @@ export const routes: Routes = [
     path: 'tasks',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/tasks/list/tasks-list.component').then(m => m.TasksListComponent),
+      import('./features/tasks/tasks-habits/tasks-habits.component').then(m => m.TasksHabitsComponent),
   },
   {
     path: '**',

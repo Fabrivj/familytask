@@ -1,33 +1,10 @@
-<app-shell>
-  <main class="content">
-
-    <!-- Header -->
-    <div class="header-row">
-      <div class="header-info">
-        <p class="tag">// GESTIÓN DE FAMILIA</p>
-        <h1 class="page-title">Tareas y Hábitos</h1>
-        <p class="page-subtitle">{{ filteredTasks().length }} tareas activas</p>
-      </div>
-      @if (isParent()) {
+    @if (isParent()) {
+      <div class="action-row">
         <button class="btn-cta btn-new-task" type="button" (click)="openCreatePanel()">
           + NUEVA TAREA
         </button>
-      }
-    </div>
-
-    <!-- ── Tabs ──────────────────────────────────────────────────── -->
-    <div class="tabs" role="tablist">
-      <button class="tab tab-active" role="tab" aria-selected="true">
-        <mat-icon class="tab-icon" aria-hidden="true">task_alt</mat-icon>
-        TAREAS
-        <span class="tab-count">{{ tasks().length }}</span>
-      </button>
-      <button class="tab" role="tab" aria-selected="false" disabled>
-        <mat-icon class="tab-icon" aria-hidden="true">schedule</mat-icon>
-        HÁBITOS
-        <span class="tab-count">0</span>
-      </button>
-    </div>
+      </div>
+    }
 
     <!-- ── Filters ───────────────────────────────────────────────── -->
     <div class="filters-bar" role="group" aria-label="Filtros de tareas">
@@ -267,8 +244,6 @@
       </div>
 
     }
-  </main>
-</app-shell>
 
 <!-- ═══════════ CREATE PANEL ═══════════ -->
 @if (showCreatePanel()) {
