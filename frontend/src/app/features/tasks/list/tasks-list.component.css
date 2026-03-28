@@ -356,22 +356,6 @@
   white-space: nowrap;
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.status-pending    { border: 1px solid rgba(var(--border-rgb), 0.4); color: var(--border); }
-.status-in_progress { border: 1px solid rgba(var(--warning-rgb), 0.4); color: var(--warning); }
-.status-completed  { border: 1px solid rgba(var(--success-rgb), 0.5); color: var(--success); }
-.status-overdue    { border: 1px solid rgba(var(--error-rgb), 0.5); color: var(--error); }
-
 .col-actions {
   display: flex;
   align-items: center;

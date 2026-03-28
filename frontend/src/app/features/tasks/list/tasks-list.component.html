@@ -119,6 +119,7 @@
               <th>ZONA</th>
               <th>RECOMPENSA</th>
               <th>VENCE</th>
+              <!-- TODO: columna ESTADO — pendiente implementación con tabla intermedia -->
               <th>ESTADO</th>
               @if (isParent()) {<th>ACCIONES</th>}
             </tr>
@@ -171,16 +172,12 @@
                 </td>
                 <!-- VENCE -->
                 <td class="col-date">{{ formatDate(task.dueDate) }}</td>
-                <!-- ESTADO -->
-                <td>
-                  <span class="status-badge status-{{ task.status | lowercase }}">
-                    {{ statusLabel(task.status) }}
-                  </span>
-                </td>
+                <!-- TODO: estado — pendiente implementación con tabla intermedia -->
+                <td>—</td>
                 <!-- ACCIONES -->
                 @if (isParent()) {
                   <td class="col-actions">
-                    <button class="btn-icon" type="button" aria-label="Editar tarea" disabled>
+                    <button class="btn-icon" type="button" aria-label="Editar tarea" (click)="openEditPanel(task)">
                       <mat-icon aria-hidden="true">edit</mat-icon>
                     </button>
                     <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar tarea" (click)="openDeleteModal(task)">
@@ -200,9 +197,8 @@
           <article class="task-card">
             <div class="card-row-top">
               <span class="task-name">{{ task.title }}</span>
-              <span class="status-badge status-{{ task.status | lowercase }}">
-                {{ statusLabel(task.status) }}
-              </span>
+              <!-- TODO: badge estado — pendiente implementación con tabla intermedia -->
+              —
             </div>
 
             <div class="card-row-sub">
@@ -231,7 +227,7 @@
 
             @if (isParent()) {
               <div class="card-row-actions">
-                <button class="btn-icon" type="button" aria-label="Editar tarea" disabled>
+                <button class="btn-icon" type="button" aria-label="Editar tarea" (click)="openEditPanel(task)">
                   <mat-icon aria-hidden="true">edit</mat-icon>
                 </button>
                 <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar tarea" (click)="openDeleteModal(task)">
@@ -249,10 +245,10 @@
 @if (showCreatePanel()) {
   <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Crear nueva tarea">
+  <aside class="create-panel" role="dialog" [attr.aria-label]="isEditMode() ? 'Editar tarea' : 'Crear nueva tarea'">
     <div class="panel-header">
       <div class="panel-header-left">
-        <h2 class="panel-title">Nueva tarea</h2>
+        <h2 class="panel-title">{{ isEditMode() ? 'Editar tarea' : 'Nueva tarea' }}</h2>
         <span class="panel-badge">TAREA</span>
       </div>
       <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
@@ -454,10 +450,10 @@
         <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
         <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
           @if (isCreating()) {
-            Creando...
+            {{ isEditMode() ? 'Guardando...' : 'Creando...' }}
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
-            CREAR TAREA
+            {{ isEditMode() ? 'GUARDAR CAMBIOS' : 'CREAR TAREA' }}
           }
         </button>
       </div>
