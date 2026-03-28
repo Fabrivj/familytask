@@ -17,4 +17,8 @@ export class TaskService {
   create(request: CreateTaskRequest): Observable<TaskResponse> {
     return this.http.post<TaskResponse>(`${environment.apiUrl}/tasks`, request);
   }
+
+  delete(taskId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/tasks/${taskId}`);
+  }
 }
