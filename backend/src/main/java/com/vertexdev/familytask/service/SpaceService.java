@@ -2,6 +2,7 @@ package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.dto.space.CreateSpaceRequest;
 import com.vertexdev.familytask.dto.space.SpaceResponse;
+import com.vertexdev.familytask.dto.space.UpdateSpaceRequest;
 import com.vertexdev.familytask.exception.SpaceException;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.Space;
@@ -33,32 +34,20 @@ public class SpaceService {
     private final FamilyPermissions familyPermissions;
 
     public SpaceResponse createSpace(CreateSpaceRequest request, User creator) {
-        FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
-                .orElseThrow(() -> new SpaceException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
-
-        familyMemberRepository
-                .findByFamilyGroupIdAndUserId(familyGroup.getId(), creator.getId())
-                .filter(familyPermissions::isActiveParent)
-                .orElseThrow(() -> new SpaceException("ACCESS_DENIED", "Acceso no autorizado.", 403));
-
-        SpaceType spaceType;
-        try {
-            spaceType = SpaceType.valueOf(request.getType().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new SpaceException("INVALID_TYPE", "El tipo de espacio no es válido.", 400);
-        }
+        FamilyGroup familyGroup = resolveFamily(request.getFamilyId());
+        requireParentAccess(familyGroup, creator);
+        SpaceType spaceType = parseSpaceType(request.getType());
 
         try {
             Space space = Space.builder()
                     .name(request.getName().trim())
                     .type(spaceType)
+                    .familyGroup(familyGroup)
                     .createdBy(creator)
                     .build();
-
             spaceRepository.save(space);
             log.info("Space '{}' ({}) created by user {} in family {}",
                     space.getName(), space.getType(), creator.getEmail(), familyGroup.getName());
-
             return toResponse(space);
         } catch (SpaceException e) {
             throw e;
@@ -70,16 +59,14 @@ public class SpaceService {
 
     @Transactional(readOnly = true)
     public List<SpaceResponse> getSpaces(Long familyId, User requester) {
-        FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
-                .orElseThrow(() -> new SpaceException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
-
+        FamilyGroup familyGroup = resolveFamily(familyId);
         familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
                 .filter(m -> m.getIsActive())
                 .orElseThrow(() -> new SpaceException("ACCESS_DENIED", "Acceso no autorizado.", 403));
 
         try {
-            return spaceRepository.findByFamilyGroupId(familyGroup.getId())
+            return spaceRepository.findByFamilyGroupIdOrderByCreatedAtAsc(familyGroup.getId())
                     .stream()
                     .map(this::toResponse)
                     .toList();
@@ -91,44 +78,38 @@ public class SpaceService {
         }
     }
 
-    public void deleteSpace(Long spaceId, Long familyId, Long targetSpaceId, User requester) {
-        FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
-                .orElseThrow(() -> new SpaceException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
+    public SpaceResponse updateSpace(Long spaceId, UpdateSpaceRequest request, User requester) {
+        FamilyGroup familyGroup = resolveFamily(request.getFamilyId());
+        requireParentAccess(familyGroup, requester);
+        Space space = resolveOwnedSpace(spaceId, familyGroup.getId());
+        SpaceType spaceType = parseSpaceType(request.getType());
 
-        familyMemberRepository
-                .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
-                .filter(familyPermissions::isActiveParent)
-                .orElseThrow(() -> new SpaceException("ACCESS_DENIED", "Acceso no autorizado.", 403));
-
-        Space space = spaceRepository.findById(spaceId)
-                .orElseThrow(() -> new SpaceException("SPACE_NOT_FOUND", "Espacio no encontrado.", 404));
-
-        // Verify the space belongs to this family (created by an active member of the family)
-        List<Space> familySpaces = spaceRepository.findByFamilyGroupId(familyGroup.getId());
-        boolean belongsToFamily = familySpaces.stream().anyMatch(s -> s.getId().equals(spaceId));
-        if (!belongsToFamily) {
-            throw new SpaceException("SPACE_NOT_FOUND", "Espacio no encontrado.", 404);
+        try {
+            space.setName(request.getName().trim());
+            space.setType(spaceType);
+            spaceRepository.save(space);
+            log.info("Space '{}' (id={}) updated by user {} in family '{}'",
+                    space.getName(), spaceId, requester.getEmail(), familyGroup.getName());
+            return toResponse(space);
+        } catch (SpaceException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to update space {} for user {}: {}", spaceId, requester.getEmail(), e.getMessage());
+            throw new SpaceException("SPACE_UPDATE_FAILED", "No se pudo actualizar el espacio. Intenta de nuevo.", 500);
         }
+    }
 
-        // Check for active tasks in this space
+    public void deleteSpace(Long spaceId, Long familyId, Long targetSpaceId, User requester) {
+        FamilyGroup familyGroup = resolveFamily(familyId);
+        requireParentAccess(familyGroup, requester);
+        Space space = resolveOwnedSpace(spaceId, familyGroup.getId());
+
         if (taskRepository.existsByHomeSpaceIdAndDeletedAtIsNull(spaceId)) {
             if (targetSpaceId == null) {
                 throw new SpaceException("SPACE_HAS_TASKS",
                         "No es posible eliminar este espacio porque tiene tareas asignadas.", 409);
             }
-
-            // Validate target space exists and belongs to the same family
-            Space targetSpace = spaceRepository.findById(targetSpaceId)
-                    .orElseThrow(() -> new SpaceException("TARGET_SPACE_NOT_FOUND",
-                            "El espacio destino no fue encontrado.", 404));
-
-            boolean targetBelongsToFamily = familySpaces.stream().anyMatch(s -> s.getId().equals(targetSpaceId));
-            if (!targetBelongsToFamily) {
-                throw new SpaceException("TARGET_SPACE_NOT_FOUND",
-                        "El espacio destino no pertenece a esta familia.", 404);
-            }
-
-            // Bulk reassign all active tasks to the target space
+            Space targetSpace = resolveOwnedSpace(targetSpaceId, familyGroup.getId());
             List<Task> tasks = taskRepository.findByHomeSpaceIdAndDeletedAtIsNull(spaceId);
             tasks.forEach(t -> t.setHomeSpace(targetSpace));
             taskRepository.saveAll(tasks);
@@ -138,6 +119,33 @@ public class SpaceService {
         spaceRepository.delete(space);
         log.info("Space '{}' (id={}) deleted by user {} in family '{}'",
                 space.getName(), spaceId, requester.getEmail(), familyGroup.getName());
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    private FamilyGroup resolveFamily(Long familyId) {
+        return familyGroupRepository.findById(familyId)
+                .orElseThrow(() -> new SpaceException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
+    }
+
+    private void requireParentAccess(FamilyGroup familyGroup, User user) {
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyGroup.getId(), user.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new SpaceException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+    }
+
+    private Space resolveOwnedSpace(Long spaceId, Long familyGroupId) {
+        return spaceRepository.findByIdAndFamilyGroupId(spaceId, familyGroupId)
+                .orElseThrow(() -> new SpaceException("SPACE_NOT_FOUND", "Espacio no encontrado.", 404));
+    }
+
+    private SpaceType parseSpaceType(String type) {
+        try {
+            return SpaceType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new SpaceException("INVALID_TYPE", "El tipo de espacio no es válido.", 400);
+        }
     }
 
     private SpaceResponse toResponse(Space space) {

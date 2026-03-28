@@ -23,6 +23,7 @@ import {
   SPACE_TYPE_OPTIONS,
   SpaceResponse,
   SpaceType,
+  UpdateSpaceRequest,
   spaceTypeIcon,
   spaceTypeLabel,
 } from '../../core/models/space.model';
@@ -107,6 +108,12 @@ export class HomeMapComponent {
   );
   readonly hasTargetSpaces = computed(() => this.availableTargetSpaces().length > 0);
 
+  // ─── Panel de edición ─────────────────────────────────────────────────────
+  readonly showEditPanel = signal(false);
+  readonly spaceToEdit = signal<SpaceResponse | null>(null);
+  readonly isEditing = signal(false);
+  readonly editError = signal('');
+
   // ─── Panel de creación ────────────────────────────────────────────────────
   readonly showCreatePanel = signal(false);
   readonly isCreating = signal(false);
@@ -157,12 +164,68 @@ export class HomeMapComponent {
   // ─── Panel ───────────────────────────────────────────────────────────────
   openCreatePanel(): void {
     this.resetForm();
+    this.showEditPanel.set(false);
     this.showCreatePanel.set(true);
   }
 
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+  }
+
+  openEditPanel(space: SpaceResponse): void {
+    this.showCreatePanel.set(false);
+    this.spaceToEdit.set(space);
+    this.nameCtrl.reset(space.name);
+    this.selectedType.set(space.type);
+    this.typeError.set(false);
+    this.editError.set('');
+    this.showEditPanel.set(true);
+  }
+
+  closeEditPanel(): void {
+    this.showEditPanel.set(false);
+    this.spaceToEdit.set(null);
+    this.editError.set('');
+  }
+
+  submitEdit(): void {
+    this.nameCtrl.markAllAsTouched();
+    const typeValid = this.selectedType() !== null;
+    this.typeError.set(!typeValid);
+
+    if (this.nameCtrl.invalid || !typeValid) return;
+
+    const familyId = this.familyId();
+    const space = this.spaceToEdit();
+    if (!familyId || !space) return;
+
+    this.isEditing.set(true);
+    this.editError.set('');
+
+    const request: UpdateSpaceRequest = {
+      familyId,
+      name: this.nameCtrl.value.trim(),
+      type: this.selectedType()!,
+    };
+
+    this.spaceService.update(space.id, request)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.spaces.update(list => list.map(s => s.id === updated.id ? updated : s));
+          this.isEditing.set(false);
+          this.closeEditPanel();
+          this.snackBar.open('Espacio actualizado exitosamente.', 'Cerrar', {
+            duration: 4000,
+            panelClass: 'snack-success',
+          });
+        },
+        error: (err: HttpErrorResponse) => {
+          this.editError.set(err.error?.message || 'No se pudo actualizar el espacio. Intenta de nuevo.');
+          this.isEditing.set(false);
+        },
+      });
   }
 
   selectType(type: SpaceType): void {

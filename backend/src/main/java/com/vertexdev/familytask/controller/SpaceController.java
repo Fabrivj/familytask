@@ -2,6 +2,7 @@ package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.space.CreateSpaceRequest;
 import com.vertexdev.familytask.dto.space.SpaceResponse;
+import com.vertexdev.familytask.dto.space.UpdateSpaceRequest;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.SpaceService;
 import jakarta.validation.Valid;
@@ -44,6 +45,21 @@ public class SpaceController {
 
         SpaceResponse response = spaceService.createSpace(request, authenticatedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Updates the name and/or type of an existing space.
+     * Requires PARENT role.
+     * PUT /api/spaces/{id}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<SpaceResponse> updateSpace(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateSpaceRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        SpaceResponse response = spaceService.updateSpace(id, request, authenticatedUser);
+        return ResponseEntity.ok(response);
     }
 
     /**
