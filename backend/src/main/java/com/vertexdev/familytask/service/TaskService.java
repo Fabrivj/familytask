@@ -8,6 +8,7 @@ import com.vertexdev.familytask.mapper.TaskMapper;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.Space;
 import com.vertexdev.familytask.model.Task;
+import com.vertexdev.familytask.model.TaskAssignment;
 import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.Priority;
@@ -16,6 +17,7 @@ import com.vertexdev.familytask.util.FamilyPermissions;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.SpaceRepository;
+import com.vertexdev.familytask.repository.TaskAssignmentRepository;
 import com.vertexdev.familytask.repository.TaskRepository;
 import com.vertexdev.familytask.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final TaskAssignmentRepository taskAssignmentRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final SpaceRepository spaceRepository;
@@ -67,25 +70,10 @@ public class TaskService {
             throw new TaskException("INVALID_PRIORITY", "El campo Prioridad es obligatorio.", 400);
         }
 
-        User assignedTo = null;
-        if (request.getAssignedToId() != null) {
-            assignedTo = userRepository.findById(request.getAssignedToId())
-                    .orElseThrow(() -> new TaskException("USER_NOT_FOUND", "El usuario asignado no existe.", 404));
-            final User finalAssignedTo = assignedTo;
-            boolean isMember = familyMemberRepository
-                    .findByFamilyGroupIdAndIsActiveTrue(familyGroup.getId())
-                    .stream()
-                    .anyMatch(m -> m.getUser().getId().equals(finalAssignedTo.getId()));
-            if (!isMember) {
-                throw new TaskException("NOT_A_MEMBER", "El usuario asignado no pertenece a esta familia.", 400);
-            }
-        }
-
         try {
             Task task = Task.builder()
                     .familyGroup(familyGroup)
                     .createdBy(creator)
-                    .assignedTo(assignedTo)
                     .homeSpace(homeSpace)
                     .title(request.getTitle().trim())
                     .description(request.getDescription().trim())
@@ -96,6 +84,11 @@ public class TaskService {
                     .build();
 
             taskRepository.save(task);
+
+            if (request.getAssignedToId() != null) {
+                assignTask(task, request.getAssignedToId(), familyGroup.getId());
+            }
+
             log.info("Task '{}' created by user {} in family {} at space '{}'",
                     task.getTitle(), creator.getEmail(), familyGroup.getName(), homeSpace.getName());
 
@@ -141,20 +134,6 @@ public class TaskService {
             throw new TaskException("INVALID_PRIORITY", "El campo Prioridad es obligatorio.", 400);
         }
 
-        User assignedTo = null;
-        if (request.getAssignedToId() != null) {
-            assignedTo = userRepository.findById(request.getAssignedToId())
-                    .orElseThrow(() -> new TaskException("USER_NOT_FOUND", "El usuario asignado no existe.", 404));
-            final User finalAssignedTo = assignedTo;
-            boolean isMember = familyMemberRepository
-                    .findByFamilyGroupIdAndIsActiveTrue(familyGroup.getId())
-                    .stream()
-                    .anyMatch(m -> m.getUser().getId().equals(finalAssignedTo.getId()));
-            if (!isMember) {
-                throw new TaskException("NOT_A_MEMBER", "El usuario asignado no pertenece a esta familia.", 400);
-            }
-        }
-
         try {
             task.setTitle(request.getTitle().trim());
             task.setDescription(request.getDescription().trim());
@@ -163,9 +142,24 @@ public class TaskService {
             task.setXpReward(request.getXpReward());
             task.setCoinsReward(request.getCoinsReward());
             task.setDueDate(request.getDueDate());
-            task.setAssignedTo(assignedTo);
 
             taskRepository.save(task);
+
+            TaskAssignment existingAssignment = taskAssignmentRepository.findByTaskId(task.getId()).orElse(null);
+
+            if (request.getAssignedToId() != null) {
+                if (existingAssignment != null) {
+                    User assignedTo = validateAssignee(request.getAssignedToId(), familyGroup.getId());
+                    existingAssignment.setUser(assignedTo);
+                    taskAssignmentRepository.save(existingAssignment);
+                } else {
+                    assignTask(task, request.getAssignedToId(), familyGroup.getId());
+                }
+            } else if (existingAssignment != null) {
+                taskAssignmentRepository.delete(existingAssignment);
+                task.setAssignment(null);
+            }
+
             log.info("Task '{}' updated by user {} in family {}",
                     task.getTitle(), editor.getEmail(), familyGroup.getName());
 
@@ -193,6 +187,31 @@ public class TaskService {
         taskRepository.save(task);
         log.info("Task '{}' deleted by user {}", task.getTitle(), requester.getEmail());
         return new MessageResponse("Tarea eliminada correctamente.");
+    }
+
+    // ─── Asignación de tarea ─────────────────────────────────────────────────
+
+    private User validateAssignee(Long assignedToId, Long familyGroupId) {
+        User assignedTo = userRepository.findById(assignedToId)
+                .orElseThrow(() -> new TaskException("USER_NOT_FOUND", "El usuario asignado no existe.", 404));
+        boolean isMember = familyMemberRepository
+                .findByFamilyGroupIdAndIsActiveTrue(familyGroupId)
+                .stream()
+                .anyMatch(m -> m.getUser().getId().equals(assignedTo.getId()));
+        if (!isMember) {
+            throw new TaskException("NOT_A_MEMBER", "El usuario asignado no pertenece a esta familia.", 400);
+        }
+        return assignedTo;
+    }
+
+    private void assignTask(Task task, Long assignedToId, Long familyGroupId) {
+        User assignedTo = validateAssignee(assignedToId, familyGroupId);
+        TaskAssignment assignment = TaskAssignment.builder()
+                .task(task)
+                .user(assignedTo)
+                .build();
+        taskAssignmentRepository.save(assignment);
+        task.setAssignment(assignment);
     }
 
     @Transactional(readOnly = true)

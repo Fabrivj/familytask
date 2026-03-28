@@ -30,9 +30,8 @@ public class Task {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_to")
-    private User assignedTo;
+    @OneToOne(mappedBy = "task", fetch = FetchType.LAZY)
+    private TaskAssignment assignment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "home_space_id", nullable = false)
