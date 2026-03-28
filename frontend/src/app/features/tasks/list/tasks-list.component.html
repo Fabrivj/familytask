@@ -119,6 +119,7 @@
               <th>ZONA</th>
               <th>RECOMPENSA</th>
               <th>VENCE</th>
+              <!-- TODO: columna ESTADO — pendiente implementación con tabla intermedia -->
               <th>ESTADO</th>
               @if (isParent()) {<th>ACCIONES</th>}
             </tr>
@@ -171,12 +172,8 @@
                 </td>
                 <!-- VENCE -->
                 <td class="col-date">{{ formatDate(task.dueDate) }}</td>
-                <!-- ESTADO -->
-                <td>
-                  <span class="status-badge status-{{ task.status | lowercase }}">
-                    {{ statusLabel(task.status) }}
-                  </span>
-                </td>
+                <!-- TODO: estado — pendiente implementación con tabla intermedia -->
+                <td>—</td>
                 <!-- ACCIONES -->
                 @if (isParent()) {
                   <td class="col-actions">
@@ -200,9 +197,8 @@
           <article class="task-card">
             <div class="card-row-top">
               <span class="task-name">{{ task.title }}</span>
-              <span class="status-badge status-{{ task.status | lowercase }}">
-                {{ statusLabel(task.status) }}
-              </span>
+              <!-- TODO: badge estado — pendiente implementación con tabla intermedia -->
+              —
             </div>
 
             <div class="card-row-sub">
@@ -318,33 +314,6 @@
           ><span class="priority-dot priority-dot-low"></span> BAJA</button>
         </div>
       </div>
-
-      <!-- Estado (solo en edición) -->
-      @if (isEditMode()) {
-        <div class="field">
-          <label class="field-label">ESTADO <span class="req">*</span></label>
-          <div class="status-toggle">
-            <button
-              class="status-btn"
-              [class.status-btn-active-pending]="selectedStatus() === 'PENDING'"
-              type="button"
-              (click)="selectedStatus.set('PENDING')"
-            >Pendiente</button>
-            <button
-              class="status-btn"
-              [class.status-btn-active-in_progress]="selectedStatus() === 'IN_PROGRESS'"
-              type="button"
-              (click)="selectedStatus.set('IN_PROGRESS')"
-            >En progreso</button>
-            <button
-              class="status-btn"
-              [class.status-btn-active-completed]="selectedStatus() === 'COMPLETED'"
-              type="button"
-              (click)="selectedStatus.set('COMPLETED')"
-            >Completada</button>
-          </div>
-        </div>
-      }
 
       <!-- XP y Monedas -->
       <div class="field-row">

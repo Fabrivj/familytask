@@ -57,9 +57,6 @@
                 @for (task of tasksForSpace(space.id); track task.id) {
                   <div [class]="'task-pill priority-' + task.priority.toLowerCase()">
                     <span class="task-pill-title">{{ task.title }}</span>
-                    <span [class]="'task-pill-status status-' + task.status.toLowerCase()">
-                      {{ statusLabel(task.status) }}
-                    </span>
                   </div>
                 }
               }

@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 public interface TaskMapper {
 
     @Mapping(target = "priority",             expression = "java(task.getPriority().name())")
-    @Mapping(target = "status",               expression = "java(task.getStatus().name())")
     @Mapping(target = "homeSpaceId",          expression = "java(task.getHomeSpace().getId())")
     @Mapping(target = "homeSpaceName",        expression = "java(task.getHomeSpace().getName())")
     @Mapping(target = "homeSpaceType",        expression = "java(task.getHomeSpace().getType().name())")

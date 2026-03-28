@@ -20,8 +20,8 @@ import { PermissionsService } from '../../../core/services/permissions.service';
 import { TaskService } from '../../../core/services/task.service';
 import { MembersService } from '../../../core/services/members.service';
 import { SpaceService } from '../../../core/services/space.service';
-import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
-import { TaskPriority, TaskResponse, TaskStatus } from '../../../core/models/task.model';
+import { priorityLabel } from '../../../core/utils/task-labels';
+import { TaskPriority, TaskResponse } from '../../../core/models/task.model';
 import { MemberItem } from '../../../core/models/member.model';
 import { SpaceResponse, spaceTypeIcon } from '../../../core/models/space.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
@@ -108,8 +108,6 @@ export class TasksListComponent {
   readonly createError = signal('');
   readonly editingTask = signal<TaskResponse | null>(null);
   readonly isEditMode = computed(() => this.editingTask() !== null);
-  readonly selectedStatus = signal<TaskStatus>('PENDING');
-
   readonly titleCtrl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(100)],
@@ -193,7 +191,6 @@ export class TasksListComponent {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
   readonly priorityLabel = priorityLabel;
-  readonly statusLabel = statusLabel;
 
   memberShortName(name: string): string {
     const parts = name.split(' ');
@@ -250,7 +247,6 @@ export class TasksListComponent {
     this.titleCtrl.setValue(task.title);
     this.descriptionCtrl.setValue(task.description);
     this.selectedPriority.set(task.priority as TaskPriority);
-    this.selectedStatus.set(task.status as TaskStatus);
     this.xpRewardCtrl.setValue(task.xpReward);
     this.coinsRewardCtrl.setValue(task.coinsReward);
     const space = this.spaces().find(s => s.id === task.homeSpaceId) ?? null;
@@ -317,7 +313,6 @@ export class TasksListComponent {
           title: this.titleCtrl.value.trim(),
           description: this.descriptionCtrl.value.trim(),
           priority: this.selectedPriority(),
-          status: this.selectedStatus(),
           xpReward: this.xpRewardCtrl.value!,
           coinsReward: this.coinsRewardCtrl.value!,
           dueDate: this.dueDateCtrl.value
@@ -381,7 +376,6 @@ export class TasksListComponent {
     this.titleCtrl.reset('');
     this.descriptionCtrl.reset('');
     this.selectedPriority.set('MEDIUM');
-    this.selectedStatus.set('PENDING');
     this.xpRewardCtrl.reset(null);
     this.coinsRewardCtrl.reset(null);
     this.selectedSpace.set(null);

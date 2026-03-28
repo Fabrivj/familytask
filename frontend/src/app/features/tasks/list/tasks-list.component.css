@@ -356,22 +356,6 @@
   white-space: nowrap;
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.status-pending    { border: 1px solid rgba(var(--border-rgb), 0.4); color: var(--border); }
-.status-in_progress { border: 1px solid rgba(var(--warning-rgb), 0.4); color: var(--warning); }
-.status-completed  { border: 1px solid rgba(var(--success-rgb), 0.5); color: var(--success); }
-.status-overdue    { border: 1px solid rgba(var(--error-rgb), 0.5); color: var(--error); }
-
 .col-actions {
   display: flex;
   align-items: center;
@@ -671,36 +655,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .priority-btn-active-high   { border-color: var(--error);   color: var(--error);   background: rgba(var(--error-rgb),   0.07); }
 .priority-btn-active-medium { border-color: var(--warning); color: var(--warning); background: rgba(var(--warning-rgb), 0.07); }
 .priority-btn-active-low    { border-color: var(--success); color: var(--success); background: rgba(var(--success-rgb), 0.07); }
-
-/* ── Status toggle ───────────────────────────────────────────────────── */
-.status-toggle {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-}
-
-.status-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 12px;
-  border: 1.5px solid rgba(var(--border-rgb), 0.18);
-  border-radius: 8px;
-  background: transparent;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--text-sub);
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
-}
-
-.status-btn:hover { border-color: rgba(var(--border-rgb), 0.35); }
-
-.status-btn-active-pending     { border-color: var(--border);  color: var(--border);  background: rgba(var(--border-rgb),  0.07); }
-.status-btn-active-in_progress { border-color: var(--warning); color: var(--warning); background: rgba(var(--warning-rgb), 0.07); }
-.status-btn-active-completed   { border-color: var(--success); color: var(--success); background: rgba(var(--success-rgb), 0.07); }
 
 /* ── Panel space dropdown (form field style) ──────────────────────────── */
 .panel-space-dropdown-wrap {

@@ -28,9 +28,6 @@ public class UpdateTaskRequest {
     @NotNull(message = "El campo Prioridad es obligatorio.")
     private String priority;
 
-    @NotNull(message = "El campo Estado es obligatorio.")
-    private String status;
-
     @NotNull(message = "Los puntos deben ser un número entero mayor a cero.")
     @Min(value = 1, message = "Los puntos deben ser un número entero mayor a cero.")
     private Integer xpReward;

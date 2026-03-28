@@ -1,12 +1,10 @@
 export type TaskPriority = 'HIGH' | 'MEDIUM' | 'LOW';
-export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
 export interface TaskResponse {
   id: number;
   title: string;
   description: string;
   priority: string;
-  status: string;
   homeSpaceId: number;
   homeSpaceName: string;
   homeSpaceType: string;
@@ -37,7 +35,6 @@ export interface UpdateTaskRequest {
   title: string;
   description: string;
   priority: TaskPriority;
-  status: TaskStatus;
   xpReward: number;
   coinsReward: number;
   dueDate?: string | null;

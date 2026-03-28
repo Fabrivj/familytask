@@ -200,21 +200,6 @@
   white-space: nowrap;
 }
 
-.task-pill-status {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 10px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.task-pill-status.status-pending     { color: var(--text-sub); background: rgba(var(--border-rgb), 0.1); }
-.task-pill-status.status-in_progress { color: var(--primary);  background: rgba(var(--primary-rgb), 0.12); }
-.task-pill-status.status-completed   { color: #4caf50;         background: rgba(76, 175, 80, 0.12); }
-
 .card-footer {
   display: flex;
   align-items: center;

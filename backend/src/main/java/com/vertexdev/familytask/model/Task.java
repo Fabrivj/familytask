@@ -1,7 +1,6 @@
 package com.vertexdev.familytask.model;
 
 import com.vertexdev.familytask.model.enums.Priority;
-import com.vertexdev.familytask.model.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -48,11 +47,6 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private TaskStatus status = TaskStatus.PENDING;
 
     @Column(name = "xp_reward", nullable = false)
     private Integer xpReward;

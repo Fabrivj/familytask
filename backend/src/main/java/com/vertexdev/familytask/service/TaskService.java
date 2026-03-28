@@ -12,7 +12,6 @@ import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.Priority;
 import com.vertexdev.familytask.model.enums.Role;
-import com.vertexdev.familytask.model.enums.TaskStatus;
 import com.vertexdev.familytask.util.FamilyPermissions;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
@@ -91,7 +90,6 @@ public class TaskService {
                     .title(request.getTitle().trim())
                     .description(request.getDescription().trim())
                     .priority(priority)
-                    .status(TaskStatus.PENDING)
                     .xpReward(request.getXpReward())
                     .coinsReward(request.getCoinsReward())
                     .dueDate(request.getDueDate())
@@ -143,13 +141,6 @@ public class TaskService {
             throw new TaskException("INVALID_PRIORITY", "El campo Prioridad es obligatorio.", 400);
         }
 
-        TaskStatus status;
-        try {
-            status = TaskStatus.valueOf(request.getStatus());
-        } catch (IllegalArgumentException e) {
-            throw new TaskException("INVALID_STATUS", "El campo Estado es obligatorio.", 400);
-        }
-
         User assignedTo = null;
         if (request.getAssignedToId() != null) {
             assignedTo = userRepository.findById(request.getAssignedToId())
@@ -168,7 +159,6 @@ public class TaskService {
             task.setTitle(request.getTitle().trim());
             task.setDescription(request.getDescription().trim());
             task.setPriority(priority);
-            task.setStatus(status);
             task.setHomeSpace(homeSpace);
             task.setXpReward(request.getXpReward());
             task.setCoinsReward(request.getCoinsReward());
