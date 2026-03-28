@@ -25,6 +25,7 @@ import { TaskPriority, TaskResponse } from '../../../core/models/task.model';
 import { MemberItem } from '../../../core/models/member.model';
 import { SpaceResponse, spaceTypeIcon } from '../../../core/models/space.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-tasks-list',
@@ -35,6 +36,7 @@ import { UserAvatarComponent } from '../../../shared/components/user-avatar/user
     MatProgressSpinnerModule,
     MatDatepickerModule,
     UserAvatarComponent,
+    ConfirmDialogComponent,
   ],
   templateUrl: './tasks-list.component.html',
   styleUrl: './tasks-list.component.css',
@@ -353,6 +355,25 @@ export class TasksListComponent {
   }
 
   confirmDelete(): void {
-    this.closeDeleteModal();
+    const task = this.taskToDelete();
+    if (!task) return;
+    this.taskService.delete(task.id).subscribe({
+      next: () => {
+        this.tasks.update(list => list.filter(t => t.id !== task.id));
+        this.closeDeleteModal();
+        this.snackBar.open('Tarea eliminada correctamente', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'snack-success',
+        });
+      },
+      error: (err) => {
+        this.closeDeleteModal();
+        this.snackBar.open(
+          err.error?.message || 'Ocurrió un error al eliminar la tarea. Por favor, intente nuevamente.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-error' },
+        );
+      },
+    });
   }
 }

@@ -91,7 +91,7 @@
                   <button class="btn-icon" type="button" aria-label="Editar hábito" disabled>
                     <mat-icon aria-hidden="true">edit</mat-icon>
                   </button>
-                  <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" disabled>
+                  <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" (click)="openDeleteModal(habit)">
                     <mat-icon aria-hidden="true">delete</mat-icon>
                   </button>
                 </div>
@@ -264,3 +264,13 @@
     </form>
   </aside>
 }
+
+<app-confirm-dialog
+  [open]="showDeleteModal()"
+  title="¿Eliminar hábito?"
+  [message]="'¿Estás seguro de que quieres eliminar &quot;' + (habitToDelete()?.title ?? '') + '&quot;? Esta acción no se puede deshacer.'"
+  confirmLabel="ELIMINAR"
+  cancelLabel="CANCELAR"
+  (confirmed)="confirmDelete()"
+  (cancelled)="closeDeleteModal()"
+/>

@@ -1,5 +1,6 @@
 package com.vertexdev.familytask.controller;
 
+import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
 import com.vertexdev.familytask.model.User;
@@ -36,5 +37,13 @@ public class HabitController {
 
         HabitResponse response = habitService.createHabit(request, authenticatedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<MessageResponse> deleteHabit(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        return ResponseEntity.ok(habitService.deleteHabit(id, authenticatedUser));
     }
 }

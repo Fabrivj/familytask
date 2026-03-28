@@ -17,4 +17,8 @@ export class HabitService {
   create(request: CreateHabitRequest): Observable<HabitResponse> {
     return this.http.post<HabitResponse>(`${environment.apiUrl}/habits`, request);
   }
+
+  delete(habitId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/habits/${habitId}`);
+  }
 }
