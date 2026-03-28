@@ -21,4 +21,8 @@ export class TaskService {
   update(taskId: number, request: UpdateTaskRequest): Observable<TaskResponse> {
     return this.http.put<TaskResponse>(`${environment.apiUrl}/tasks/${taskId}`, request);
   }
+
+  delete(taskId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${environment.apiUrl}/tasks/${taskId}`);
+  }
 }

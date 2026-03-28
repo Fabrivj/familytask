@@ -1,5 +1,6 @@
 package com.vertexdev.familytask.controller;
 
+import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.task.CreateTaskRequest;
 import com.vertexdev.familytask.dto.task.UpdateTaskRequest;
 import com.vertexdev.familytask.dto.task.TaskResponse;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,5 +74,19 @@ public class TaskController {
 
         TaskResponse response = taskService.updateTask(id, request, authenticatedUser);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Soft-deletes a task (sets deletedAt).
+     * Requires JWT. Only users with PARENT role in the same family can delete.
+     *
+     * DELETE /api/tasks/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<MessageResponse> deleteTask(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        return ResponseEntity.ok(taskService.deleteTask(id, authenticatedUser));
     }
 }

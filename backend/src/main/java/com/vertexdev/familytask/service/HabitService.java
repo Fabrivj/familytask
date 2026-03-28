@@ -1,5 +1,6 @@
 package com.vertexdev.familytask.service;
 
+import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
 import com.vertexdev.familytask.exception.HabitException;
@@ -67,6 +68,23 @@ public class HabitService {
             log.error("Error creating habit: {}", e.getMessage());
             throw new HabitException("HABIT_CREATION_FAILED", "Ocurrió un error al crear el hábito. Por favor, intente nuevamente.", 500);
         }
+    }
+
+    @Transactional
+    public MessageResponse deleteHabit(Long habitId, User requester) {
+        Habit habit = habitRepository.findById(habitId)
+                .filter(h -> Boolean.TRUE.equals(h.getIsActive()))
+                .orElseThrow(() -> new HabitException("HABIT_NOT_FOUND", "Hábito no encontrado.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(habit.getFamilyGroup().getId(), requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new HabitException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        habit.setIsActive(false);
+        habitRepository.save(habit);
+        log.info("Habit '{}' deleted by user {}", habit.getTitle(), requester.getEmail());
+        return new MessageResponse("Hábito eliminado correctamente.");
     }
 
     @Transactional(readOnly = true)

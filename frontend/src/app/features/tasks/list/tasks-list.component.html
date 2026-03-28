@@ -493,20 +493,12 @@
   </aside>
 }
 
-<!-- ═══════════ DELETE MODAL ═══════════ -->
-@if (showDeleteModal()) {
-  <div class="overlay modal-overlay" (click)="closeDeleteModal()" aria-hidden="true"></div>
-
-  <div class="delete-modal" role="dialog" aria-label="Confirmar eliminación">
-    <div class="modal-icon">
-      <mat-icon class="modal-icon-svg" aria-hidden="true">delete</mat-icon>
-    </div>
-    <h3 class="modal-title">¿Eliminar tarea/<br>hábito?</h3>
-    <p class="modal-text">Vas a eliminar <strong>"{{ taskToDelete()?.title }}"</strong>.</p>
-    <p class="modal-text-sub">Esta acción no se puede deshacer.</p>
-    <div class="modal-actions">
-      <button class="btn-cta btn-outline btn-modal-cancel" type="button" (click)="closeDeleteModal()">CANCELAR</button>
-      <button class="btn-cta btn-modal-delete" type="button" (click)="confirmDelete()">ELIMINAR</button>
-    </div>
-  </div>
-}
+<app-confirm-dialog
+  [open]="showDeleteModal()"
+  title="¿Eliminar tarea?"
+  [message]="'¿Estás seguro de que quieres eliminar &quot;' + (taskToDelete()?.title ?? '') + '&quot;? Esta acción no se puede deshacer.'"
+  confirmLabel="ELIMINAR"
+  cancelLabel="CANCELAR"
+  (confirmed)="confirmDelete()"
+  (cancelled)="closeDeleteModal()"
+/>
