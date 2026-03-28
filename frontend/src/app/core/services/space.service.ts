@@ -17,4 +17,12 @@ export class SpaceService {
   create(request: CreateSpaceRequest): Observable<SpaceResponse> {
     return this.http.post<SpaceResponse>(this.baseUrl, request);
   }
+
+  delete(spaceId: number, familyId: number, targetSpaceId?: number): Observable<void> {
+    let params = new HttpParams().set('familyId', familyId);
+    if (targetSpaceId != null) {
+      params = params.set('targetSpaceId', targetSpaceId);
+    }
+    return this.http.delete<void>(`${this.baseUrl}/${spaceId}`, { params });
+  }
 }

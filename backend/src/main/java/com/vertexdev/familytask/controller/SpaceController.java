@@ -45,4 +45,21 @@ public class SpaceController {
         SpaceResponse response = spaceService.createSpace(request, authenticatedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    /**
+     * Deletes a space. If the space has active tasks, targetSpaceId must be provided
+     * to migrate them atomically before deletion.
+     * Requires PARENT role.
+     * DELETE /api/spaces/{id}?familyId=X&targetSpaceId=Y
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSpace(
+            @PathVariable Long id,
+            @RequestParam Long familyId,
+            @RequestParam(required = false) Long targetSpaceId,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        spaceService.deleteSpace(id, familyId, targetSpaceId, authenticatedUser);
+        return ResponseEntity.noContent().build();
+    }
 }
