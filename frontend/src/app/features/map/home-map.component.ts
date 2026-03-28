@@ -28,7 +28,7 @@ import {
   spaceTypeLabel,
 } from '../../core/models/space.model';
 import { TaskResponse } from '../../core/models/task.model';
-import { priorityLabel, statusLabel } from '../../core/utils/task-labels';
+import { priorityLabel } from '../../core/utils/task-labels';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -65,7 +65,6 @@ export class HomeMapComponent {
   readonly spaceTypeIcon = spaceTypeIcon;
   readonly spaceTypeOptions = SPACE_TYPE_OPTIONS;
   readonly priorityLabel = priorityLabel;
-  readonly statusLabel = statusLabel;
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly spaces = signal<SpaceResponse[]>([]);

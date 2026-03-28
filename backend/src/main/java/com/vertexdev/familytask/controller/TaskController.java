@@ -2,6 +2,7 @@ package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.task.CreateTaskRequest;
+import com.vertexdev.familytask.dto.task.UpdateTaskRequest;
 import com.vertexdev.familytask.dto.task.TaskResponse;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.TaskService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,6 +58,22 @@ public class TaskController {
 
         TaskResponse response = taskService.createTask(request, authenticatedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Updates an existing task.
+     * Requires JWT. Only users with PARENT role can update tasks.
+     *
+     * PUT /api/tasks/{id}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<TaskResponse> updateTask(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateTaskRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        TaskResponse response = taskService.updateTask(id, request, authenticatedUser);
+        return ResponseEntity.ok(response);
     }
 
     /**

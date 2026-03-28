@@ -14,7 +14,6 @@ public class TaskResponse {
     private String title;
     private String description;
     private String priority;
-    private String status;
     private Long homeSpaceId;
     private String homeSpaceName;
     private String homeSpaceType;

@@ -20,7 +20,7 @@ import { PermissionsService } from '../../../core/services/permissions.service';
 import { TaskService } from '../../../core/services/task.service';
 import { MembersService } from '../../../core/services/members.service';
 import { SpaceService } from '../../../core/services/space.service';
-import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
+import { priorityLabel } from '../../../core/utils/task-labels';
 import { TaskPriority, TaskResponse } from '../../../core/models/task.model';
 import { MemberItem } from '../../../core/models/member.model';
 import { SpaceResponse, spaceTypeIcon } from '../../../core/models/space.model';
@@ -102,11 +102,12 @@ export class TasksListComponent {
     );
   });
 
-  // ─── Panel de creación ────────────────────────────────────────────────────
+  // ─── Panel de creación / edición ─────────────────────────────────────────
   readonly showCreatePanel = signal(false);
   readonly isCreating = signal(false);
   readonly createError = signal('');
-
+  readonly editingTask = signal<TaskResponse | null>(null);
+  readonly isEditMode = computed(() => this.editingTask() !== null);
   readonly titleCtrl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(100)],
@@ -190,7 +191,6 @@ export class TasksListComponent {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
   readonly priorityLabel = priorityLabel;
-  readonly statusLabel = statusLabel;
 
   memberShortName(name: string): string {
     const parts = name.split(' ');
@@ -235,15 +235,34 @@ export class TasksListComponent {
     return '';
   }
 
-  // ─── Panel de creación ────────────────────────────────────────────────────
+  // ─── Panel de creación / edición ─────────────────────────────────────────
   openCreatePanel(): void {
     this.resetForm();
+    this.showCreatePanel.set(true);
+  }
+
+  openEditPanel(task: TaskResponse): void {
+    this.resetForm();
+    this.editingTask.set(task);
+    this.titleCtrl.setValue(task.title);
+    this.descriptionCtrl.setValue(task.description);
+    this.selectedPriority.set(task.priority as TaskPriority);
+    this.xpRewardCtrl.setValue(task.xpReward);
+    this.coinsRewardCtrl.setValue(task.coinsReward);
+    const space = this.spaces().find(s => s.id === task.homeSpaceId) ?? null;
+    this.selectedSpace.set(space);
+    if (task.dueDate) {
+      const [y, m, d] = task.dueDate.split('-').map(Number);
+      this.dueDateCtrl.setValue(new Date(y, m - 1, d));
+    }
+    this.selectedAssignee.set(task.assignedToId);
     this.showCreatePanel.set(true);
   }
 
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+    this.editingTask.set(null);
   }
 
   selectPriority(p: TaskPriority): void {
@@ -285,30 +304,53 @@ export class TasksListComponent {
     this.isCreating.set(true);
     this.createError.set('');
 
-    this.taskService.create({
-      familyId,
-      homeSpaceId: this.selectedSpace()!.id,
-      title: this.titleCtrl.value.trim(),
-      description: this.descriptionCtrl.value.trim(),
-      priority: this.selectedPriority(),
-      xpReward: this.xpRewardCtrl.value!,
-      coinsReward: this.coinsRewardCtrl.value!,
-      dueDate: this.dueDateCtrl.value
-        ? this.toIsoDate(this.dueDateCtrl.value)
-        : null,
-      assignedToId: this.selectedAssignee(),
-    }).subscribe({
+    const editing = this.editingTask();
+
+    const request$ = editing
+      ? this.taskService.update(editing.id, {
+          familyId,
+          homeSpaceId: this.selectedSpace()!.id,
+          title: this.titleCtrl.value.trim(),
+          description: this.descriptionCtrl.value.trim(),
+          priority: this.selectedPriority(),
+          xpReward: this.xpRewardCtrl.value!,
+          coinsReward: this.coinsRewardCtrl.value!,
+          dueDate: this.dueDateCtrl.value
+            ? this.toIsoDate(this.dueDateCtrl.value)
+            : null,
+          assignedToId: this.selectedAssignee(),
+        })
+      : this.taskService.create({
+          familyId,
+          homeSpaceId: this.selectedSpace()!.id,
+          title: this.titleCtrl.value.trim(),
+          description: this.descriptionCtrl.value.trim(),
+          priority: this.selectedPriority(),
+          xpReward: this.xpRewardCtrl.value!,
+          coinsReward: this.coinsRewardCtrl.value!,
+          dueDate: this.dueDateCtrl.value
+            ? this.toIsoDate(this.dueDateCtrl.value)
+            : null,
+          assignedToId: this.selectedAssignee(),
+        });
+
+    const successMsg = editing ? 'Tarea actualizada correctamente' : 'Tarea guardada correctamente';
+    const errorMsg = editing
+      ? 'Ocurrió un error al actualizar la tarea. Por favor, intente nuevamente.'
+      : 'Ocurrió un error al crear la tarea. Por favor, intente nuevamente.';
+
+    request$.subscribe({
       next: () => {
         this.isCreating.set(false);
         this.closeCreatePanel();
-        this.snackBar.open('Tarea guardada correctamente', 'Cerrar', {
+        this.snackBar.open(successMsg, 'Cerrar', {
           duration: 4000,
           panelClass: 'snack-success',
         });
         this.loadData(familyId);
       },
       error: (err) => {
-        this.createError.set(err.error?.message || 'Ocurrió un error al crear la tarea. Por favor, intente nuevamente.');
+        this.createError.set(err.error?.message || errorMsg);
         this.isCreating.set(false);
       },
     });
@@ -330,6 +372,7 @@ export class TasksListComponent {
   }
 
   private resetForm(): void {
+    this.editingTask.set(null);
     this.titleCtrl.reset('');
     this.descriptionCtrl.reset('');
     this.selectedPriority.set('MEDIUM');
