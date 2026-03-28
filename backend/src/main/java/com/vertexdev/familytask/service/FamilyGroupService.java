@@ -16,6 +16,7 @@ import com.vertexdev.familytask.model.enums.Role;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.InvitationRepository;
+import com.vertexdev.familytask.repository.TaskAssignmentRepository;
 import com.vertexdev.familytask.util.FamilyPermissions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class FamilyGroupService {
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final InvitationRepository invitationRepository;
+    private final TaskAssignmentRepository taskAssignmentRepository;
     private final FamilyPermissions familyPermissions;
 
     @Transactional
@@ -146,6 +148,7 @@ public class FamilyGroupService {
             throw new FamilyException("INACTIVE_MEMBER", "El miembro ya fue removido de la familia.", 400);
         }
 
+        taskAssignmentRepository.deleteByUserIdAndFamilyGroupId(userId, familyId);
         targetMember.setIsActive(false);
         familyMemberRepository.save(targetMember);
         log.info("Member {} removed from family {} by {}", userId, familyId, requester.getEmail());
