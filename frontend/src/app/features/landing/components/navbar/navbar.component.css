@@ -37,14 +37,12 @@
 }
 
 .navbar-logo-text {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 1.25rem;
-  letter-spacing: 0.06em;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
   color: var(--text);
+  text-shadow: -1px 0 0 var(--primary), 1px 0 0 var(--border);
+  letter-spacing: 0;
 }
-
-.navbar-logo-text span { color: var(--primary); }
 
 .navbar-links {
   display: flex;
