@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateTaskRequest, UpdateTaskRequest, TaskResponse } from '../models/task.model';
+import { CreateTaskRequest, UpdateTaskRequest, TaskResponse, TaskStatus } from '../models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -24,5 +24,9 @@ export class TaskService {
 
   delete(taskId: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/tasks/${taskId}`);
+  }
+
+  updateStatus(taskId: number, status: TaskStatus): Observable<TaskResponse> {
+    return this.http.patch<TaskResponse>(`${environment.apiUrl}/tasks/${taskId}/status`, { status });
   }
 }

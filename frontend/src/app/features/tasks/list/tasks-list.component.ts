@@ -20,8 +20,8 @@ import { PermissionsService } from '../../../core/services/permissions.service';
 import { TaskService } from '../../../core/services/task.service';
 import { MembersService } from '../../../core/services/members.service';
 import { SpaceService } from '../../../core/services/space.service';
-import { priorityLabel } from '../../../core/utils/task-labels';
-import { TaskPriority, TaskResponse } from '../../../core/models/task.model';
+import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
+import { TaskPriority, TaskResponse, TaskStatus } from '../../../core/models/task.model';
 import { MemberItem } from '../../../core/models/member.model';
 import { SpaceResponse, spaceTypeIcon } from '../../../core/models/space.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
@@ -53,6 +53,14 @@ export class TasksListComponent {
     }
     if (this.spaceSelectOpen() && !this.el.nativeElement.querySelector('.panel-space-dropdown-wrap')?.contains(target)) {
       this.spaceSelectOpen.set(false);
+    }
+    if (this.openStatusDropdownId() !== null) {
+      const isInsideMenu = target.closest('.status-dropdown-fixed');
+      const isInsideTrigger = target.closest('.status-btn');
+      if (!isInsideMenu && !isInsideTrigger) {
+        this.openStatusDropdownId.set(null);
+        this.statusDropdownPos.set(null);
+      }
     }
   }
 
@@ -129,6 +137,15 @@ export class TasksListComponent {
   readonly dueDateCtrl = new FormControl<Date | null>(null);
   readonly minDateObj = new Date();
   readonly selectedAssignee = signal<number | null>(null);
+
+  // ─── Cambio de estado ─────────────────────────────────────────────────────
+  readonly openStatusDropdownId = signal<number | null>(null);
+  readonly isUpdatingStatus = signal<number | null>(null);
+  readonly statusLabel = statusLabel;
+  readonly statusDropdownPos = signal<{ top: number; left: number } | null>(null);
+  readonly activeStatusTask = computed(() =>
+    this.tasks().find(t => t.id === this.openStatusDropdownId()) ?? null
+  );
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────
   readonly showDeleteModal = signal(false);
@@ -384,6 +401,40 @@ export class TasksListComponent {
     this.dueDateCtrl.reset(null);
     this.selectedAssignee.set(null);
     this.createError.set('');
+  }
+
+  openStatusDropdown(event: MouseEvent, taskId: number): void {
+    if (this.openStatusDropdownId() === taskId) {
+      this.openStatusDropdownId.set(null);
+      this.statusDropdownPos.set(null);
+      return;
+    }
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.statusDropdownPos.set({ top: rect.bottom + 6, left: rect.left });
+    this.openStatusDropdownId.set(taskId);
+  }
+
+  changeStatus(task: TaskResponse, newStatus: TaskStatus): void {
+    this.openStatusDropdownId.set(null);
+    this.statusDropdownPos.set(null);
+    this.isUpdatingStatus.set(task.id);
+    this.taskService.updateStatus(task.id, newStatus).subscribe({
+      next: (updated) => {
+        this.tasks.update(list => list.map(t => t.id === task.id ? updated : t));
+        this.isUpdatingStatus.set(null);
+        this.snackBar.open('Estado actualizado exitosamente', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'snack-success',
+        });
+      },
+      error: (err) => {
+        this.isUpdatingStatus.set(null);
+        const msg = err.status === 403
+          ? 'Acceso no autorizado.'
+          : 'No se pudo actualizar el estado, por favor, intente nuevamente.';
+        this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+      },
+    });
   }
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────

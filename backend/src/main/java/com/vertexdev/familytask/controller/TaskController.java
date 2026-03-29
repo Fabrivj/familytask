@@ -3,6 +3,7 @@ package com.vertexdev.familytask.controller;
 import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.task.CreateTaskRequest;
 import com.vertexdev.familytask.dto.task.UpdateTaskRequest;
+import com.vertexdev.familytask.dto.task.UpdateTaskStatusRequest;
 import com.vertexdev.familytask.dto.task.TaskResponse;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.TaskService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -74,6 +76,21 @@ public class TaskController {
 
         TaskResponse response = taskService.updateTask(id, request, authenticatedUser);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Updates the status of a task assignment.
+     * Requires JWT. PARENT can update any assigned task; CHILD can only update tasks assigned to them.
+     *
+     * PATCH /api/tasks/{id}/status
+     */
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<TaskResponse> updateTaskStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateTaskStatusRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        return ResponseEntity.ok(taskService.updateTaskStatus(id, request, authenticatedUser));
     }
 
     /**

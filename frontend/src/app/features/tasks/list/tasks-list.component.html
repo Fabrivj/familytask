@@ -172,8 +172,26 @@
                 </td>
                 <!-- VENCE -->
                 <td class="col-date">{{ formatDate(task.dueDate) }}</td>
-                <!-- TODO: estado — pendiente implementación con tabla intermedia -->
-                <td>—</td>
+                <!-- ESTADO -->
+                <td class="col-status">
+                  @if (task.status !== null) {
+                    <button
+                      class="status-btn status-btn-{{ task.status | lowercase }}"
+                      type="button"
+                      (click)="openStatusDropdown($event, task.id)"
+                      [disabled]="isUpdatingStatus() === task.id"
+                      [attr.aria-expanded]="openStatusDropdownId() === task.id"
+                      aria-haspopup="listbox"
+                    >
+                      {{ statusLabel(task.status) }}
+                      <mat-icon class="status-chevron" aria-hidden="true">
+                        {{ openStatusDropdownId() === task.id ? 'expand_less' : 'expand_more' }}
+                      </mat-icon>
+                    </button>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
                 <!-- ACCIONES -->
                 @if (isParent()) {
                   <td class="col-actions">
@@ -197,8 +215,11 @@
           <article class="task-card">
             <div class="card-row-top">
               <span class="task-name">{{ task.title }}</span>
-              <!-- TODO: badge estado — pendiente implementación con tabla intermedia -->
-              —
+              @if (task.status !== null) {
+                <span class="status-badge status-badge-{{ task.status | lowercase }}">{{ statusLabel(task.status) }}</span>
+              } @else {
+                <span class="text-muted">—</span>
+              }
             </div>
 
             <div class="card-row-sub">
@@ -460,6 +481,25 @@
 
     </form>
   </aside>
+}
+
+@if (activeStatusTask() !== null && statusDropdownPos() !== null) {
+  <ul
+    class="status-dropdown-menu status-dropdown-fixed"
+    role="listbox"
+    aria-label="Cambiar estado"
+    [style.top.px]="statusDropdownPos()!.top"
+    [style.left.px]="statusDropdownPos()!.left"
+  >
+    @for (s of ['PENDING', 'IN_PROGRESS', 'COMPLETED']; track s) {
+      <li
+        class="status-dropdown-item"
+        role="option"
+        [class.active]="activeStatusTask()!.status === s"
+        (click)="changeStatus(activeStatusTask()!, $any(s))"
+      >{{ statusLabel(s) }}</li>
+    }
+  </ul>
 }
 
 <app-confirm-dialog
