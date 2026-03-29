@@ -1,0 +1,83 @@
+@if (open()) {
+  <div class="demo-backdrop" (click)="close()" aria-hidden="true"></div>
+
+  <div
+    class="demo-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Vista previa de la app"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="demo-header">
+      <span class="demo-label">Vista previa</span>
+      <span class="demo-counter">{{ current() + 1 }} / {{ slides.length }}</span>
+      <button class="demo-close" type="button" aria-label="Cerrar" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- GIF screen -->
+    <div class="demo-screen">
+      @if (!imgError()) {
+        <img
+          class="demo-gif"
+          [src]="slides[current()].gif"
+          [alt]="slides[current()].title"
+          (error)="onImgError()"
+          (load)="onImgLoad()"
+        >
+      }
+      @if (imgError()) {
+        <div class="demo-placeholder">
+          <mat-icon class="demo-placeholder-icon">smart_display</mat-icon>
+          <span class="demo-placeholder-text">GIF próximamente</span>
+          <span class="demo-placeholder-sub">{{ slides[current()].title }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Slide info -->
+    <div class="demo-info">
+      <h3 class="demo-title">{{ slides[current()].title }}</h3>
+      <p class="demo-desc">{{ slides[current()].desc }}</p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="demo-nav">
+      <button
+        class="demo-nav-btn"
+        type="button"
+        aria-label="Anterior"
+        [disabled]="current() === 0"
+        (click)="prev()"
+      >
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <div class="demo-dots" role="tablist">
+        @for (slide of slides; track $index) {
+          <button
+            class="demo-dot"
+            [class.active]="$index === current()"
+            type="button"
+            role="tab"
+            [attr.aria-label]="'Slide ' + ($index + 1) + ': ' + slide.title"
+            [attr.aria-selected]="$index === current()"
+            (click)="goTo($index)"
+          ></button>
+        }
+      </div>
+
+      <button
+        class="demo-nav-btn"
+        type="button"
+        aria-label="Siguiente"
+        [disabled]="current() === slides.length - 1"
+        (click)="next()"
+      >
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  </div>
+}

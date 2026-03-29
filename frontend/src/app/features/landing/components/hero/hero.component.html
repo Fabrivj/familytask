@@ -20,7 +20,7 @@
         <button class="landing-btn landing-btn-primary" (click)="ctaClicked.emit()">
           <mat-icon>rocket_launch</mat-icon> Comenzar gratis
         </button>
-        <button class="landing-btn landing-btn-outline">
+        <button class="landing-btn landing-btn-outline" (click)="demoOpen.set(true)">
           <mat-icon>play_arrow</mat-icon> Ver demo
         </button>
       </div>
@@ -28,3 +28,8 @@
     </div>
   </div>
 </section>
+
+<app-landing-demo-modal
+  [open]="demoOpen()"
+  (closed)="demoOpen.set(false)"
+/>
