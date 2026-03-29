@@ -7,9 +7,12 @@ import {
   signal,
 } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-landing-navbar',
+  standalone: true,
+  imports: [MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
