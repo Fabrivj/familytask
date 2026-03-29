@@ -15,5 +15,6 @@ public interface TaskMapper {
     @Mapping(target = "assignedToId",         expression = "java(task.getAssignment() != null ? task.getAssignment().getUser().getId() : null)")
     @Mapping(target = "assignedToName",       expression = "java(task.getAssignment() != null ? task.getAssignment().getUser().getName() : null)")
     @Mapping(target = "assignedToPictureUrl", expression = "java(task.getAssignment() != null ? task.getAssignment().getUser().getPictureUrl() : null)")
+    @Mapping(target = "status",               expression = "java(task.getAssignment() != null ? task.getAssignment().getStatus().name() : null)")
     TaskResponse toResponse(Task task);
 }

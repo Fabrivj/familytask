@@ -24,4 +24,5 @@ public class TaskResponse {
     private Long assignedToId;
     private String assignedToName;
     private String assignedToPictureUrl;
+    private String status;
 }

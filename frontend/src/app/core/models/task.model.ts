@@ -1,4 +1,5 @@
 export type TaskPriority = 'HIGH' | 'MEDIUM' | 'LOW';
+export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
 export interface TaskResponse {
   id: number;
@@ -15,6 +16,7 @@ export interface TaskResponse {
   assignedToId: number | null;
   assignedToName: string | null;
   assignedToPictureUrl: string | null;
+  status: TaskStatus | null;
 }
 
 export interface CreateTaskRequest {

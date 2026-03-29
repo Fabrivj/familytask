@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vertexdev.familytask.dto.task.UpdateTaskRequest;
+import com.vertexdev.familytask.dto.task.UpdateTaskStatusRequest;
+import com.vertexdev.familytask.model.enums.TaskStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -212,6 +214,46 @@ public class TaskService {
                 .build();
         taskAssignmentRepository.save(assignment);
         task.setAssignment(assignment);
+    }
+
+    public TaskResponse updateTaskStatus(Long taskId, UpdateTaskStatusRequest request, User requester) {
+        Task task = taskRepository.findById(taskId)
+                .filter(t -> t.getDeletedAt() == null)
+                .orElseThrow(() -> new TaskException("TASK_NOT_FOUND", "La tarea no existe.", 404));
+
+        FamilyMember member = familyMemberRepository
+                .findByFamilyGroupIdAndUserId(task.getFamilyGroup().getId(), requester.getId())
+                .filter(m -> m.getIsActive())
+                .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        TaskAssignment assignment = taskAssignmentRepository.findByTaskId(taskId)
+                .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        if (member.getRole() == Role.CHILD && !assignment.getUser().getId().equals(requester.getId())) {
+            throw new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403);
+        }
+
+        TaskStatus newStatus;
+        try {
+            newStatus = TaskStatus.valueOf(request.getStatus());
+        } catch (IllegalArgumentException e) {
+            throw new TaskException("INVALID_STATUS", "Estado inválido.", 400);
+        }
+
+        try {
+            assignment.setStatus(newStatus);
+            taskAssignmentRepository.save(assignment);
+
+            log.info("Task '{}' status updated to {} by user {}", task.getTitle(), newStatus, requester.getEmail());
+
+            return taskMapper.toResponse(task);
+        } catch (TaskException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to update status of task {} for user {}: {}", taskId, requester.getEmail(), e.getMessage());
+            throw new TaskException("TASK_UPDATE_FAILED",
+                    "Ocurrió un error al actualizar la tarea. Por favor, intente nuevamente.", 500);
+        }
     }
 
     @Transactional(readOnly = true)
