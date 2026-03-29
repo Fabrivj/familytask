@@ -14,7 +14,7 @@
 
 /* ── CSS Reset ── */
 *, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); }
+body { margin: 0; background: var(--bg); font-family: var(--font-body); }
 
 /* ── Scrollbar — Neon theme ── */
 ::-webkit-scrollbar {
@@ -52,7 +52,7 @@ body { margin: 0; background: var(--bg); }
 }
 
 .landing-section-title {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(1.6rem, 4vw, 2.4rem);
   font-weight: 700;
   color: var(--text);
@@ -62,7 +62,7 @@ body { margin: 0; background: var(--bg); }
 }
 
 .landing-section-sub {
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   color: var(--text-sub);
   text-align: center;
@@ -71,7 +71,7 @@ body { margin: 0; background: var(--bg); }
 
 .landing-chip {
   display: inline-block;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -87,7 +87,7 @@ body { margin: 0; background: var(--bg); }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1rem;
   letter-spacing: 0.06em;

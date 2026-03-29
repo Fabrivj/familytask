@@ -2,7 +2,7 @@
   <div class="landing-container">
     <div class="hero-inner">
 
-      <div class="hero-eyebrow">⚡ App Familiar Gamificada — 2026</div>
+      <div class="hero-eyebrow">Para toda la familia — 2026</div>
 
       <h1 class="hero-title">
         <span class="accent">MISIONES</span><br>
@@ -11,33 +11,25 @@
       </h1>
 
       <p class="hero-tagline">
-        Convierte las tareas del hogar en aventuras. Tus hijos acumulan XP,
-        suben de nivel y desbloquean recompensas reales mientras construyen
-        hábitos positivos con la guía de IA.
+        Convierte las tareas del hogar en aventuras. Tus hijos ganan puntos,
+        suben de nivel y desbloquean premios reales mientras construyen
+        hábitos positivos.
       </p>
 
       <div class="hero-actions">
         <button class="landing-btn landing-btn-primary" (click)="ctaClicked.emit()">
-          🚀 Comenzar gratis
+          <mat-icon>rocket_launch</mat-icon> Comenzar gratis
         </button>
-        <button class="landing-btn landing-btn-outline">▶ Ver demo</button>
-      </div>
-
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-value">2,400+</div>
-          <div class="hero-stat-label">Familias activas</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-value">18K</div>
-          <div class="hero-stat-label">Misiones completadas</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-value">96%</div>
-          <div class="hero-stat-label">Tasa de retención</div>
-        </div>
+        <button class="landing-btn landing-btn-outline" (click)="demoOpen.set(true)">
+          <mat-icon>play_arrow</mat-icon> Ver demo
+        </button>
       </div>
 
     </div>
   </div>
 </section>
+
+<app-landing-demo-modal
+  [open]="demoOpen()"
+  (closed)="demoOpen.set(false)"
+/>
