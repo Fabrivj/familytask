@@ -63,7 +63,9 @@
             </div>
             <div class="card-footer">
               @if (isParent()) {
-                <button class="btn-icon" type="button" aria-label="Editar espacio" disabled>
+                <button class="btn-icon" type="button" aria-label="Editar espacio"
+                  (click)="openEditPanel(space)"
+                  [disabled]="isDeleting() || isMigrating() || isEditing()">
                   <mat-icon aria-hidden="true">edit</mat-icon>
                 </button>
                 <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar espacio"
@@ -158,6 +160,85 @@
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
             CREAR ESPACIO
+          }
+        </button>
+      </div>
+
+    </form>
+  </aside>
+}
+
+<!-- ═══════════ EDIT PANEL ═══════════ -->
+@if (showEditPanel()) {
+  <div class="overlay panel-overlay" (click)="closeEditPanel()" aria-hidden="true"></div>
+
+  <aside class="create-panel" role="dialog" aria-label="Editar espacio" aria-modal="true">
+    <div class="panel-header">
+      <div class="panel-header-left">
+        <h2 class="panel-title">Editar espacio</h2>
+        <span class="panel-badge">MAPA DEL HOGAR</span>
+      </div>
+      <button class="btn-close" type="button" (click)="closeEditPanel()" aria-label="Cerrar">
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </div>
+
+    <form class="panel-body" (submit)="$event.preventDefault(); submitEdit()" novalidate>
+
+      <!-- Nombre -->
+      <div class="field">
+        <label class="field-label" for="f-edit-name">NOMBRE DEL ESPACIO <span class="req">*</span></label>
+        <input
+          id="f-edit-name"
+          class="field-input"
+          [class.has-error]="nameCtrl.invalid && nameCtrl.touched"
+          type="text"
+          [formControl]="nameCtrl"
+          placeholder="Ej. Cocina Principal, Cuarto de Diego..."
+          autocomplete="off"
+          maxlength="50"
+        />
+        @if (nameCtrl.invalid && nameCtrl.touched) {
+          <span class="field-error" role="alert">{{ getNameError() }}</span>
+        }
+      </div>
+
+      <!-- Tipo de espacio -->
+      <div class="field">
+        <label class="field-label">TIPO DE ESPACIO <span class="req">*</span></label>
+        <div class="type-grid">
+          @for (opt of spaceTypeOptions; track opt.value) {
+            <button
+              class="type-btn"
+              [class.type-btn-active]="selectedType() === opt.value"
+              type="button"
+              (click)="selectType(opt.value)"
+              [attr.aria-pressed]="selectedType() === opt.value"
+            >
+              <mat-icon class="type-icon" aria-hidden="true">{{ opt.icon }}</mat-icon>
+              <span class="type-label">{{ opt.label }}</span>
+            </button>
+          }
+        </div>
+        @if (typeError()) {
+          <span class="field-error" role="alert">El tipo de espacio es obligatorio.</span>
+        }
+      </div>
+
+      <!-- Error global -->
+      @if (editError()) {
+        <p class="create-error-msg" role="alert">{{ editError() }}</p>
+      }
+
+      <!-- Actions -->
+      <div class="panel-actions">
+        <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeEditPanel()">CANCELAR</button>
+        <button class="btn-cta btn-create" type="submit" [disabled]="isEditing()">
+          @if (isEditing()) {
+            Guardando...
+          } @else {
+            <mat-icon aria-hidden="true">check</mat-icon>
+            GUARDAR CAMBIOS
           }
         </button>
       </div>

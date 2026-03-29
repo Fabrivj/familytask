@@ -16,6 +16,12 @@ export interface CreateSpaceRequest {
   type: SpaceType;
 }
 
+export interface UpdateSpaceRequest {
+  familyId: number;
+  name: string;
+  type: SpaceType;
+}
+
 export const SPACE_TYPE_OPTIONS: { value: SpaceType; label: string; icon: string }[] = [
   { value: 'BAÑO',       label: 'Baño',       icon: 'bathtub' },
   { value: 'COCINA',     label: 'Cocina',     icon: 'kitchen' },

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateSpaceRequest, SpaceResponse } from '../models/space.model';
+import { CreateSpaceRequest, SpaceResponse, UpdateSpaceRequest } from '../models/space.model';
 
 @Injectable({ providedIn: 'root' })
 export class SpaceService {
@@ -16,6 +16,10 @@ export class SpaceService {
 
   create(request: CreateSpaceRequest): Observable<SpaceResponse> {
     return this.http.post<SpaceResponse>(this.baseUrl, request);
+  }
+
+  update(spaceId: number, request: UpdateSpaceRequest): Observable<SpaceResponse> {
+    return this.http.put<SpaceResponse>(`${this.baseUrl}/${spaceId}`, request);
   }
 
   delete(spaceId: number, familyId: number, targetSpaceId?: number): Observable<void> {

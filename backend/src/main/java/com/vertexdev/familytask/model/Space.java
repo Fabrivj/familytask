@@ -29,6 +29,10 @@ public class Space {
     private SpaceType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "family_group_id", nullable = false)
+    private FamilyGroup familyGroup;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
