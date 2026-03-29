@@ -61,7 +61,7 @@ public class InvitationService {
         // Validate that the email is not already an active member or has a pending invitation
         boolean alreadyMember = userRepository.findByEmail(request.getInvitedEmail())
                 .map(existingUser -> familyMemberRepository
-                        .existsByFamilyGroupIdAndUserId(familyGroup.getId(), existingUser.getId()))
+                        .existsByFamilyGroupIdAndUserIdAndIsActiveTrue(familyGroup.getId(), existingUser.getId()))
                 .orElse(false);
 
         boolean hasPendingInvitation = invitationRepository
@@ -129,22 +129,26 @@ public class InvitationService {
             throw new InvitationException("EMAIL_MISMATCH", "Esta invitación no pertenece a tu cuenta de Google.", 403);
         }
 
-        // Verify that user is not already a member
-        if (familyMemberRepository.existsByFamilyGroupIdAndUserId(
+        // Verify that user is not already an active member
+        if (familyMemberRepository.existsByFamilyGroupIdAndUserIdAndIsActiveTrue(
                 invitation.getFamilyGroup().getId(), authenticatedUser.getId())) {
             throw new InvitationException("ALREADY_MEMBER", "Ya eres miembro de esta familia.", 409);
         }
 
-        // Add user as a member of the family with the invitation role
+        // Add user as a member — reactivate existing record if previously removed, otherwise create new
         try {
-            FamilyMember newMember = FamilyMember.builder()
-                    .familyGroup(invitation.getFamilyGroup())
-                    .user(authenticatedUser)
-                    .role(invitation.getRole())
-                    .isActive(true)
-                    .build();
+            FamilyMember member = familyMemberRepository
+                    .findByFamilyGroupIdAndUserId(invitation.getFamilyGroup().getId(), authenticatedUser.getId())
+                    .orElse(FamilyMember.builder()
+                            .familyGroup(invitation.getFamilyGroup())
+                            .user(authenticatedUser)
+                            .build());
 
-            familyMemberRepository.save(newMember);
+            member.setRole(invitation.getRole());
+            member.setIsActive(true);
+            member.setIsAdmin(false);
+
+            familyMemberRepository.save(member);
 
             // Mark invitation as used
             invitation.setIsUsed(true);
