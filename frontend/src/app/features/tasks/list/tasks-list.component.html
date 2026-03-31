@@ -168,7 +168,7 @@
                 <!-- RECOMPENSA -->
                 <td class="col-reward">
                   <span class="reward-xp">+{{ task.xpReward }} XP</span>
-                  <span class="reward-coins"><mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon> {{ task.coinsReward }}</span>
+                  <span class="reward-coins"><span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span> {{ task.coinsReward }}</span>
                 </td>
                 <!-- VENCE -->
                 <td class="col-date">{{ formatDate(task.dueDate) }}</td>
@@ -243,7 +243,7 @@
                 {{ task.homeSpaceName }}
               </span>
               <span class="reward-xp">+{{ task.xpReward }} XP</span>
-              <span class="reward-coins"><mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon> {{ task.coinsReward }}</span>
+              <span class="reward-coins"><span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span> {{ task.coinsReward }}</span>
             </div>
 
             @if (isParent()) {
@@ -387,7 +387,7 @@
           >
             @if (selectedSpace()) {
               <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(selectedSpace()!.type) }}</mat-icon>
-              {{ selectedSpace()!.name }}
+              <span class="panel-space-selected-name">{{ selectedSpace()!.name }}</span>
             } @else {
               <span class="panel-space-placeholder">
                 {{ spaces().length === 0 ? 'Sin espacios creados' : 'Selecciona un espacio...' }}

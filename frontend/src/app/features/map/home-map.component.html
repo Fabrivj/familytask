@@ -4,14 +4,14 @@
     <!-- Header -->
     <div class="header-row">
       <app-page-header
-        tag="// ORGANIZACIÓN DEL HOGAR"
+        tag="// MAPA DEL HOGAR"
         title="Mapa del Hogar"
         [subtitle]="spacesSubtitle()"
       />
       @if (isParent()) {
         <button class="btn-cta btn-new-space" type="button" (click)="openCreatePanel()">
           <mat-icon aria-hidden="true">add</mat-icon>
-          CREAR ESPACIO
+          NUEVO ESPACIO
         </button>
       }
     </div>
@@ -159,7 +159,7 @@
             Creando...
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
-            CREAR ESPACIO
+            NUEVO ESPACIO
           }
         </button>
       </div>
@@ -252,8 +252,8 @@
   [open]="showDeleteConfirm()"
   title="Eliminar espacio"
   message="¿Deseas eliminar este espacio del mapa?"
-  confirmLabel="Eliminar"
-  cancelLabel="Cancelar"
+  confirmLabel="ELIMINAR"
+  cancelLabel="CANCELAR"
   (confirmed)="confirmDeleteSpace()"
   (cancelled)="cancelDeleteSpace()"
 />
@@ -281,7 +281,7 @@
           >
             @if (selectedTargetSpace()) {
               <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(selectedTargetSpace()!.type) }}</mat-icon>
-              {{ selectedTargetSpace()!.name }}
+              <span class="migrate-space-selected-name">{{ selectedTargetSpace()!.name }}</span>
             } @else {
               <span class="migrate-space-placeholder">Selecciona un espacio...</span>
             }
@@ -318,7 +318,7 @@
           @if (isMigrating()) {
             Migrando...
           } @else {
-            MIGRAR Y ELIMINAR
+            MIGRAR
           }
         </button>
       </div>
