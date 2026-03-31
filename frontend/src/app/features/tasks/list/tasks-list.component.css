@@ -342,11 +342,12 @@
 }
 
 .coin-icon {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
+  font-size: 13px;
+  width: auto;
+  height: auto;
   line-height: 1;
   flex-shrink: 0;
+  vertical-align: middle;
 }
 
 .col-date {

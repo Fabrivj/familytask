@@ -2,12 +2,12 @@
   <main class="content">
 
     @if (successMessage()) {
-      <p class="msg-success" role="status">✓ {{ successMessage() }}</p>
+      <p class="msg-success" role="status"><mat-icon>check</mat-icon> {{ successMessage() }}</p>
     }
 
     <app-page-header
-      tag="// DASHBOARD"
-      [title]="'Bienvenido, ' + shortName() + ' 👋'"
+      tag="// INICIO"
+      title="Tu panel familiar"
     />
 
     @if ((session()?.families ?? []).length > 0) {
@@ -18,7 +18,7 @@
             <div class="chip">
               <strong class="chip-name">{{ familia.familyName }}</strong>
               <span class="chip-role">
-                {{ familia.role === 'PARENT' ? '👑 Padre / Tutor' : '👦 Hijo' }}
+                <app-role-badge [role]="familia.role" />
               </span>
             </div>
           }

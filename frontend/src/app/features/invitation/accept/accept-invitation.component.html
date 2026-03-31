@@ -30,10 +30,9 @@
       </ng-container>
 
       <div class="role-card">
-        <span class="role-emoji" aria-hidden="true">{{ rolEmoji() }}</span>
         <div class="role-info">
           <span class="role-label">TU ROL EN ESTE GRUPO</span>
-          <span class="role-value">{{ rolLabel() }}</span>
+          <app-role-badge [role]="details()!.role" />
         </div>
         <span class="assigned-tag">Asignado</span>
       </div>
@@ -66,7 +65,7 @@
         <p class="tag">// LISTO</p>
         <p class="card-title">¡Te uniste exitosamente!</p>
       </ng-container>
-      <div class="success-icon" aria-hidden="true">✓</div>
+      <div class="success-icon" aria-hidden="true"><mat-icon>check_circle</mat-icon></div>
       <p class="loading-text">Redirigiendo al dashboard...</p>
     </app-neon-card>
 

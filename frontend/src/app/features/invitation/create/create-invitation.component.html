@@ -19,7 +19,7 @@
     </ng-container>
 
     <div class="family-badge">
-      <div class="family-icon" aria-hidden="true">👨‍👩‍👧‍👦</div>
+      <div class="family-icon" aria-hidden="true"><mat-icon>family_restroom</mat-icon></div>
       <div class="family-info">
         <span class="family-name">{{ familyName() }}</span>
         <app-role-badge [role]="familyRole()" />
@@ -75,7 +75,7 @@
             (click)="copyLink()"
             [attr.aria-label]="linkCopied() ? 'Copiado' : 'Copiar link'"
           >
-            @if (linkCopied()) { ✓ } @else { Copiar }
+            @if (linkCopied()) { <mat-icon>check</mat-icon> } @else { Copiar }
           </button>
         </div>
 
@@ -121,7 +121,7 @@
         <span class="separator">·</span>
       }
       <button class="skip-link" type="button" (click)="goToDashboard()">
-        Saltar por ahora → ir al inicio
+        Saltar por ahora — ir al inicio
       </button>
     </p>
 

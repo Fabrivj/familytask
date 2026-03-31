@@ -82,6 +82,8 @@ import { MatIconModule } from '@angular/material/icon';
       font-size: 14px;
       line-height: 1.5;
       color: var(--text-sub);
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .actions {

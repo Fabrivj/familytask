@@ -3,7 +3,7 @@
 
     <div class="page-header-row">
       <app-page-header
-        tag="// GESTIÓN DE FAMILIA"
+        tag="// MIEMBROS"
         title="Miembros"
         [subtitle]="pageSubtitle()"
       />
@@ -169,8 +169,8 @@
   [open]="confirmDialogOpen()"
   [title]="confirmTitle()"
   [message]="confirmMessage()"
-  confirmLabel="Cambiar"
-  cancelLabel="Cancelar"
+  confirmLabel="CAMBIAR"
+  cancelLabel="CANCELAR"
   (confirmed)="onConfirmRoleChange()"
   (cancelled)="onCancelRoleChange()"
 />
@@ -181,8 +181,8 @@
   [message]="removeMessage()"
   subMessage="Sus tareas pendientes quedarán sin asignar y perderá acceso al grupo."
   variant="danger"
-  confirmLabel="Sí, remover"
-  cancelLabel="Cancelar"
+  confirmLabel="REMOVER"
+  cancelLabel="CANCELAR"
   (confirmed)="onConfirmRemove()"
   (cancelled)="onCancelRemove()"
 />

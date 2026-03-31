@@ -93,6 +93,8 @@
   gap: 16px;
   background: rgba(var(--border-rgb), 0.02);
   transition: border-color 0.2s;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .space-card:hover {
@@ -109,6 +111,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .space-icon {
@@ -128,6 +132,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .space-type {
@@ -145,6 +151,10 @@
   font-weight: 700;
   color: var(--text);
   letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .card-tasks {
@@ -505,6 +515,14 @@
   flex: 1;
   font-style: italic;
   opacity: 0.5;
+}
+
+.migrate-space-selected-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .migrate-space-chevron {
