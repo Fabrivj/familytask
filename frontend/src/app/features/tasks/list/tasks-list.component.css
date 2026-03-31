@@ -670,6 +670,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   text-align: left;
   cursor: pointer;
   color: var(--text-sub);
+  overflow: hidden;
 }
 
 .panel-space-trigger.has-value {
@@ -680,6 +681,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   flex: 1;
   font-style: italic;
   opacity: 0.5;
+}
+
+.panel-space-selected-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .panel-space-chevron {

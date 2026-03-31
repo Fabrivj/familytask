@@ -387,7 +387,7 @@
           >
             @if (selectedSpace()) {
               <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(selectedSpace()!.type) }}</mat-icon>
-              {{ selectedSpace()!.name }}
+              <span class="panel-space-selected-name">{{ selectedSpace()!.name }}</span>
             } @else {
               <span class="panel-space-placeholder">
                 {{ spaces().length === 0 ? 'Sin espacios creados' : 'Selecciona un espacio...' }}

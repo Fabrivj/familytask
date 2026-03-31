@@ -48,7 +48,11 @@ export class SelectFamilyComponent implements OnInit {
       this.authService.setActiveFamily(current[0].familyId);
       this.router.navigate(['/dashboard']);
     } else if (current.length > 1) {
-      this.selectedFamilyId.set(current[0].familyId);
+      const activeFamilyId = this.authService.session()?.activeFamilyId ?? null;
+      const preselect = activeFamilyId && current.some(f => f.familyId === activeFamilyId)
+        ? activeFamilyId
+        : current[0].familyId;
+      this.selectedFamilyId.set(preselect);
     }
   }
 
