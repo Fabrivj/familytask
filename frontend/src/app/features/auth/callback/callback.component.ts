@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { timeout, TimeoutError } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
@@ -17,7 +18,7 @@ type CallbackState = 'processing' | 'error';
 
 @Component({
   selector: 'app-callback',
-  imports: [MatProgressSpinnerModule, PageLayoutComponent, NeonCardComponent],
+  imports: [MatIconModule, MatProgressSpinnerModule, PageLayoutComponent, NeonCardComponent],
   templateUrl: './callback.component.html',
   styleUrl: './callback.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

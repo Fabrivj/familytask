@@ -37,4 +37,10 @@ export class FamilyService {
       { role }
     );
   }
+
+  removeMember(familyId: number, userId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `${environment.apiUrl}/families/${familyId}/members/${userId}`
+    );
+  }
 }

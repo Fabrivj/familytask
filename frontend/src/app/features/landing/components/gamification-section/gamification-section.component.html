@@ -1,134 +1,36 @@
 <section class="gamification landing-section">
   <div class="landing-container">
 
-    <div class="landing-chip">Sistema de progresión</div>
-    <h2 class="landing-section-title">Mecánicas de Gamificación</h2>
-    <p class="landing-section-sub">XP, niveles, rachas y badges diseñados para mantener la motivación semana tras semana.</p>
+    <div class="landing-chip">Progresión</div>
+    <h2 class="landing-section-title">¿Cómo funciona el sistema de puntos?</h2>
+    <p class="landing-section-sub">Un sistema sencillo que convierte las tareas en hábitos.</p>
 
     <div class="gami-grid">
 
-      <!-- Left column -->
-      <div class="gami-left">
-
-        <div class="player-card">
-          <div class="player-header">
-            <div class="player-avatar">🦸</div>
-            <div>
-              <div class="player-name">Sebastián R.</div>
-              <div class="player-level">⭐ NIVEL 7 — Guardián del Hogar</div>
-            </div>
-          </div>
-          <div class="xp-label-row">
-            <span class="xp-label">Progreso de nivel</span>
-            <span class="xp-value">1,360 / 2,000 XP</span>
-          </div>
-          <div class="xp-bar-track">
-            <div class="xp-bar-fill"></div>
-          </div>
-          <div class="xp-subtext">640 XP para alcanzar Nivel 8</div>
-        </div>
-
-        <div class="badges-card">
-          <div class="badges-title">🏆 Badges obtenidos</div>
-          <div class="badges-row">
-            <div class="badge-item">
-              <div class="badge-icon gold">⭐</div>
-              <div class="badge-name">Primera misión</div>
-            </div>
-            <div class="badge-item">
-              <div class="badge-icon cyan">🌊</div>
-              <div class="badge-name">Racha 7 días</div>
-            </div>
-            <div class="badge-item">
-              <div class="badge-icon green">🌿</div>
-              <div class="badge-name">Hábito verde</div>
-            </div>
-            <div class="badge-item">
-              <div class="badge-icon pink">🚀</div>
-              <div class="badge-name">Nivel 5</div>
-            </div>
-            <div class="badge-item">
-              <div class="badge-icon locked">🔒</div>
-              <div class="badge-name">Leyenda</div>
-            </div>
-            <div class="badge-item">
-              <div class="badge-icon locked">🔒</div>
-              <div class="badge-name">Maestro IA</div>
-            </div>
-          </div>
-        </div>
-
+      <div class="gami-card">
+        <div class="gami-icon"><mat-icon>military_tech</mat-icon></div>
+        <div class="gami-title">Puntos por cada tarea</div>
+        <div class="gami-desc">Cada tarea completada suma XP y monedas. El XP hace subir de nivel; las monedas se usan para solicitar premios del catálogo.</div>
       </div>
 
-      <!-- Right column -->
-      <div class="gami-right">
-
-        <div class="streak-card">
-          <div class="streak-top">
-            <div class="streak-flame">🔥</div>
-            <div>
-              <div class="streak-count">12</div>
-              <div class="streak-desc">días de racha activa · ¡No rompas la cadena!</div>
-            </div>
-          </div>
-          <div class="streak-days">
-            <div class="streak-day done">L</div>
-            <div class="streak-day done">M</div>
-            <div class="streak-day done">X</div>
-            <div class="streak-day done">J</div>
-            <div class="streak-day done">V</div>
-            <div class="streak-day today">S</div>
-            <div class="streak-day next">D</div>
-          </div>
-        </div>
-
-        <div class="levels-card">
-          <div class="levels-title">📈 Tabla de niveles</div>
-
-          <div class="level-item">
-            <div class="level-num">1</div>
-            <div class="level-icon">🌱</div>
-            <div class="level-info">
-              <div class="level-name">Recluta del Hogar</div>
-              <div class="level-xp">0 — 200 XP</div>
-            </div>
-          </div>
-          <div class="level-item">
-            <div class="level-num">3</div>
-            <div class="level-icon">🛡️</div>
-            <div class="level-info">
-              <div class="level-name">Explorador Familiar</div>
-              <div class="level-xp">500 — 900 XP</div>
-            </div>
-          </div>
-          <div class="level-item">
-            <div class="level-num">5</div>
-            <div class="level-icon">⚔️</div>
-            <div class="level-info">
-              <div class="level-name">Héroe del Hogar</div>
-              <div class="level-xp">1,000 — 1,500 XP</div>
-            </div>
-          </div>
-          <div class="level-item">
-            <div class="level-num">7</div>
-            <div class="level-icon">🏰</div>
-            <div class="level-info">
-              <div class="level-name">Guardián del Hogar</div>
-              <div class="level-xp">1,501 — 2,000 XP</div>
-            </div>
-            <div class="level-badge-current">Actual</div>
-          </div>
-          <div class="level-item">
-            <div class="level-num">10</div>
-            <div class="level-icon">👑</div>
-            <div class="level-info">
-              <div class="level-name">Leyenda de la Familia</div>
-              <div class="level-xp">3,000+ XP</div>
-            </div>
-          </div>
-        </div>
-
+      <div class="gami-card">
+        <div class="gami-icon"><mat-icon>trending_up</mat-icon></div>
+        <div class="gami-title">Niveles de progreso</div>
+        <div class="gami-desc">A medida que suma puntos, tu hijo sube de nivel y obtiene un nuevo título en su perfil.</div>
       </div>
+
+      <div class="gami-card">
+        <div class="gami-icon"><mat-icon>local_fire_department</mat-icon></div>
+        <div class="gami-title">Rachas diarias</div>
+        <div class="gami-desc">Completar al menos una tarea por día mantiene la racha activa. Las rachas fomentan la constancia como hábito.</div>
+      </div>
+
+      <div class="gami-card">
+        <div class="gami-icon"><mat-icon>workspace_premium</mat-icon></div>
+        <div class="gami-title">Insignias</div>
+        <div class="gami-desc">Se ganan al alcanzar logros especiales. Cada insignia es un reconocimiento que queda guardado en el perfil.</div>
+      </div>
+
     </div>
   </div>
 </section>

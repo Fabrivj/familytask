@@ -32,4 +32,16 @@ export class PermissionsService {
     if (member.isAdmin && !me.isAdmin) return false;
     return true;
   }
+
+  /**
+   * Whether the current user can remove {@link member} from the family.
+   * Rules (mirror of FamilyPermissions.java#canRemoveMember):
+   * - Current user must be the family admin.
+   * - The admin cannot remove themselves.
+   */
+  canRemoveMember(member: MemberItem): boolean {
+    if (!this.isAdmin()) return false;
+    if (member.isAdmin) return false;
+    return true;
+  }
 }

@@ -1,33 +1,10 @@
-<app-shell>
-  <main class="content">
-
-    <!-- Header -->
-    <div class="header-row">
-      <div class="header-info">
-        <p class="tag">// GESTIÓN DE FAMILIA</p>
-        <h1 class="page-title">Tareas y Hábitos</h1>
-        <p class="page-subtitle">{{ filteredTasks().length }} tareas activas</p>
-      </div>
-      @if (isParent()) {
+    @if (isParent()) {
+      <div class="action-row">
         <button class="btn-cta btn-new-task" type="button" (click)="openCreatePanel()">
           + NUEVA TAREA
         </button>
-      }
-    </div>
-
-    <!-- ── Tabs ──────────────────────────────────────────────────── -->
-    <div class="tabs" role="tablist">
-      <button class="tab tab-active" role="tab" aria-selected="true">
-        <mat-icon class="tab-icon" aria-hidden="true">task_alt</mat-icon>
-        TAREAS
-        <span class="tab-count">{{ tasks().length }}</span>
-      </button>
-      <button class="tab" role="tab" aria-selected="false" disabled>
-        <mat-icon class="tab-icon" aria-hidden="true">schedule</mat-icon>
-        HÁBITOS
-        <span class="tab-count">0</span>
-      </button>
-    </div>
+      </div>
+    }
 
     <!-- ── Filters ───────────────────────────────────────────────── -->
     <div class="filters-bar" role="group" aria-label="Filtros de tareas">
@@ -45,17 +22,50 @@
         </button>
       }
 
-      @if (zones().length > 0) {
-        <span class="filter-label">ZONA</span>
-        @for (z of zones(); track z) {
+      @if (spaces().length > 0) {
+        <div class="space-dropdown-wrap">
           <button
-            class="filter-chip"
-            [class.filter-active]="filterZone() === z"
+            class="filter-chip space-dropdown-trigger"
+            [class.filter-active]="filterSpaceId() !== null"
             type="button"
-            (click)="toggleZone(z)"
-            [attr.aria-pressed]="filterZone() === z"
-          >{{ z }}</button>
-        }
+            (click)="toggleSpaceDropdown()"
+            [attr.aria-expanded]="spaceDropdownOpen()"
+            aria-haspopup="listbox"
+          >
+            <mat-icon class="chip-space-icon" aria-hidden="true">
+              {{ filterSpaceId() ? spaceTypeIcon(selectedFilterSpace()?.type ?? '') : 'home' }}
+            </mat-icon>
+            {{ selectedFilterSpace()?.name ?? 'ESPACIO' }}
+            <mat-icon class="dropdown-chevron" aria-hidden="true">
+              {{ spaceDropdownOpen() ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+
+          @if (spaceDropdownOpen()) {
+            <ul class="space-dropdown-menu" role="listbox" aria-label="Filtrar por espacio">
+              <li
+                class="space-dropdown-item"
+                role="option"
+                [class.active]="filterSpaceId() === null"
+                (click)="selectSpaceFilter(null)"
+              >
+                <mat-icon class="chip-space-icon" aria-hidden="true">home</mat-icon>
+                Todos los espacios
+              </li>
+              @for (s of spaces(); track s.id) {
+                <li
+                  class="space-dropdown-item"
+                  role="option"
+                  [class.active]="filterSpaceId() === s.id"
+                  (click)="selectSpaceFilter(s.id)"
+                >
+                  <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(s.type) }}</mat-icon>
+                  {{ s.name }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
       }
 
       @if (members().length > 0) {
@@ -109,6 +119,7 @@
               <th>ZONA</th>
               <th>RECOMPENSA</th>
               <th>VENCE</th>
+              <!-- TODO: columna ESTADO — pendiente implementación con tabla intermedia -->
               <th>ESTADO</th>
               @if (isParent()) {<th>ACCIONES</th>}
             </tr>
@@ -147,25 +158,44 @@
                     <span class="text-muted">Sin asignar</span>
                   }
                 </td>
-                <!-- ZONA -->
-                <td class="col-zone">{{ task.location }}</td>
+                <!-- ESPACIO -->
+                <td class="col-zone">
+                  <span class="space-chip-inline">
+                    <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(task.homeSpaceType) }}</mat-icon>
+                    {{ task.homeSpaceName }}
+                  </span>
+                </td>
                 <!-- RECOMPENSA -->
                 <td class="col-reward">
                   <span class="reward-xp">+{{ task.xpReward }} XP</span>
-                  <span class="reward-coins"><mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon> {{ task.coinsReward }}</span>
+                  <span class="reward-coins"><span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span> {{ task.coinsReward }}</span>
                 </td>
                 <!-- VENCE -->
                 <td class="col-date">{{ formatDate(task.dueDate) }}</td>
                 <!-- ESTADO -->
-                <td>
-                  <span class="status-badge status-{{ task.status | lowercase }}">
-                    {{ statusLabel(task.status) }}
-                  </span>
+                <td class="col-status">
+                  @if (task.status !== null) {
+                    <button
+                      class="status-btn status-btn-{{ task.status | lowercase }}"
+                      type="button"
+                      (click)="openStatusDropdown($event, task.id)"
+                      [disabled]="isUpdatingStatus() === task.id"
+                      [attr.aria-expanded]="openStatusDropdownId() === task.id"
+                      aria-haspopup="listbox"
+                    >
+                      {{ statusLabel(task.status) }}
+                      <mat-icon class="status-chevron" aria-hidden="true">
+                        {{ openStatusDropdownId() === task.id ? 'expand_less' : 'expand_more' }}
+                      </mat-icon>
+                    </button>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
                 </td>
                 <!-- ACCIONES -->
                 @if (isParent()) {
                   <td class="col-actions">
-                    <button class="btn-icon" type="button" aria-label="Editar tarea" disabled>
+                    <button class="btn-icon" type="button" aria-label="Editar tarea" (click)="openEditPanel(task)">
                       <mat-icon aria-hidden="true">edit</mat-icon>
                     </button>
                     <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar tarea" (click)="openDeleteModal(task)">
@@ -185,9 +215,11 @@
           <article class="task-card">
             <div class="card-row-top">
               <span class="task-name">{{ task.title }}</span>
-              <span class="status-badge status-{{ task.status | lowercase }}">
-                {{ statusLabel(task.status) }}
-              </span>
+              @if (task.status !== null) {
+                <span class="status-badge status-badge-{{ task.status | lowercase }}">{{ statusLabel(task.status) }}</span>
+              } @else {
+                <span class="text-muted">—</span>
+              }
             </div>
 
             <div class="card-row-sub">
@@ -206,14 +238,17 @@
                   {{ task.assignedToName.split(' ')[0] }}
                 </span>
               }
-              <span class="zone-chip">📍 {{ task.location }}</span>
+              <span class="zone-chip">
+                <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(task.homeSpaceType) }}</mat-icon>
+                {{ task.homeSpaceName }}
+              </span>
               <span class="reward-xp">+{{ task.xpReward }} XP</span>
-              <span class="reward-coins"><mat-icon class="coin-icon" aria-hidden="true">toll</mat-icon> {{ task.coinsReward }}</span>
+              <span class="reward-coins"><span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span> {{ task.coinsReward }}</span>
             </div>
 
             @if (isParent()) {
               <div class="card-row-actions">
-                <button class="btn-icon" type="button" aria-label="Editar tarea" disabled>
+                <button class="btn-icon" type="button" aria-label="Editar tarea" (click)="openEditPanel(task)">
                   <mat-icon aria-hidden="true">edit</mat-icon>
                 </button>
                 <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar tarea" (click)="openDeleteModal(task)">
@@ -226,17 +261,15 @@
       </div>
 
     }
-  </main>
-</app-shell>
 
 <!-- ═══════════ CREATE PANEL ═══════════ -->
 @if (showCreatePanel()) {
   <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Crear nueva tarea">
+  <aside class="create-panel" role="dialog" [attr.aria-label]="isEditMode() ? 'Editar tarea' : 'Crear nueva tarea'">
     <div class="panel-header">
       <div class="panel-header-left">
-        <h2 class="panel-title">Nueva tarea</h2>
+        <h2 class="panel-title">{{ isEditMode() ? 'Editar tarea' : 'Nueva tarea' }}</h2>
         <span class="panel-badge">TAREA</span>
       </div>
       <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
@@ -284,19 +317,19 @@
         <div class="priority-toggle">
           <button
             class="priority-btn"
-            [class.priority-btn-active]="selectedPriority() === 'HIGH'"
+            [class.priority-btn-active-high]="selectedPriority() === 'HIGH'"
             type="button"
             (click)="selectPriority('HIGH')"
           ><span class="priority-dot priority-dot-high"></span> ALTA</button>
           <button
             class="priority-btn"
-            [class.priority-btn-active]="selectedPriority() === 'MEDIUM'"
+            [class.priority-btn-active-medium]="selectedPriority() === 'MEDIUM'"
             type="button"
             (click)="selectPriority('MEDIUM')"
           ><span class="priority-dot priority-dot-medium"></span> MEDIA</button>
           <button
             class="priority-btn"
-            [class.priority-btn-active]="selectedPriority() === 'LOW'"
+            [class.priority-btn-active-low]="selectedPriority() === 'LOW'"
             type="button"
             (click)="selectPriority('LOW')"
           ><span class="priority-dot priority-dot-low"></span> BAJA</button>
@@ -339,33 +372,69 @@
         </div>
       </div>
 
-      <!-- Zona / Ubicación -->
+      <!-- Espacio del hogar -->
       <div class="field">
-        <label class="field-label" for="f-zone">ZONA / UBICACIÓN <span class="req">*</span></label>
-        <input
-          id="f-zone"
-          class="field-input"
-          [class.has-error]="locationCtrl.invalid && locationCtrl.touched"
-          type="text"
-          [formControl]="locationCtrl"
-          placeholder="Ej. Cocina, Sala, Patio..."
-          autocomplete="off"
-        />
-        @if (locationCtrl.invalid && locationCtrl.touched) {
-          <span class="field-error" role="alert">{{ getLocationError() }}</span>
+        <label class="field-label">ESPACIO DEL HOGAR <span class="req">*</span></label>
+        <div class="panel-space-dropdown-wrap">
+          <button
+            class="field-input panel-space-trigger"
+            [class.has-error]="spaceError()"
+            [class.has-value]="selectedSpace() !== null"
+            type="button"
+            (click)="toggleSpaceSelect()"
+            [attr.aria-expanded]="spaceSelectOpen()"
+            [disabled]="spaces().length === 0"
+          >
+            @if (selectedSpace()) {
+              <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(selectedSpace()!.type) }}</mat-icon>
+              <span class="panel-space-selected-name">{{ selectedSpace()!.name }}</span>
+            } @else {
+              <span class="panel-space-placeholder">
+                {{ spaces().length === 0 ? 'Sin espacios creados' : 'Selecciona un espacio...' }}
+              </span>
+            }
+            <mat-icon class="panel-space-chevron" aria-hidden="true">
+              {{ spaceSelectOpen() ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+
+          @if (spaceSelectOpen()) {
+            <ul class="panel-space-menu" role="listbox" aria-label="Seleccionar espacio">
+              @for (s of spaces(); track s.id) {
+                <li
+                  class="panel-space-item"
+                  role="option"
+                  [class.active]="selectedSpace()?.id === s.id"
+                  (click)="selectSpace(s)"
+                >
+                  <mat-icon class="chip-space-icon" aria-hidden="true">{{ spaceTypeIcon(s.type) }}</mat-icon>
+                  {{ s.name }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
+        @if (spaceError()) {
+          <span class="field-error" role="alert">El espacio del hogar es obligatorio.</span>
         }
       </div>
 
       <!-- Fecha límite -->
       <div class="field">
         <label class="field-label" for="f-due">FECHA LÍMITE <span class="optional">(OPCIONAL)</span></label>
-        <input
-          id="f-due"
-          class="field-input"
-          type="date"
-          [min]="minDate"
-          [formControl]="dueDateCtrl"
-        />
+        <div class="date-input-wrap">
+          <input
+            id="f-due"
+            class="field-input date-input"
+            [matDatepicker]="picker"
+            [min]="minDateObj"
+            [formControl]="dueDateCtrl"
+            placeholder="dd/mm/aaaa"
+            readonly
+          />
+          <mat-datepicker-toggle class="date-toggle" [for]="picker" aria-label="Abrir calendario" />
+          <mat-datepicker #picker />
+        </div>
       </div>
 
       <!-- Asignar a -->
@@ -402,10 +471,10 @@
         <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
         <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
           @if (isCreating()) {
-            Creando...
+            {{ isEditMode() ? 'Guardando...' : 'Creando...' }}
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
-            CREAR TAREA
+            {{ isEditMode() ? 'GUARDAR CAMBIOS' : 'CREAR TAREA' }}
           }
         </button>
       </div>
@@ -414,20 +483,31 @@
   </aside>
 }
 
-<!-- ═══════════ DELETE MODAL ═══════════ -->
-@if (showDeleteModal()) {
-  <div class="overlay modal-overlay" (click)="closeDeleteModal()" aria-hidden="true"></div>
-
-  <div class="delete-modal" role="dialog" aria-label="Confirmar eliminación">
-    <div class="modal-icon">
-      <mat-icon class="modal-icon-svg" aria-hidden="true">delete</mat-icon>
-    </div>
-    <h3 class="modal-title">¿Eliminar tarea/<br>hábito?</h3>
-    <p class="modal-text">Vas a eliminar <strong>"{{ taskToDelete()?.title }}"</strong>.</p>
-    <p class="modal-text-sub">Esta acción no se puede deshacer.</p>
-    <div class="modal-actions">
-      <button class="btn-cta btn-outline btn-modal-cancel" type="button" (click)="closeDeleteModal()">CANCELAR</button>
-      <button class="btn-cta btn-modal-delete" type="button" (click)="confirmDelete()">ELIMINAR</button>
-    </div>
-  </div>
+@if (activeStatusTask() !== null && statusDropdownPos() !== null) {
+  <ul
+    class="status-dropdown-menu status-dropdown-fixed"
+    role="listbox"
+    aria-label="Cambiar estado"
+    [style.top.px]="statusDropdownPos()!.top"
+    [style.left.px]="statusDropdownPos()!.left"
+  >
+    @for (s of ['PENDING', 'IN_PROGRESS', 'COMPLETED']; track s) {
+      <li
+        class="status-dropdown-item"
+        role="option"
+        [class.active]="activeStatusTask()!.status === s"
+        (click)="changeStatus(activeStatusTask()!, $any(s))"
+      >{{ statusLabel(s) }}</li>
+    }
+  </ul>
 }
+
+<app-confirm-dialog
+  [open]="showDeleteModal()"
+  title="¿Eliminar tarea?"
+  [message]="'¿Estás seguro de que quieres eliminar &quot;' + (taskToDelete()?.title ?? '') + '&quot;? Esta acción no se puede deshacer.'"
+  confirmLabel="ELIMINAR"
+  cancelLabel="CANCELAR"
+  (confirmed)="confirmDelete()"
+  (cancelled)="closeDeleteModal()"
+/>

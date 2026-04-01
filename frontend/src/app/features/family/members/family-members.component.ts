@@ -76,6 +76,14 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     return `¿Estás seguro de cambiar el rol de ${pending.member.name} a ${newRoleLabel}?`;
   });
 
+  readonly removeDialogOpen = signal(false);
+  readonly pendingRemove = signal<MemberItem | null>(null);
+  readonly isRemoving = signal(false);
+  readonly removeMessage = computed(() => {
+    const m = this.pendingRemove();
+    return m ? `Vas a remover a ${m.name} de la familia.` : '';
+  });
+
   ngOnInit(): void {
     const state = history.state as { message?: string };
     if (state?.message) {
@@ -144,6 +152,43 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   // ─── Helpers ──────────────────────────────────────────────────────────────
   canEdit(member: MemberItem): boolean {
     return this.permissions.canEditMemberRole(member);
+  }
+
+  canRemove(member: MemberItem): boolean {
+    return this.permissions.canRemoveMember(member);
+  }
+
+  confirmRemove(member: MemberItem): void {
+    this.pendingRemove.set(member);
+    this.removeDialogOpen.set(true);
+  }
+
+  onConfirmRemove(): void {
+    const member = this.pendingRemove();
+    this.removeDialogOpen.set(false);
+    this.pendingRemove.set(null);
+    if (!member) return;
+
+    const familyId = this.authService.getActiveFamilyId();
+    if (!familyId) return;
+
+    this.isRemoving.set(true);
+    this.familyService.removeMember(familyId, member.id).subscribe({
+      next: () => {
+        this.isRemoving.set(false);
+        this.snackBar.open('Miembro removido exitosamente.', 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
+        this.fetchMembers(familyId, false);
+      },
+      error: () => {
+        this.isRemoving.set(false);
+        this.snackBar.open('No se pudo remover el miembro. Intenta de nuevo.', 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+      },
+    });
+  }
+
+  onCancelRemove(): void {
+    this.removeDialogOpen.set(false);
+    this.pendingRemove.set(null);
   }
 
   isCurrentUser(member: MemberItem): boolean {

@@ -1,7 +1,6 @@
 package com.vertexdev.familytask.model;
 
 import com.vertexdev.familytask.model.enums.Priority;
-import com.vertexdev.familytask.model.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -31,9 +30,12 @@ public class Task {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
+    @OneToOne(mappedBy = "task", fetch = FetchType.LAZY)
+    private TaskAssignment assignment;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_to")
-    private User assignedTo;
+    @JoinColumn(name = "home_space_id", nullable = false)
+    private Space homeSpace;
 
     @Column(name = "title", nullable = false, length = 100)
     private String title;
@@ -41,17 +43,9 @@ public class Task {
     @Column(nullable = false, length = 500)
     private String description;
 
-    @Column(nullable = false)
-    private String location;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private TaskStatus status = TaskStatus.PENDING;
 
     @Column(name = "xp_reward", nullable = false)
     private Integer xpReward;
@@ -61,10 +55,6 @@ public class Task {
 
     @Column(name = "due_date")
     private LocalDate dueDate;
-
-    @Column(name = "is_deleted", nullable = false)
-    @Builder.Default
-    private Boolean isDeleted = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

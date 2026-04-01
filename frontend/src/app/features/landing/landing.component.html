@@ -5,3 +5,9 @@
 <app-landing-gamification id="gamification" />
 <app-landing-cta id="cta" (ctaClicked)="onCtaClick()" />
 <app-landing-footer />
+
+@if (showBackToTop()) {
+  <button class="back-to-top" (click)="scrollToTop()" aria-label="Volver arriba">
+    <mat-icon>keyboard_arrow_up</mat-icon>
+  </button>
+}

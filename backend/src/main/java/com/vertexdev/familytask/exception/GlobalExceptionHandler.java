@@ -60,6 +60,24 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(HabitException.class)
+    public ResponseEntity<ErrorResponse> handleHabitException(HabitException ex) {
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(SpaceException.class)
+    public ResponseEntity<ErrorResponse> handleSpaceException(SpaceException ex) {
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ErrorResponse> handleAuthException(AuthException ex) {
         HttpStatus status = switch (ex.getCode()) {

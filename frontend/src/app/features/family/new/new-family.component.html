@@ -18,7 +18,7 @@
     @if (!showForm()) {
 
       <div class="opt" role="presentation">
-        <div class="opt-icon" aria-hidden="true">🏠</div>
+        <div class="opt-icon" aria-hidden="true"><mat-icon>home</mat-icon></div>
         <div class="opt-body">
           <div class="opt-title">Crear una familia</div>
           <div class="opt-desc">
@@ -33,7 +33,7 @@
       </div>
 
       <div class="info-box" role="note">
-        <span class="info-icon" aria-hidden="true">💬</span>
+        <span class="info-icon" aria-hidden="true"><mat-icon>help_outline</mat-icon></span>
         <div class="info-text">
           <strong>¿Te van a invitar?</strong> No necesitas hacer nada aquí.
           Cuando alguien cree el grupo te compartirá un
@@ -85,7 +85,7 @@
       <p card-footer class="footer-note">Puedes modificar el nombre luego en configuración</p>
     } @else {
       <p card-footer class="footer-note">
-        <button class="back-link" type="button" (click)="goBack()">← Volver</button>
+        <button class="back-link" type="button" (click)="goBack()"><mat-icon>arrow_back</mat-icon> Volver</button>
       </p>
     }
 

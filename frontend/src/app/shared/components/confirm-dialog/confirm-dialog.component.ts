@@ -7,9 +7,11 @@ import {
   effect,
   viewChild,
 } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-confirm-dialog',
+  imports: [MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(keydown.escape)': 'onCancel()',
@@ -19,13 +21,19 @@ import {
       <div class="backdrop" (click)="onCancel()"></div>
       <div class="dialog" role="alertdialog" aria-modal="true"
         aria-labelledby="confirm-title" aria-describedby="confirm-msg">
+        @if (variant() === 'danger') {
+          <mat-icon class="warning-icon" aria-hidden="true">warning</mat-icon>
+        }
         <h2 id="confirm-title" class="title">{{ title() }}</h2>
         <p id="confirm-msg" class="message">{{ message() }}</p>
+        @if (subMessage()) {
+          <p class="sub-message">{{ subMessage() }}</p>
+        }
         <div class="actions">
           <button class="btn-cancel" type="button" #cancelBtn (click)="onCancel()">
             {{ cancelLabel() }}
           </button>
-          <button class="btn-confirm" type="button" (click)="onConfirm()">
+          <button class="btn-confirm" [class.btn-danger]="variant() === 'danger'" type="button" (click)="onConfirm()">
             {{ confirmLabel() }}
           </button>
         </div>
@@ -74,6 +82,8 @@ import {
       font-size: 14px;
       line-height: 1.5;
       color: var(--text-sub);
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .actions {
@@ -105,6 +115,23 @@ import {
       background: rgba(var(--primary-rgb), 0.08);
     }
 
+    .warning-icon {
+      display: block;
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+      color: #f5c542;
+      margin: 0 auto 14px;
+    }
+
+    .sub-message {
+      margin: -16px 0 24px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-sub);
+    }
+
     .btn-confirm {
       background: var(--primary);
       border: 1.5px solid var(--primary);
@@ -114,6 +141,16 @@ import {
 
     .btn-confirm:hover {
       box-shadow: 0 4px 24px rgba(var(--primary-rgb), 0.55);
+    }
+
+    .btn-danger {
+      background: #e53935;
+      border-color: #e53935;
+      box-shadow: 0 4px 18px rgba(229, 57, 53, 0.35);
+    }
+
+    .btn-danger:hover {
+      box-shadow: 0 4px 24px rgba(229, 57, 53, 0.55);
     }
 
     .btn-cancel:focus-visible,
@@ -137,6 +174,8 @@ export class ConfirmDialogComponent {
   readonly open = input.required<boolean>();
   readonly title = input.required<string>();
   readonly message = input.required<string>();
+  readonly subMessage = input<string>('');
+  readonly variant = input<'default' | 'danger'>('default');
   readonly confirmLabel = input<string>('Confirmar');
   readonly cancelLabel = input<string>('Cancelar');
 

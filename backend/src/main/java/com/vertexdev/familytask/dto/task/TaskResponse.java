@@ -14,8 +14,9 @@ public class TaskResponse {
     private String title;
     private String description;
     private String priority;
-    private String status;
-    private String location;
+    private Long homeSpaceId;
+    private String homeSpaceName;
+    private String homeSpaceType;
     private Integer xpReward;
     private Integer coinsReward;
     private LocalDate dueDate;
@@ -23,4 +24,5 @@ public class TaskResponse {
     private Long assignedToId;
     private String assignedToName;
     private String assignedToPictureUrl;
+    private String status;
 }

@@ -15,12 +15,13 @@ import { InviteDetailsResponse } from '../../../core/models/invitation.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
+import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
 
 type PageState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
 
 @Component({
   selector: 'app-accept-invitation',
-  imports: [MatIconModule, MatProgressSpinnerModule, UserAvatarComponent, PageLayoutComponent, NeonCardComponent],
+  imports: [MatIconModule, MatProgressSpinnerModule, UserAvatarComponent, PageLayoutComponent, NeonCardComponent, RoleBadgeComponent],
   templateUrl: './accept-invitation.component.html',
   styleUrl: './accept-invitation.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,15 +39,6 @@ export class AcceptInvitationComponent implements OnInit {
   private token = '';
 
   // ─── Computed helpers ──────────────────────────────────────────────────────
-  readonly rolLabel = computed(() => {
-    const role = this.details()?.role;
-    return role === 'PARENT' ? 'Padre / Tutor' : 'Hijo / a';
-  });
-
-  readonly rolEmoji = computed(() => {
-    return this.details()?.role === 'PARENT' ? '👑' : '👧';
-  });
-
   readonly expirationText = computed(() => {
     const exp = this.details()?.expirationDate;
     if (!exp) return '';

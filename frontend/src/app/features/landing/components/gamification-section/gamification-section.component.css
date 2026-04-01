@@ -22,289 +22,52 @@
 
 .gami-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
 }
 
-.gami-left {
+.gami-card {
+  background: var(--bg);
+  border: 1.5px solid rgba(0, 239, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 12px;
+  transition: border-color 0.2s;
 }
 
-/* --- Player card --- */
-.player-card {
-  background: var(--bg);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-}
+.gami-card:hover { border-color: rgba(0, 239, 255, 0.5); }
 
-.player-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.player-avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--secondary), var(--primary));
+.gami-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
+  background: rgba(0, 72, 255, 0.18);
+  border: 1.5px solid rgba(0, 239, 255, 0.25);
   flex-shrink: 0;
-  border: 3px solid var(--border);
+  color: var(--border);
 }
 
-.player-name {
+.gami-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.15rem;
   font-weight: 700;
-  color: var(--text);
-}
-
-.player-level {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.8rem;
-  color: var(--warning);
-  margin-top: 2px;
-}
-
-.xp-label-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.xp-label {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-sub);
+  font-size: 1.1rem;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.xp-value {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.9rem;
-  color: var(--success);
-}
-
-.xp-bar-track {
-  width: 100%;
-  height: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 100px;
-  border: 1.5px solid rgba(0, 239, 255, 0.2);
-  overflow: hidden;
-}
-
-.xp-bar-fill {
-  height: 100%;
-  border-radius: 100px;
-  background: linear-gradient(90deg, var(--secondary), var(--primary));
-  width: 68%;
-}
-
-.xp-subtext {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.78rem;
-  color: var(--text-sub);
-  margin-top: 6px;
-  text-align: right;
-}
-
-/* --- Badges --- */
-.badges-card {
-  background: var(--bg);
-  border: 1.5px solid rgba(0, 239, 255, 0.2);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-}
-
-.badges-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.06em;
-  color: var(--text-sub);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-.badges-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.badge-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 72px;
-}
-
-.badge-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
-  border: 2px solid;
-}
-
-.badge-icon.gold   { border-color: var(--warning); background: rgba(255, 230, 0, 0.12); }
-.badge-icon.cyan   { border-color: var(--border);  background: rgba(0, 239, 255, 0.10); }
-.badge-icon.green  { border-color: var(--success); background: rgba(60, 255, 90, 0.10); }
-.badge-icon.pink   { border-color: var(--primary); background: rgba(255, 46, 190, 0.12); }
-.badge-icon.locked { border-color: rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.03); opacity: 0.4; }
-
-.badge-name {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.68rem;
-  color: var(--text-sub);
-  text-align: center;
-  line-height: 1.3;
-}
-
-/* --- Gami right --- */
-.gami-right {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/* --- Streak --- */
-.streak-card {
-  background: var(--bg);
-  border: 1.5px solid rgba(255, 230, 0, 0.3);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-}
-
-.streak-top {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.streak-flame { font-size: 2rem; line-height: 1; }
-
-.streak-count {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 2.4rem;
-  color: var(--warning);
-  line-height: 1;
-}
-
-.streak-desc {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.85rem;
-  color: var(--text-sub);
-  line-height: 1.5;
-}
-
-.streak-days {
-  display: flex;
-  gap: 8px;
-}
-
-.streak-day {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.7rem;
-  border: 1.5px solid;
-}
-
-.streak-day.done  { border-color: var(--warning); background: rgba(255, 230, 0, 0.15); color: var(--warning); }
-.streak-day.today { border-color: var(--success); background: rgba(60, 255, 90, 0.12); color: var(--success); }
-.streak-day.next  { border-color: rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.3); }
-
-/* --- Levels --- */
-.levels-card {
-  background: var(--bg);
-  border: 1.5px solid rgba(0, 239, 255, 0.2);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-}
-
-.levels-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.06em;
-  color: var(--text-sub);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-.level-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(0, 239, 255, 0.08);
-}
-
-.level-item:last-child { border-bottom: none; }
-
-.level-num {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.8rem;
-  min-width: 20px;
-  color: var(--text-sub);
-}
-
-.level-icon {
-  font-size: 1.3rem;
-  min-width: 30px;
-  text-align: center;
-}
-
-.level-info { flex: 1; }
-
-.level-name {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 600;
-  font-size: 0.95rem;
   color: var(--text);
 }
 
-.level-xp {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.72rem;
+.gami-desc {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
   color: var(--text-sub);
+  line-height: 1.65;
 }
 
-.level-badge-current {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--success);
-  border: 1.5px solid var(--success);
-  border-radius: 4px;
-  padding: 2px 8px;
-  text-transform: uppercase;
-}
-
-@media (max-width: 900px) {
+@media (max-width: 700px) {
   .gami-grid { grid-template-columns: 1fr; }
 }

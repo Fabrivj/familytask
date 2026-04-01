@@ -1,0 +1,276 @@
+<!-- ── Action row ────────────────────────────────────────────── -->
+@if (isParent()) {
+  <div class="action-row">
+    <button class="btn-cta btn-new-habit" type="button" (click)="openCreatePanel()">
+      + NUEVO HÁBITO
+    </button>
+  </div>
+}
+
+<!-- ── Filters ────────────────────────────────────────────────── -->
+<div class="filters-bar" role="group" aria-label="Filtros de hábitos">
+  <span class="filter-label">FRECUENCIA</span>
+  @for (f of ['DAILY', 'WEEKDAYS', 'WEEKENDS', 'WEEKLY', 'MONTHLY']; track f) {
+    <button
+      class="filter-chip"
+      [class.filter-active]="filterFrequency() === f"
+      type="button"
+      (click)="toggleFrequency(f)"
+      [attr.aria-pressed]="filterFrequency() === f"
+    >
+      {{ frequencyLabel(f) }}
+    </button>
+  }
+  <div class="search-wrap">
+    <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
+    <input
+      class="search-input"
+      type="search"
+      placeholder="Buscar hábito..."
+      [value]="searchQuery()"
+      (input)="searchQuery.set($any($event.target).value)"
+      aria-label="Buscar hábito"
+    />
+  </div>
+</div>
+
+<!-- ── States ────────────────────────────────────────────────── -->
+@if (isLoading()) {
+  <div class="state-center" role="status" aria-label="Cargando">
+    <mat-spinner diameter="36" />
+  </div>
+} @else if (error()) {
+  <p class="error-msg" role="alert">{{ error() }}</p>
+} @else if (filteredHabits().length === 0) {
+  <p class="empty-msg">No hay hábitos registrados.</p>
+} @else {
+
+  <!-- ── Desktop Table ─────────────────────────────────────── -->
+  <div class="table-wrap desktop-only">
+    <table class="habits-table" aria-label="Lista de hábitos">
+      <thead>
+        <tr>
+          <th>HÁBITO</th>
+          <th>FRECUENCIA</th>
+          <th>ASIGNADO A</th>
+          <th>RECOMPENSA</th>
+          @if (isParent()) {<th>ACCIONES</th>}
+        </tr>
+      </thead>
+      <tbody>
+        @for (habit of filteredHabits(); track habit.id) {
+          <tr>
+            <td class="col-habit">
+              <div class="habit-info">
+                <span class="habit-name">{{ habit.title }}</span>
+                @if (habit.description) {
+                  <span class="habit-desc">{{ habit.description }}</span>
+                }
+              </div>
+            </td>
+            <td>
+              <span class="freq-badge freq-{{ habit.frequency | lowercase }}">
+                {{ frequencyLabel(habit.frequency) }}
+              </span>
+            </td>
+            <td>
+              <span class="text-muted">Sin asignar</span>
+            </td>
+            <td>
+              <div class="col-reward">
+                <span class="reward-xp">+{{ habit.xpReward }} XP</span>
+                <span class="reward-coins">
+                  <span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span>
+                  {{ habit.coinsReward }}
+                </span>
+              </div>
+            </td>
+            @if (isParent()) {
+              <td>
+                <div class="col-actions">
+                  <button class="btn-icon" type="button" aria-label="Editar hábito" disabled>
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" (click)="openDeleteModal(habit)">
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Mobile Cards ──────────────────────────────────────── -->
+  <div class="cards mobile-only">
+    @for (habit of filteredHabits(); track habit.id) {
+      <article class="habit-card">
+        <div class="card-row-top">
+          <span class="habit-name">{{ habit.title }}</span>
+          <span class="freq-badge freq-{{ habit.frequency | lowercase }}">
+            {{ frequencyLabel(habit.frequency) }}
+          </span>
+        </div>
+        @if (habit.description) {
+          <div class="card-row-sub">
+            <span class="habit-desc">{{ habit.description }}</span>
+          </div>
+        }
+        <div class="card-row-meta">
+          <span class="reward-xp">+{{ habit.xpReward }} XP</span>
+          <span class="reward-coins">
+            <span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span>
+            {{ habit.coinsReward }}
+          </span>
+        </div>
+      </article>
+    }
+  </div>
+
+}
+
+<!-- ═══════════ CREATE PANEL ═══════════ -->
+@if (showCreatePanel()) {
+  <div class="overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
+
+  <aside class="create-panel" role="dialog" aria-label="Crear nuevo hábito">
+    <div class="panel-header">
+      <div class="panel-header-left">
+        <h2 class="panel-title">Nuevo hábito</h2>
+        <span class="panel-badge">HÁBITO</span>
+      </div>
+      <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
+        <mat-icon aria-hidden="true">close</mat-icon>
+      </button>
+    </div>
+
+    <form class="panel-body" (submit)="$event.preventDefault(); submitCreate()" novalidate>
+
+      <!-- Título -->
+      <div class="field">
+        <label class="field-label" for="h-title">TÍTULO <span class="req">*</span></label>
+        <input
+          id="h-title"
+          class="field-input"
+          [class.has-error]="titleCtrl.invalid && titleCtrl.touched"
+          type="text"
+          [formControl]="titleCtrl"
+          placeholder="Ej. Lavar los dientes"
+          autocomplete="off"
+        />
+        @if (titleCtrl.invalid && titleCtrl.touched) {
+          <span class="field-error" role="alert">{{ getTitleError() }}</span>
+        }
+      </div>
+
+      <!-- Descripción -->
+      <div class="field">
+        <label class="field-label" for="h-desc">DESCRIPCIÓN <span class="optional">(OPCIONAL)</span></label>
+        <textarea
+          id="h-desc"
+          class="field-input field-textarea"
+          [class.has-error]="descriptionCtrl.invalid && descriptionCtrl.touched"
+          [formControl]="descriptionCtrl"
+          rows="3"
+        ></textarea>
+        @if (descriptionCtrl.invalid && descriptionCtrl.touched) {
+          <span class="field-error" role="alert">{{ getDescriptionError() }}</span>
+        }
+      </div>
+
+      <!-- Frecuencia -->
+      <div class="field">
+        <label class="field-label">FRECUENCIA <span class="req">*</span></label>
+        <div class="freq-toggle">
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'DAILY'"
+                  type="button" (click)="selectFrequency('DAILY')">
+            <mat-icon aria-hidden="true">wb_sunny</mat-icon> DIARIO
+          </button>
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKDAYS'"
+                  type="button" (click)="selectFrequency('WEEKDAYS')">
+            <mat-icon aria-hidden="true">view_week</mat-icon> LUN–VIE
+          </button>
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKENDS'"
+                  type="button" (click)="selectFrequency('WEEKENDS')">
+            <mat-icon aria-hidden="true">weekend</mat-icon> FIN DE SEMANA
+          </button>
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKLY'"
+                  type="button" (click)="selectFrequency('WEEKLY')">
+            <mat-icon aria-hidden="true">date_range</mat-icon> SEMANAL
+          </button>
+          <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'MONTHLY'"
+                  type="button" (click)="selectFrequency('MONTHLY')">
+            <mat-icon aria-hidden="true">calendar_month</mat-icon> MENSUAL
+          </button>
+        </div>
+      </div>
+
+      <!-- XP y Monedas -->
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="h-xp">XP <span class="req">*</span></label>
+          <input
+            id="h-xp"
+            class="field-input"
+            [class.has-error]="xpRewardCtrl.invalid && xpRewardCtrl.touched"
+            type="number"
+            [formControl]="xpRewardCtrl"
+            min="1"
+            step="1"
+            placeholder="Ej. 10"
+          />
+          @if (xpRewardCtrl.invalid && xpRewardCtrl.touched) {
+            <span class="field-error" role="alert">{{ getXpError() }}</span>
+          }
+        </div>
+        <div class="field">
+          <label class="field-label" for="h-coins">MONEDAS <span class="req">*</span></label>
+          <input
+            id="h-coins"
+            class="field-input"
+            [class.has-error]="coinsRewardCtrl.invalid && coinsRewardCtrl.touched"
+            type="number"
+            [formControl]="coinsRewardCtrl"
+            min="1"
+            step="1"
+            placeholder="Ej. 5"
+          />
+          @if (coinsRewardCtrl.invalid && coinsRewardCtrl.touched) {
+            <span class="field-error" role="alert">{{ getCoinsError() }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- Error -->
+      @if (createError()) {
+        <p class="create-error-msg" role="alert">{{ createError() }}</p>
+      }
+
+      <!-- Actions -->
+      <div class="panel-actions">
+        <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
+        <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
+          @if (isCreating()) {
+            Creando...
+          } @else {
+            <mat-icon aria-hidden="true">check</mat-icon>
+            CREAR HÁBITO
+          }
+        </button>
+      </div>
+
+    </form>
+  </aside>
+}
+
+<app-confirm-dialog
+  [open]="showDeleteModal()"
+  title="¿Eliminar hábito?"
+  [message]="'¿Estás seguro de que quieres eliminar &quot;' + (habitToDelete()?.title ?? '') + '&quot;? Esta acción no se puede deshacer.'"
+  confirmLabel="ELIMINAR"
+  cancelLabel="CANCELAR"
+  (confirmed)="confirmDelete()"
+  (cancelled)="closeDeleteModal()"
+/>

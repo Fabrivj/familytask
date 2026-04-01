@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { MatIconModule } from '@angular/material/icon';
 import { LandingNavbarComponent } from './components/navbar/navbar.component';
 import { LandingHeroComponent } from './components/hero/hero.component';
 import { LandingFeaturesComponent } from './components/features-section/features-section.component';
@@ -14,6 +15,7 @@ import { LandingFooterComponent } from './components/footer/footer.component';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    MatIconModule,
     LandingNavbarComponent,
     LandingHeroComponent,
     LandingFeaturesComponent,
@@ -28,6 +30,17 @@ import { LandingFooterComponent } from './components/footer/footer.component';
 export class LandingComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
+
+  readonly showBackToTop = signal(false);
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    this.showBackToTop.set(window.scrollY > 400);
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   onCtaClick(): void {
     if (this.auth.isAuthenticated()) {

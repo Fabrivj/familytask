@@ -70,10 +70,16 @@ export const routes: Routes = [
       import('./features/settings/settings.component').then(m => m.SettingsComponent),
   },
   {
+    path: 'map',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/map/home-map.component').then(m => m.HomeMapComponent),
+  },
+  {
     path: 'tasks',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/tasks/list/tasks-list.component').then(m => m.TasksListComponent),
+      import('./features/tasks/tasks-habits/tasks-habits.component').then(m => m.TasksHabitsComponent),
   },
   {
     path: '**',

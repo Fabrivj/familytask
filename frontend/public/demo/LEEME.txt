@@ -1,0 +1,21 @@
+Carpeta para los GIFs del tour de demostración del landing page.
+
+Coloca aquí los siguientes archivos GIF grabados desde la app real:
+
+  01-familia.gif    → Inicio de sesión con Google → wizard de usuario nuevo
+                      (crear familia, nombre, invitar miembro)
+
+  02-mapa.gif       → Tab de mapa: crear espacios del hogar
+
+  03-tareas.gif     → Tab de tareas/hábitos: crear tarea o hábito para un hijo
+
+  04-miembros.gif   → Tab de miembros: vista del padre con perfiles de cada hijo
+
+  05-hijo.gif       → Vista del hijo: misiones asignadas, progreso y recompensas
+
+Recomendaciones para grabar:
+- Resolución: 1280x720 (16:9) para que encaje sin recorte en el modal
+- Duración: 10-20 segundos por GIF, loop automático
+- Herramientas sugeridas: ScreenToGif (Windows)
+
+Hasta que existan estos archivos, el modal muestra un placeholder estilizado.
