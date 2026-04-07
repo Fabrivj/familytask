@@ -14,12 +14,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
 import { HabitService } from '../../../core/services/habit.service';
+import { MembersService } from '../../../core/services/members.service';
 import { HabitFrequency, HabitResponse } from '../../../core/models/habit.model';
+import { MemberItem } from '../../../core/models/member.model';
+import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-habits-list',
-  imports: [LowerCasePipe, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, ConfirmDialogComponent],
+  imports: [LowerCasePipe, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, UserAvatarComponent, ConfirmDialogComponent],
   templateUrl: './habits-list.component.html',
   styleUrl: './habits-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +30,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 export class HabitsListComponent {
   private readonly authService = inject(AuthService);
   private readonly habitService = inject(HabitService);
+  private readonly membersService = inject(MembersService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly permissionsService = inject(PermissionsService);
 
@@ -34,7 +38,9 @@ export class HabitsListComponent {
   readonly isParent = this.permissionsService.isParent;
 
   // ─── Datos ────────────────────────────────────────────────────────────────
-  readonly habits        = signal<HabitResponse[]>([]);
+  readonly habits   = signal<HabitResponse[]>([]);
+  readonly members  = signal<MemberItem[]>([]);
+  readonly childMembers = computed(() => this.members().filter(m => m.role === 'CHILD'));
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────
   readonly showDeleteModal = signal(false);
@@ -78,6 +84,11 @@ export class HabitsListComponent {
         this.isLoading.set(false);
       },
     });
+
+    this.membersService.getMembers(familyId).subscribe({
+      next: (res) => this.members.set(res.members),
+      error: () => {},
+    });
   }
 
   // ─── Panel de creación ────────────────────────────────────────────────────
@@ -93,7 +104,8 @@ export class HabitsListComponent {
     nonNullable: true,
     validators: [Validators.maxLength(500)],
   });
-  readonly selectedFrequency = signal<HabitFrequency>('DAILY');
+  readonly selectedFrequency  = signal<HabitFrequency>('DAILY');
+  readonly selectedAssignee   = signal<number | null>(null);
   readonly xpRewardCtrl = new FormControl<number | null>(null, {
     validators: [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)],
   });
@@ -101,6 +113,11 @@ export class HabitsListComponent {
     validators: [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)],
   });
   // ─── Helpers ──────────────────────────────────────────────────────────────
+  memberShortName(name: string): string {
+    const parts = name.trim().split(' ');
+    return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0];
+  }
+
   frequencyLabel(f: string): string {
     const labels: Record<string, string> = {
       DAILY: 'Diario',
@@ -176,6 +193,8 @@ export class HabitsListComponent {
     this.isCreating.set(true);
     this.createError.set('');
 
+    const assignedToId = this.selectedAssignee();
+
     this.habitService.create({
       familyId,
       title: this.titleCtrl.value.trim(),
@@ -185,13 +204,27 @@ export class HabitsListComponent {
       coinsReward: this.coinsRewardCtrl.value!,
     }).subscribe({
       next: (habit) => {
-        this.isCreating.set(false);
-        this.closeCreatePanel();
-        this.habits.update(list => [...list, habit]);
-        this.snackBar.open('Hábito guardado correctamente', 'Cerrar', {
-          duration: 4000,
-          panelClass: 'snack-success',
-        });
+        if (assignedToId) {
+          this.habitService.assign(habit.id, { familyId, assignedToId }).subscribe({
+            next: (updated) => {
+              this.isCreating.set(false);
+              this.closeCreatePanel();
+              this.habits.update(list => [...list, updated]);
+              this.snackBar.open('Hábito creado y asignado correctamente', 'Cerrar', { duration: 4000, panelClass: 'snack-success' });
+            },
+            error: () => {
+              this.isCreating.set(false);
+              this.closeCreatePanel();
+              this.habits.update(list => [...list, habit]);
+              this.snackBar.open('Hábito creado, pero no se pudo asignar. Por favor, intente nuevamente.', 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
+            },
+          });
+        } else {
+          this.isCreating.set(false);
+          this.closeCreatePanel();
+          this.habits.update(list => [...list, habit]);
+          this.snackBar.open('Hábito guardado correctamente', 'Cerrar', { duration: 4000, panelClass: 'snack-success' });
+        }
       },
       error: (err) => {
         this.createError.set(err.error?.message || 'Ocurrió un error al crear el hábito. Por favor, intente nuevamente.');
@@ -240,6 +273,7 @@ export class HabitsListComponent {
     this.selectedFrequency.set('DAILY');
     this.xpRewardCtrl.reset(null);
     this.coinsRewardCtrl.reset(null);
+    this.selectedAssignee.set(null);
     this.createError.set('');
   }
 }
