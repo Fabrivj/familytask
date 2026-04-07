@@ -76,6 +76,12 @@ export const routes: Routes = [
       import('./features/map/home-map.component').then(m => m.HomeMapComponent),
   },
   {
+    path: 'store',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/store/store.component').then(m => m.StoreComponent),
+  },
+  {
     path: 'tasks',
     canActivate: [authGuard],
     loadComponent: () =>
