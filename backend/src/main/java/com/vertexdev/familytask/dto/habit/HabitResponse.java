@@ -18,4 +18,7 @@ public class HabitResponse {
     private Integer xpReward;
     private Integer coinsReward;
     private LocalDateTime createdAt;
+    private Long assignedToId;
+    private String assignedToName;
+    private String assignedToPictureUrl;
 }

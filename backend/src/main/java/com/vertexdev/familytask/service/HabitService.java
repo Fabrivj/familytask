@@ -7,6 +7,7 @@ import com.vertexdev.familytask.exception.HabitException;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.Habit;
+import com.vertexdev.familytask.model.HabitAssignment;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.HabitFrequency;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
@@ -109,6 +110,7 @@ public class HabitService {
     }
 
     private HabitResponse toResponse(Habit habit) {
+        HabitAssignment assignment = habit.getAssignment();
         return HabitResponse.builder()
                 .id(habit.getId())
                 .title(habit.getTitle())
@@ -117,6 +119,9 @@ public class HabitService {
                 .xpReward(habit.getXpReward())
                 .coinsReward(habit.getCoinsReward())
                 .createdAt(habit.getCreatedAt())
+                .assignedToId(assignment != null ? assignment.getUser().getId() : null)
+                .assignedToName(assignment != null ? assignment.getUser().getName() : null)
+                .assignedToPictureUrl(assignment != null ? assignment.getUser().getPictureUrl() : null)
                 .build();
     }
 }
