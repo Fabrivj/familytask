@@ -1,6 +1,7 @@
 package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.dto.MessageResponse;
+import com.vertexdev.familytask.dto.habit.AssignHabitRequest;
 import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
 import com.vertexdev.familytask.exception.HabitException;
@@ -12,7 +13,9 @@ import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.HabitFrequency;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
+import com.vertexdev.familytask.repository.HabitAssignmentRepository;
 import com.vertexdev.familytask.repository.HabitRepository;
+import com.vertexdev.familytask.repository.UserRepository;
 import com.vertexdev.familytask.util.FamilyPermissions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +32,8 @@ public class HabitService {
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final HabitRepository habitRepository;
+    private final HabitAssignmentRepository habitAssignmentRepository;
+    private final UserRepository userRepository;
     private final FamilyPermissions familyPermissions;
 
     @Transactional
@@ -106,6 +111,61 @@ public class HabitService {
         } catch (Exception e) {
             log.error("Failed to fetch habits for family {}: {}", familyId, e.getMessage());
             throw new HabitException("FETCH_FAILED", "Error al cargar los hábitos. Por favor, intente nuevamente.", 500);
+        }
+    }
+
+    @Transactional
+    public HabitResponse assignHabit(Long habitId, AssignHabitRequest request, User requester) {
+        FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
+                .orElseThrow(() -> new HabitException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new HabitException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        Habit habit = habitRepository.findById(habitId)
+                .filter(h -> Boolean.TRUE.equals(h.getIsActive()))
+                .orElseThrow(() -> new HabitException("HABIT_NOT_FOUND", "Hábito no encontrado.", 404));
+
+        if (!habit.getFamilyGroup().getId().equals(familyGroup.getId())) {
+            throw new HabitException("ACCESS_DENIED", "El hábito no pertenece a esta familia.", 403);
+        }
+
+        User assignedTo = userRepository.findById(request.getAssignedToId())
+                .orElseThrow(() -> new HabitException("USER_NOT_FOUND", "El usuario asignado no existe.", 404));
+
+        boolean isMember = familyMemberRepository
+                .findByFamilyGroupIdAndIsActiveTrue(familyGroup.getId())
+                .stream()
+                .anyMatch(m -> m.getUser().getId().equals(assignedTo.getId()));
+        if (!isMember) {
+            throw new HabitException("NOT_A_MEMBER", "El miembro seleccionado no pertenece al grupo familiar activo.", 400);
+        }
+
+        try {
+            HabitAssignment existing = habitAssignmentRepository.findByHabitId(habitId).orElse(null);
+
+            if (existing != null) {
+                existing.setUser(assignedTo);
+                existing.setIsActive(true);
+                habitAssignmentRepository.save(existing);
+            } else {
+                HabitAssignment assignment = HabitAssignment.builder()
+                        .habit(habit)
+                        .user(assignedTo)
+                        .build();
+                habitAssignmentRepository.save(assignment);
+                habit.setAssignment(assignment);
+            }
+
+            log.info("Habit '{}' assigned to user {} by {}", habit.getTitle(), assignedTo.getEmail(), requester.getEmail());
+            return toResponse(habit);
+        } catch (HabitException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to assign habit {} to user {}: {}", habitId, assignedTo.getEmail(), e.getMessage());
+            throw new HabitException("ASSIGN_FAILED", "No se pudo asignar el hábito. Por favor, intente nuevamente.", 500);
         }
     }
 
