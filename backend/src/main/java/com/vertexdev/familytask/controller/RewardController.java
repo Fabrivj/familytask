@@ -3,6 +3,7 @@ package com.vertexdev.familytask.controller;
 import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.reward.CreateRewardRequest;
 import com.vertexdev.familytask.dto.reward.RewardResponse;
+import com.vertexdev.familytask.dto.reward.UpdateRewardRequest;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.RewardService;
 import jakarta.validation.Valid;
@@ -45,5 +46,13 @@ public class RewardController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         return ResponseEntity.ok(rewardService.deleteReward(id, authenticatedUser));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<RewardResponse> updateReward(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateRewardRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+        return ResponseEntity.ok(rewardService.updateReward(id, request, authenticatedUser));
     }
 }

@@ -3,6 +3,8 @@ package com.vertexdev.familytask.service;
 import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.reward.CreateRewardRequest;
 import com.vertexdev.familytask.dto.reward.RewardResponse;
+import com.vertexdev.familytask.dto.reward.UpdateRewardRequest;
+import com.vertexdev.familytask.model.enums.ApprovalRule;
 import com.vertexdev.familytask.exception.RewardException;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
@@ -100,6 +102,39 @@ public class RewardService {
         return new MessageResponse("Recompensa eliminada correctamente.");
     }
 
+    @Transactional
+    public RewardResponse updateReward(Long rewardId, UpdateRewardRequest request, User requester) {
+        Reward reward = rewardRepository.findById(rewardId)
+                .filter(r -> Boolean.TRUE.equals(r.getIsActive()))
+                .orElseThrow(() -> new RewardException("REWARD_NOT_FOUND", "Recompensa no encontrada.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(reward.getFamilyGroup().getId(), requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new RewardException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        try {
+            reward.setName(request.getName().trim());
+            reward.setDescription(request.getDescription() != null ? request.getDescription().trim() : null);
+            reward.setIcon(request.getIcon());
+            reward.setCost(request.getCost());
+            reward.setMinLevel(request.getMinLevel());
+            // Normalize: set AUTOMATIC for legacy DB rows that have NULL
+            reward.setApprovalRule(
+                    request.getApprovalRule() != null ? request.getApprovalRule() : ApprovalRule.AUTOMATIC
+            );
+
+            Reward saved = rewardRepository.save(reward);
+            log.info("Reward '{}' updated by user {}", saved.getName(), requester.getEmail());
+            return toResponse(saved);
+        } catch (RewardException re) {
+            throw re;
+        } catch (Exception e) {
+            log.error("Failed to update reward {}: {}", rewardId, e.getMessage());
+            throw new RewardException("REWARD_UPDATE_FAILED", "No se pudo completar la operación. Intenta de nuevo.", 500);
+        }
+    }
+
     private RewardResponse toResponse(Reward reward) {
         return RewardResponse.builder()
                 .id(reward.getId())
@@ -108,6 +143,9 @@ public class RewardService {
                 .icon(reward.getIcon())
                 .cost(reward.getCost())
                 .minLevel(reward.getMinLevel())
+                .approvalRule(reward.getApprovalRule() != null
+                        ? reward.getApprovalRule()
+                        : ApprovalRule.AUTOMATIC)
                 .familyId(reward.getFamilyGroup().getId())
                 .createdAt(reward.getCreatedAt())
                 .build();
