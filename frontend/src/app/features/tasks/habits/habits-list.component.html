@@ -70,6 +70,7 @@
             </td>
             <td>
               <span class="freq-badge freq-{{ habit.frequency | lowercase }}">
+                <mat-icon class="freq-badge-icon" aria-hidden="true">{{ frequencyIcon(habit.frequency) }}</mat-icon>
                 {{ frequencyLabel(habit.frequency) }}
               </span>
             </td>
@@ -146,7 +147,7 @@
 @if (showCreatePanel()) {
   <div class="overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Crear nuevo hábito">
+  <aside class="create-panel" role="dialog" aria-label="Crear nuevo hábito" cdkTrapFocus cdkTrapFocusAutoCapture>
     <div class="panel-header">
       <div class="panel-header-left">
         <h2 class="panel-title">Nuevo hábito</h2>
@@ -192,8 +193,8 @@
       </div>
 
       <!-- Frecuencia -->
-      <div class="field">
-        <label class="field-label">FRECUENCIA <span class="req">*</span></label>
+      <fieldset class="field field-fieldset">
+        <legend class="field-label">FRECUENCIA <span class="req">*</span></legend>
         <div class="freq-toggle">
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'DAILY'"
                   type="button" (click)="selectFrequency('DAILY')">
@@ -216,7 +217,7 @@
             <mat-icon aria-hidden="true">calendar_month</mat-icon> MENSUAL
           </button>
         </div>
-      </div>
+      </fieldset>
 
       <!-- XP y Monedas -->
       <div class="field-row">

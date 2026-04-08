@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { A11yModule } from '@angular/cdk/a11y';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -33,16 +34,19 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { UserAvatarComponent } from '../../shared/components/user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-home-map',
   imports: [
+    A11yModule,
     ReactiveFormsModule,
     MatIconModule,
     MatProgressSpinnerModule,
     AppShellComponent,
     PageHeaderComponent,
     ConfirmDialogComponent,
+    UserAvatarComponent,
   ],
   templateUrl: './home-map.component.html',
   styleUrl: './home-map.component.css',
@@ -161,7 +165,10 @@ export class HomeMapComponent {
   }
 
   // ─── Panel ───────────────────────────────────────────────────────────────
+  private _panelTrigger: HTMLElement | null = null;
+
   openCreatePanel(): void {
+    this._panelTrigger = document.activeElement as HTMLElement;
     this.resetForm();
     this.showEditPanel.set(false);
     this.showCreatePanel.set(true);
@@ -170,9 +177,12 @@ export class HomeMapComponent {
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+    this._panelTrigger?.focus();
+    this._panelTrigger = null;
   }
 
   openEditPanel(space: SpaceResponse): void {
+    this._panelTrigger = document.activeElement as HTMLElement;
     this.showCreatePanel.set(false);
     this.spaceToEdit.set(space);
     this.nameCtrl.reset(space.name);
@@ -186,6 +196,8 @@ export class HomeMapComponent {
     this.showEditPanel.set(false);
     this.spaceToEdit.set(null);
     this.editError.set('');
+    this._panelTrigger?.focus();
+    this._panelTrigger = null;
   }
 
   submitEdit(): void {

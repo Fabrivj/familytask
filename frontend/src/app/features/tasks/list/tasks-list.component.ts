@@ -11,6 +11,7 @@ import {
 import { LowerCasePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { A11yModule } from '@angular/cdk/a11y';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -30,6 +31,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 @Component({
   selector: 'app-tasks-list',
   imports: [
+    A11yModule,
     LowerCasePipe,
     ReactiveFormsModule,
     MatIconModule,
@@ -142,6 +144,13 @@ export class TasksListComponent {
   readonly openStatusDropdownId = signal<number | null>(null);
   readonly isUpdatingStatus = signal<number | null>(null);
   readonly statusLabel = statusLabel;
+
+  statusIcon(status: string): string {
+    if (status === 'PENDING') return 'schedule';
+    if (status === 'IN_PROGRESS') return 'play_arrow';
+    if (status === 'COMPLETED') return 'check_circle';
+    return 'help_outline';
+  }
   readonly statusDropdownPos = signal<{ top: number; left: number } | null>(null);
   readonly activeStatusTask = computed(() =>
     this.tasks().find(t => t.id === this.openStatusDropdownId()) ?? null
@@ -253,12 +262,16 @@ export class TasksListComponent {
   }
 
   // ─── Panel de creación / edición ─────────────────────────────────────────
+  private _panelTrigger: HTMLElement | null = null;
+
   openCreatePanel(): void {
+    this._panelTrigger = document.activeElement as HTMLElement;
     this.resetForm();
     this.showCreatePanel.set(true);
   }
 
   openEditPanel(task: TaskResponse): void {
+    this._panelTrigger = document.activeElement as HTMLElement;
     this.resetForm();
     this.editingTask.set(task);
     this.titleCtrl.setValue(task.title);
@@ -280,6 +293,8 @@ export class TasksListComponent {
     this.showCreatePanel.set(false);
     this.createError.set('');
     this.editingTask.set(null);
+    this._panelTrigger?.focus();
+    this._panelTrigger = null;
   }
 
   selectPriority(p: TaskPriority): void {
@@ -438,7 +453,10 @@ export class TasksListComponent {
   }
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────
+  private _deleteTrigger: HTMLElement | null = null;
+
   openDeleteModal(task: TaskResponse): void {
+    this._deleteTrigger = document.activeElement as HTMLElement;
     this.taskToDelete.set(task);
     this.showDeleteModal.set(true);
   }
@@ -446,6 +464,8 @@ export class TasksListComponent {
   closeDeleteModal(): void {
     this.showDeleteModal.set(false);
     this.taskToDelete.set(null);
+    this._deleteTrigger?.focus();
+    this._deleteTrigger = null;
   }
 
   confirmDelete(): void {

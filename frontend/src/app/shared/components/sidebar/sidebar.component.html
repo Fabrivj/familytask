@@ -21,7 +21,7 @@
     @if (isParent()) {
       <li>
         <button class="nav-item" type="button" (click)="navigate(null)"
-          [class.active]="isActive('/ai')" aria-label="IA" aria-disabled="true">
+          [class.active]="isActive('/ai')" aria-label="IA (próximamente)" aria-disabled="true" tabindex="-1">
           <mat-icon aria-hidden="true">auto_awesome</mat-icon>
           <span class="label">IA</span>
         </button>
@@ -31,7 +31,7 @@
     @if (isParent()) {
       <li>
         <button class="nav-item" type="button" (click)="navigate(null)"
-          [class.active]="isActive('/reports')" aria-label="Reportes" aria-disabled="true">
+          [class.active]="isActive('/reports')" aria-label="Reportes (próximamente)" aria-disabled="true" tabindex="-1">
           <mat-icon aria-hidden="true">bar_chart</mat-icon>
           <span class="label">REPORTES</span>
         </button>
@@ -40,7 +40,7 @@
 
     <li>
       <button class="nav-item" type="button" (click)="navigate(null)"
-        [class.active]="isActive('/store')" aria-label="Tienda" aria-disabled="true">
+        [class.active]="isActive('/store')" aria-label="Tienda (próximamente)" aria-disabled="true" tabindex="-1">
         <mat-icon aria-hidden="true">store</mat-icon>
         <span class="label">TIENDA</span>
       </button>

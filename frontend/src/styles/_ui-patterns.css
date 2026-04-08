@@ -262,6 +262,10 @@
   color: var(--error);
 }
 
+.field-error::before {
+  content: '⚠ ';
+}
+
 /* ── Overlay ── */
 .overlay {
   position: fixed;
@@ -286,6 +290,10 @@
   border-radius: 8px;
   background: rgba(var(--error-rgb), 0.05);
   margin: 0;
+}
+
+.error-msg::before {
+  content: '⚠ ';
 }
 
 /* ── Help Row ── */

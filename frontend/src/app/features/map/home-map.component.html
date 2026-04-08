@@ -41,6 +41,8 @@
       <div class="spaces-grid">
         @for (space of spaces(); track space.id) {
           <article class="space-card">
+
+            <!-- Header: icon + name · task count + actions -->
             <div class="card-header">
               <div class="card-meta">
                 <mat-icon class="space-icon" aria-hidden="true">{{ spaceTypeIcon(space.type) }}</mat-icon>
@@ -49,38 +51,63 @@
                   <span class="space-name">{{ space.name }}</span>
                 </div>
               </div>
-            </div>
-            <div class="card-tasks">
-              @if (tasksForSpace(space.id).length === 0) {
-                <p class="placeholder-text">Sin tareas asignadas</p>
-              } @else {
-                @for (task of tasksForSpace(space.id); track task.id) {
-                  <div [class]="'task-pill priority-' + task.priority.toLowerCase()">
-                    <span class="task-pill-title">{{ task.title }}</span>
-                  </div>
+              <div class="card-header-right">
+                <span class="task-count-badge">
+                  {{ tasksForSpace(space.id).length }} tarea{{ tasksForSpace(space.id).length !== 1 ? 's' : '' }}
+                </span>
+                @if (isParent()) {
+                  <button class="btn-icon" type="button" aria-label="Editar espacio"
+                    (click)="openEditPanel(space)"
+                    [disabled]="isDeleting() || isMigrating() || isEditing()">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar espacio"
+                    (click)="requestDeleteSpace(space)"
+                    [disabled]="isDeleting() || isMigrating()">
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
                 }
-              }
+              </div>
             </div>
-            <div class="card-footer">
-              @if (isParent()) {
-                <button class="btn-icon" type="button" aria-label="Editar espacio"
-                  (click)="openEditPanel(space)"
-                  [disabled]="isDeleting() || isMigrating() || isEditing()">
-                  <mat-icon aria-hidden="true">edit</mat-icon>
-                </button>
-                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar espacio"
-                  (click)="requestDeleteSpace(space)"
-                  [disabled]="isDeleting() || isMigrating()">
-                  <mat-icon aria-hidden="true">delete</mat-icon>
-                </button>
-              }
-              @if (isParent()) {
-                <button class="btn-assign" type="button" (click)="navigateToAssignTask(space)">
-                  <mat-icon aria-hidden="true">add</mat-icon>
-                  ASIGNAR TAREA
-                </button>
-              }
+
+            <!-- Task list with overflow fade -->
+            <div class="card-tasks-outer">
+              <div class="card-tasks">
+                @if (tasksForSpace(space.id).length === 0) {
+                  @if (isParent()) {
+                    <button class="empty-assign-cta" type="button" (click)="navigateToAssignTask(space)">
+                      <mat-icon aria-hidden="true">add</mat-icon>
+                      Asignar primera tarea
+                    </button>
+                  } @else {
+                    <p class="placeholder-text">Sin tareas asignadas</p>
+                  }
+                } @else {
+                  @for (task of tasksForSpace(space.id); track task.id) {
+                    <div [class]="'task-pill priority-' + task.priority.toLowerCase()">
+                      <span class="task-pill-dot" aria-hidden="true"></span>
+                      <span class="task-pill-title">{{ task.title }}</span>
+                      @if (task.assignedToName) {
+                        <app-user-avatar
+                          [name]="task.assignedToName"
+                          [pictureUrl]="task.assignedToPictureUrl ?? ''"
+                          [size]="16"
+                        />
+                      }
+                    </div>
+                  }
+                }
+              </div>
             </div>
+
+            <!-- Footer: full-width assign CTA (only when tasks exist) -->
+            @if (isParent() && tasksForSpace(space.id).length > 0) {
+              <button class="btn-assign" type="button" (click)="navigateToAssignTask(space)">
+                <mat-icon aria-hidden="true">add</mat-icon>
+                ASIGNAR TAREA
+              </button>
+            }
+
           </article>
         }
       </div>
@@ -93,7 +120,7 @@
 @if (showCreatePanel()) {
   <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Crear nuevo espacio" aria-modal="true">
+  <aside class="create-panel" role="dialog" aria-label="Crear nuevo espacio" aria-modal="true" cdkTrapFocus cdkTrapFocusAutoCapture>
     <div class="panel-header">
       <div class="panel-header-left">
         <h2 class="panel-title">Nuevo espacio</h2>
@@ -125,8 +152,8 @@
       </div>
 
       <!-- Tipo de espacio -->
-      <div class="field">
-        <label class="field-label">TIPO DE ESPACIO <span class="req">*</span></label>
+      <fieldset class="field field-fieldset">
+        <legend class="field-label">TIPO DE ESPACIO <span class="req">*</span></legend>
         <div class="type-grid">
           @for (opt of spaceTypeOptions; track opt.value) {
             <button
@@ -144,7 +171,7 @@
         @if (typeError()) {
           <span class="field-error" role="alert">El tipo de espacio es obligatorio.</span>
         }
-      </div>
+      </fieldset>
 
       <!-- Error global -->
       @if (createError()) {
@@ -172,7 +199,7 @@
 @if (showEditPanel()) {
   <div class="overlay panel-overlay" (click)="closeEditPanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Editar espacio" aria-modal="true">
+  <aside class="create-panel" role="dialog" aria-label="Editar espacio" aria-modal="true" cdkTrapFocus cdkTrapFocusAutoCapture>
     <div class="panel-header">
       <div class="panel-header-left">
         <h2 class="panel-title">Editar espacio</h2>
@@ -204,8 +231,8 @@
       </div>
 
       <!-- Tipo de espacio -->
-      <div class="field">
-        <label class="field-label">TIPO DE ESPACIO <span class="req">*</span></label>
+      <fieldset class="field field-fieldset">
+        <legend class="field-label">TIPO DE ESPACIO <span class="req">*</span></legend>
         <div class="type-grid">
           @for (opt of spaceTypeOptions; track opt.value) {
             <button
@@ -223,7 +250,7 @@
         @if (typeError()) {
           <span class="field-error" role="alert">El tipo de espacio es obligatorio.</span>
         }
-      </div>
+      </fieldset>
 
       <!-- Error global -->
       @if (editError()) {
@@ -261,7 +288,7 @@
 <!-- ═══════════ MODAL 2: MIGRATE TASKS ═══════════ -->
 @if (showMigrateModal()) {
   <div class="overlay migrate-overlay" (click)="cancelMigrate()" aria-hidden="true"></div>
-  <div class="migrate-modal" role="dialog" aria-label="Migrar tareas" aria-modal="true">
+  <div class="migrate-modal" role="dialog" aria-label="Migrar tareas" aria-modal="true" cdkTrapFocus cdkTrapFocusAutoCapture>
     <h3 class="migrate-title">Espacio con tareas asignadas</h3>
 
     @if (hasTargetSpaces()) {

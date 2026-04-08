@@ -22,7 +22,7 @@
     <app-neon-card>
       <ng-container card-header>
         <p class="tag">// TE INVITARON A UNIRTE</p>
-        <h1 class="card-title" role="heading" aria-level="1">{{ details()?.familyName }}</h1>
+        <h1 class="card-title">{{ details()?.familyName }}</h1>
         <div class="inviter-chip">
           <app-user-avatar [name]="details()?.invitedByName ?? '?'" [size]="26" />
           <span>Invitado por <strong>{{ details()?.invitedByName }}</strong></span>

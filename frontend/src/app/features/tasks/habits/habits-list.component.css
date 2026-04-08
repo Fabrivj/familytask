@@ -212,6 +212,7 @@
 .freq-badge {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   padding: 4px 12px;
   border-radius: 20px;
   font-family: 'Share Tech Mono', monospace;
@@ -225,6 +226,14 @@
 .freq-weekdays { border: 1px solid rgba(251, 191, 36, 0.4);  color: #fbbf24; }
 .freq-weekends { border: 1px solid rgba(244, 114, 182, 0.4); color: #f472b6; }
 .freq-monthly  { border: 1px solid rgba(167, 139, 250, 0.4); color: #a78bfa; }
+
+.freq-badge-icon {
+  font-size: 12px !important;
+  width: 12px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  flex-shrink: 0;
+}
 
 /* ── Reward ───────────────────────────────────────────────────────────── */
 .col-reward {
@@ -508,6 +517,7 @@
 }
 
 /* ── Create error ─────────────────────────────────────────────────────── */
+.create-error-msg::before { content: '⚠ '; }
 .create-error-msg {
   color: var(--error);
   font-family: 'Rajdhani', sans-serif;

@@ -79,7 +79,8 @@
 /* ── Space grid ───────────────────────────────────────────────────────── */
 .spaces-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 360px));
+  justify-content: start;
   gap: 20px;
 }
 
@@ -92,19 +93,41 @@
   flex-direction: column;
   gap: 16px;
   background: rgba(var(--border-rgb), 0.02);
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   min-width: 0;
   overflow: hidden;
 }
 
 .space-card:hover {
   border-color: rgba(var(--border-rgb), 0.28);
+  box-shadow: 0 4px 24px rgba(var(--border-rgb), 0.08);
+  transform: translateY(-2px);
 }
 
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+.card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.task-count-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-sub);
+  background: rgba(var(--border-rgb), 0.06);
+  border: 1px solid rgba(var(--border-rgb), 0.12);
+  border-radius: 20px;
+  padding: 3px 9px;
+  white-space: nowrap;
 }
 
 .card-meta {
@@ -157,6 +180,23 @@
   min-width: 0;
 }
 
+/* ── Task list with overflow fade ─────────────────────────────────────── */
+.card-tasks-outer {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-tasks-outer::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: linear-gradient(to bottom, transparent, rgba(var(--bg-rgb, 0,0,0), 0.6));
+  pointer-events: none;
+}
+
 .card-tasks {
   flex: 1;
   min-height: 60px;
@@ -200,6 +240,17 @@
 .task-pill.priority-medium { border-left-color: var(--warning); }
 .task-pill.priority-low    { border-left-color: var(--success); }
 
+.task-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.task-pill.priority-high   .task-pill-dot { background: var(--error);   clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+.task-pill.priority-medium .task-pill-dot { background: var(--warning);  border-radius: 50%; }
+.task-pill.priority-low    .task-pill-dot { background: var(--success);  clip-path: polygon(0% 0%, 100% 0%, 50% 100%); }
+
 .task-pill-title {
   font-family: 'Nunito', sans-serif;
   font-size: 12px;
@@ -210,20 +261,46 @@
   white-space: nowrap;
 }
 
-.card-footer {
+.empty-assign-cta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed rgba(var(--primary-rgb), 0.4);
+  border-radius: 6px;
+  background: transparent;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  opacity: 0.7;
+  cursor: pointer;
+  margin: auto 0;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+
+.empty-assign-cta:hover { opacity: 1; border-color: var(--primary); }
+
+.empty-assign-cta mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
 }
 
 .btn-assign {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  margin-left: auto;
-  padding: 6px 14px;
+  width: 100%;
+  padding: 8px 14px;
   border: 1px solid rgba(var(--border-rgb), 0.18);
-  border-radius: 20px;
+  border-radius: 8px;
   background: transparent;
   font-family: 'Rajdhani', sans-serif;
   font-size: 11px;
@@ -426,6 +503,8 @@
   background: rgba(var(--error-rgb), 0.05);
   margin: 0;
 }
+
+.create-error-msg::before { content: '⚠ '; }
 
 .panel-actions {
   display: flex;

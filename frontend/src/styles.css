@@ -14,7 +14,15 @@
 
 /* ── CSS Reset ── */
 *, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); font-family: var(--font-body); }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px
+  );
+  font-family: var(--font-body);
+}
 
 /* ── Scrollbar — Neon theme ── */
 ::-webkit-scrollbar {
@@ -118,6 +126,59 @@ body { margin: 0; background: var(--bg); font-family: var(--font-body); }
 }
 
 /* ============================================================
+   ACCESSIBILITY UTILITIES
+   ============================================================ */
+
+/* Visually hidden — readable by screen readers only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip-to-content link — appears on keyboard focus */
+.a11y-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 9999;
+  padding: 10px 20px;
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius) 0;
+  transition: top 0.15s;
+}
+.a11y-skip-link:focus { top: 0; }
+
+/* Fieldset reset — used for grouped toggle buttons (priority, frequency, space type) */
+.field-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.field-fieldset legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.field-fieldset::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+/* ============================================================
    GLOBAL UTILITIES
    ============================================================ */
 
@@ -128,15 +189,4 @@ body { margin: 0; background: var(--bg); font-family: var(--font-body); }
   margin-bottom: 12px;
 }
 
-/* Scanlines overlay */
-.scanlines::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    to bottom, transparent 0px, transparent 3px,
-    rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 4px
-  );
-  pointer-events: none;
-  z-index: 100;
-}
+/* Scanlines: moved to body background-image — renders behind all content */
