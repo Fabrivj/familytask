@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { StoreComponent } from './store.component';
 import { RewardService } from '../../core/services/reward.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -21,13 +21,22 @@ const mockReward: RewardResponse = {
 
 describe('StoreComponent — edit flow', () => {
   let component: StoreComponent;
-  let rewardService: jasmine.SpyObj<RewardService>;
-  let snackBar: jasmine.SpyObj<MatSnackBar>;
+  let rewardService: {
+    getRewards: ReturnType<typeof vi.fn>;
+    create: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
+  };
+  let snackBar: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    rewardService = jasmine.createSpyObj('RewardService', ['getRewards', 'create', 'update', 'delete']);
-    snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
-    rewardService.getRewards.and.returnValue(of([mockReward]));
+    rewardService = {
+      getRewards: vi.fn().mockReturnValue(of([mockReward])),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    };
+    snackBar = { open: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [StoreComponent],
@@ -52,35 +61,33 @@ describe('StoreComponent — edit flow', () => {
     expect(component.costCtrl.value).toBe(100);
     expect(component.minLevelCtrl.value).toBe(3);
     expect(component.selectedApprovalRule()).toBe('AUTOMATIC');
-    expect(component.showCreatePanel()).toBeTrue();
+    expect(component.showCreatePanel()).toBe(true);
   });
 
-  it('submitCreate in edit mode calls rewardService.update with all fields', fakeAsync(() => {
-    rewardService.update.and.returnValue(of({ ...mockReward, name: 'Nueva Pizza' }));
+  it('submitCreate in edit mode calls rewardService.update with all fields', () => {
+    rewardService.update.mockReturnValue(of({ ...mockReward, name: 'Nueva Pizza' }));
     component.openEditPanel(mockReward);
     component.nameCtrl.setValue('Nueva Pizza');
 
     component.submitCreate();
-    tick();
 
-    expect(rewardService.update).toHaveBeenCalledWith(1, jasmine.objectContaining({
+    expect(rewardService.update).toHaveBeenCalledWith(1, expect.objectContaining({
       name: 'Nueva Pizza',
       cost: 100,
       approvalRule: 'AUTOMATIC',
     }));
     expect(rewardService.create).not.toHaveBeenCalled();
-  }));
+  });
 
-  it('shows "Recompensa actualizada exitosamente." snackbar on success', fakeAsync(() => {
-    rewardService.update.and.returnValue(of({ ...mockReward }));
+  it('shows "Recompensa actualizada exitosamente." snackbar on success', () => {
+    rewardService.update.mockReturnValue(of({ ...mockReward }));
     component.openEditPanel(mockReward);
     component.submitCreate();
-    tick();
 
     expect(snackBar.open).toHaveBeenCalledWith(
-      'Recompensa actualizada exitosamente.', 'Cerrar', jasmine.any(Object)
+      'Recompensa actualizada exitosamente.', 'Cerrar', expect.any(Object)
     );
-  }));
+  });
 
   it('shows error when name cleared in edit mode', () => {
     component.openEditPanel(mockReward);
@@ -88,7 +95,7 @@ describe('StoreComponent — edit flow', () => {
 
     component.submitCreate();
 
-    expect(component.nameCtrl.hasError('required')).toBeTrue();
+    expect(component.nameCtrl.hasError('required')).toBe(true);
     expect(rewardService.update).not.toHaveBeenCalled();
   });
 
@@ -98,18 +105,17 @@ describe('StoreComponent — edit flow', () => {
 
     component.submitCreate();
 
-    expect(component.costCtrl.hasError('min')).toBeTrue();
+    expect(component.costCtrl.hasError('min')).toBe(true);
     expect(rewardService.update).not.toHaveBeenCalled();
   });
 
-  it('shows general error from service on update failure', fakeAsync(() => {
-    rewardService.update.and.returnValue(throwError(() => ({
+  it('shows general error from service on update failure', () => {
+    rewardService.update.mockReturnValue(throwError(() => ({
       error: { message: 'No se pudo completar la operación. Intenta de nuevo.' },
     })));
     component.openEditPanel(mockReward);
     component.submitCreate();
-    tick();
 
     expect(component.createError()).toBe('No se pudo completar la operación. Intenta de nuevo.');
-  }));
+  });
 });
