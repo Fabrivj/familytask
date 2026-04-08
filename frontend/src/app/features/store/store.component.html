@@ -62,7 +62,8 @@
 
         @if (isParent()) {
           <div class="card-bottom">
-            <button class="btn-action btn-edit" type="button" aria-label="Editar recompensa" disabled>
+            <button class="btn-action btn-edit" type="button" aria-label="Editar recompensa"
+                    (click)="openEditPanel(reward)">
               <mat-icon aria-hidden="true">edit</mat-icon>
               EDITAR
             </button>
@@ -79,9 +80,10 @@
 @if (showCreatePanel()) {
   <div class="overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Crear nueva recompensa">
+  <aside class="create-panel" role="dialog"
+         [attr.aria-label]="isEditMode() ? 'Editar recompensa' : 'Crear nueva recompensa'">
     <div class="panel-header">
-      <h2 class="panel-title">Nueva recompensa</h2>
+      <h2 class="panel-title">{{ isEditMode() ? 'Editar recompensa' : 'Nueva recompensa' }}</h2>
       <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
         <mat-icon aria-hidden="true">close</mat-icon>
       </button>
@@ -172,6 +174,21 @@
         </div>
       </div>
 
+      <div class="field">
+        <label class="field-label">REGLA DE APROBACIÓN</label>
+        <div class="approval-rule-group" role="group" aria-label="Regla de aprobación">
+          @for (rule of availableApprovalRules; track rule.value) {
+            <button
+              class="approval-btn"
+              [class.approval-btn-active]="selectedApprovalRule() === rule.value"
+              type="button"
+              (click)="selectApprovalRule(rule.value)"
+              [attr.aria-pressed]="selectedApprovalRule() === rule.value"
+            >{{ rule.label }}</button>
+          }
+        </div>
+      </div>
+
       @if (createError()) {
         <p class="create-error-msg" role="alert">{{ createError() }}</p>
       }
@@ -180,10 +197,10 @@
         <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
         <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
           @if (isCreating()) {
-            Creando...
+            {{ isEditMode() ? 'Guardando...' : 'Creando...' }}
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
-            CREAR RECOMPENSA
+            {{ isEditMode() ? 'GUARDAR CAMBIOS' : 'CREAR RECOMPENSA' }}
           }
         </button>
       </div>

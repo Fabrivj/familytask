@@ -13,7 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/services/auth.service';
 import { PermissionsService } from '../../core/services/permissions.service';
 import { RewardService } from '../../core/services/reward.service';
-import { RewardResponse } from '../../core/models/reward.model';
+import { ApprovalRule, RewardResponse } from '../../core/models/reward.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 
 const REWARD_ICONS = [
@@ -39,6 +39,10 @@ export class StoreComponent {
   readonly isParent = this.permissionsService.isParent;
 
   readonly availableIcons = REWARD_ICONS;
+  readonly availableApprovalRules: { value: ApprovalRule; label: string }[] = [
+    { value: 'AUTOMATIC', label: 'Automática' },
+    { value: 'MANUAL',    label: 'Requiere aprobación' },
+  ];
 
   readonly rewards     = signal<RewardResponse[]>([]);
   readonly isLoading   = signal(false);
@@ -46,8 +50,11 @@ export class StoreComponent {
 
   readonly showCreatePanel = signal(false);
   readonly isCreating      = signal(false);
-  readonly createError     = signal('');
-  readonly selectedIcon    = signal<string>('card_giftcard');
+  readonly createError          = signal('');
+  readonly editingReward        = signal<RewardResponse | null>(null);
+  readonly isEditMode           = computed(() => this.editingReward() !== null);
+  readonly selectedIcon         = signal<string>('card_giftcard');
+  readonly selectedApprovalRule = signal<ApprovalRule>('AUTOMATIC');
 
   readonly nameCtrl = new FormControl('', {
     nonNullable: true,
@@ -121,17 +128,33 @@ export class StoreComponent {
     this.showCreatePanel.set(true);
   }
 
+  openEditPanel(reward: RewardResponse): void {
+    this.resetForm();
+    this.editingReward.set(reward);
+    this.nameCtrl.setValue(reward.name);
+    this.descriptionCtrl.setValue(reward.description ?? '');
+    this.costCtrl.setValue(reward.cost);
+    this.minLevelCtrl.setValue(reward.minLevel ?? null);
+    this.selectedIcon.set(reward.icon ?? 'card_giftcard');
+    this.selectedApprovalRule.set(reward.approvalRule ?? 'AUTOMATIC');
+    this.showCreatePanel.set(true);
+  }
+
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+    this.editingReward.set(null);
   }
 
   selectIcon(icon: string): void {
     this.selectedIcon.set(icon);
   }
 
+  selectApprovalRule(rule: ApprovalRule): void { this.selectedApprovalRule.set(rule); }
+
   submitCreate(): void {
-    [this.nameCtrl, this.costCtrl, this.descriptionCtrl, this.minLevelCtrl].forEach(c => c.markAllAsTouched());
+    [this.nameCtrl, this.costCtrl, this.descriptionCtrl, this.minLevelCtrl]
+      .forEach(c => c.markAllAsTouched());
 
     if (this.nameCtrl.invalid || this.costCtrl.invalid || this.descriptionCtrl.invalid || this.minLevelCtrl.invalid) return;
 
@@ -141,36 +164,55 @@ export class StoreComponent {
     this.isCreating.set(true);
     this.createError.set('');
 
-    this.rewardService.create({
-      familyId,
-      name: this.nameCtrl.value.trim(),
-      description: this.descriptionCtrl.value.trim() || null,
-      icon: this.selectedIcon(),
-      cost: this.costCtrl.value!,
-      minLevel: this.minLevelCtrl.value ?? null,
-    }).subscribe({
-      next: (reward) => {
+    const editing = this.editingReward();
+
+    const request$ = editing
+      ? this.rewardService.update(editing.id, {
+          name:         this.nameCtrl.value.trim(),
+          description:  this.descriptionCtrl.value.trim() || null,
+          icon:         this.selectedIcon(),
+          cost:         this.costCtrl.value!,
+          minLevel:     this.minLevelCtrl.value ?? null,
+          approvalRule: this.selectedApprovalRule(),
+        })
+      : this.rewardService.create({
+          familyId,
+          name:        this.nameCtrl.value.trim(),
+          description: this.descriptionCtrl.value.trim() || null,
+          icon:        this.selectedIcon(),
+          cost:        this.costCtrl.value!,
+          minLevel:    this.minLevelCtrl.value ?? null,
+        });
+
+    const successMsg  = editing ? 'Recompensa actualizada exitosamente.' : 'Recompensa creada exitosamente.';
+    const fallbackErr = editing
+      ? 'No se pudo completar la operación. Intenta de nuevo.'
+      : 'No se pudo crear la recompensa. Intenta de nuevo.';
+
+    request$.subscribe({
+      next: (saved) => {
         this.isCreating.set(false);
         this.closeCreatePanel();
-        this.rewards.update(list => [reward, ...list]);
-        this.snackBar.open('Recompensa creada exitosamente.', 'Cerrar', {
-          duration: 4000,
-          panelClass: 'snack-success',
-        });
+        this.rewards.update(list =>
+          editing ? list.map(r => r.id === saved.id ? saved : r) : [saved, ...list]
+        );
+        this.snackBar.open(successMsg, 'Cerrar', { duration: 4000, panelClass: 'snack-success' });
       },
       error: (err) => {
-        this.createError.set(err.error?.message || 'No se pudo crear la recompensa. Intenta de nuevo.');
+        this.createError.set(err.error?.message || fallbackErr);
         this.isCreating.set(false);
       },
     });
   }
 
   private resetForm(): void {
+    this.editingReward.set(null);
     this.nameCtrl.reset('');
     this.descriptionCtrl.reset('');
     this.costCtrl.reset(null);
     this.minLevelCtrl.reset(null);
     this.selectedIcon.set('card_giftcard');
+    this.selectedApprovalRule.set('AUTOMATIC');
     this.createError.set('');
   }
 }

@@ -1,3 +1,5 @@
+export type ApprovalRule = 'AUTOMATIC' | 'MANUAL';
+
 export interface RewardResponse {
   id: number;
   name: string;
@@ -5,6 +7,7 @@ export interface RewardResponse {
   icon: string | null;
   cost: number;
   minLevel: number | null;
+  approvalRule: ApprovalRule;
   familyId: number;
   createdAt: string;
 }
@@ -16,4 +19,13 @@ export interface CreateRewardRequest {
   icon?: string | null;
   cost: number;
   minLevel?: number | null;
+}
+
+export interface UpdateRewardRequest {
+  name: string;
+  description: string | null;
+  icon: string | null;
+  cost: number;
+  minLevel: number | null;
+  approvalRule: ApprovalRule;
 }
