@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateHabitRequest, HabitResponse } from '../models/habit.model';
+import { AssignHabitRequest, CreateHabitRequest, HabitResponse } from '../models/habit.model';
 
 @Injectable({ providedIn: 'root' })
 export class HabitService {
@@ -16,6 +16,10 @@ export class HabitService {
 
   create(request: CreateHabitRequest): Observable<HabitResponse> {
     return this.http.post<HabitResponse>(`${environment.apiUrl}/habits`, request);
+  }
+
+  assign(habitId: number, request: AssignHabitRequest): Observable<HabitResponse> {
+    return this.http.post<HabitResponse>(`${environment.apiUrl}/habits/${habitId}/assign`, request);
   }
 
   delete(habitId: number): Observable<{ message: string }> {
