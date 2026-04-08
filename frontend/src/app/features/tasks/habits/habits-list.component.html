@@ -74,7 +74,18 @@
               </span>
             </td>
             <td>
-              <span class="text-muted">Sin asignar</span>
+              @if (habit.assignedToName) {
+                <span class="member-chip-inline">
+                  <app-user-avatar
+                    [name]="habit.assignedToName"
+                    [pictureUrl]="habit.assignedToPictureUrl ?? ''"
+                    [size]="24"
+                  />
+                  {{ memberShortName(habit.assignedToName) }}
+                </span>
+              } @else {
+                <span class="text-muted">Sin asignar</span>
+              }
             </td>
             <td>
               <div class="col-reward">
@@ -242,6 +253,32 @@
           }
         </div>
       </div>
+
+      <!-- Asignar a -->
+      @if (childMembers().length > 0) {
+        <div class="field">
+          <label class="field-label">ASIGNAR A <span class="optional">(OPCIONAL)</span></label>
+          <div class="assignee-chips">
+            <button
+              class="assignee-chip"
+              [class.assignee-active]="selectedAssignee() === null"
+              type="button"
+              (click)="selectedAssignee.set(null)"
+            >Sin asignar</button>
+            @for (m of childMembers(); track m.id) {
+              <button
+                class="assignee-chip"
+                [class.assignee-active]="selectedAssignee() === m.id"
+                type="button"
+                (click)="selectedAssignee.set(m.id)"
+              >
+                <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="22" />
+                {{ memberShortName(m.name) }}
+              </button>
+            }
+          </div>
+        </div>
+      }
 
       <!-- Error -->
       @if (createError()) {

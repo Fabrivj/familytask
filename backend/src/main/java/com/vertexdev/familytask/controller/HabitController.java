@@ -1,6 +1,7 @@
 package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.MessageResponse;
+import com.vertexdev.familytask.dto.habit.AssignHabitRequest;
 import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
 import com.vertexdev.familytask.model.User;
@@ -37,6 +38,21 @@ public class HabitController {
 
         HabitResponse response = habitService.createHabit(request, authenticatedUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Assigns a habit to a family member.
+     * Requires JWT. Only users with PARENT role can assign habits.
+     *
+     * POST /api/habits/{id}/assign
+     */
+    @PostMapping("/{id}/assign")
+    public ResponseEntity<HabitResponse> assignHabit(
+            @PathVariable Long id,
+            @Valid @RequestBody AssignHabitRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        return ResponseEntity.ok(habitService.assignHabit(id, request, authenticatedUser));
     }
 
     @DeleteMapping("/{id}")

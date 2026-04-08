@@ -29,6 +29,9 @@ public class Habit {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
+    @OneToOne(mappedBy = "habit", fetch = FetchType.LAZY)
+    private HabitAssignment assignment;
+
     @Column(nullable = false, length = 100)
     private String title;
 
