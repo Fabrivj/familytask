@@ -1,6 +1,7 @@
 package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.MessageResponse;
+import com.vertexdev.familytask.dto.task.CompleteTaskResponse;
 import com.vertexdev.familytask.dto.task.CreateTaskRequest;
 import com.vertexdev.familytask.dto.task.UpdateTaskRequest;
 import com.vertexdev.familytask.dto.task.UpdateTaskStatusRequest;
@@ -91,6 +92,20 @@ public class TaskController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         return ResponseEntity.ok(taskService.updateTaskStatus(id, request, authenticatedUser));
+    }
+
+    /**
+     * Marks a task as completed. Only PARENT can call this endpoint.
+     * The task must be in IN_REVIEW status. Creates a task_completions record.
+     *
+     * POST /api/tasks/{id}/complete
+     */
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<CompleteTaskResponse> completeTask(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        return ResponseEntity.ok(taskService.completeTask(id, authenticatedUser));
     }
 
     /**
