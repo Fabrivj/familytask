@@ -1,6 +1,4 @@
 package com.vertexdev.familytask.dto.reward;
-
-import com.vertexdev.familytask.model.enums.ApprovalRule;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +26,4 @@ public class UpdateRewardRequest {
 
     @Min(value = 1, message = "El nivel mínimo debe ser mayor a 0.")
     private Integer minLevel;         // null = no minimum (clear in DB)
-
-    private ApprovalRule approvalRule;
 }

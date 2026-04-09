@@ -13,7 +13,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/services/auth.service';
 import { PermissionsService } from '../../core/services/permissions.service';
 import { RewardService } from '../../core/services/reward.service';
-import { ApprovalRule, RewardResponse } from '../../core/models/reward.model';
+import { RewardResponse } from '../../core/models/reward.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 
 const REWARD_ICONS = [
@@ -39,10 +39,6 @@ export class StoreComponent {
   readonly isParent = this.permissionsService.isParent;
 
   readonly availableIcons = REWARD_ICONS;
-  readonly availableApprovalRules: { value: ApprovalRule; label: string }[] = [
-    { value: 'AUTOMATIC', label: 'Automática' },
-    { value: 'MANUAL',    label: 'Requiere aprobación' },
-  ];
 
   readonly rewards     = signal<RewardResponse[]>([]);
   readonly isLoading   = signal(false);
@@ -50,11 +46,10 @@ export class StoreComponent {
 
   readonly showCreatePanel = signal(false);
   readonly isCreating      = signal(false);
-  readonly createError          = signal('');
-  readonly editingReward        = signal<RewardResponse | null>(null);
-  readonly isEditMode           = computed(() => this.editingReward() !== null);
-  readonly selectedIcon         = signal<string>('card_giftcard');
-  readonly selectedApprovalRule = signal<ApprovalRule>('AUTOMATIC');
+  readonly createError     = signal('');
+  readonly editingReward   = signal<RewardResponse | null>(null);
+  readonly isEditMode      = computed(() => this.editingReward() !== null);
+  readonly selectedIcon    = signal<string>('card_giftcard');
 
   readonly nameCtrl = new FormControl('', {
     nonNullable: true,
@@ -136,7 +131,6 @@ export class StoreComponent {
     this.costCtrl.setValue(reward.cost);
     this.minLevelCtrl.setValue(reward.minLevel ?? null);
     this.selectedIcon.set(reward.icon ?? 'card_giftcard');
-    this.selectedApprovalRule.set(reward.approvalRule ?? 'AUTOMATIC');
     this.showCreatePanel.set(true);
   }
 
@@ -149,8 +143,6 @@ export class StoreComponent {
   selectIcon(icon: string): void {
     this.selectedIcon.set(icon);
   }
-
-  selectApprovalRule(rule: ApprovalRule): void { this.selectedApprovalRule.set(rule); }
 
   submitCreate(): void {
     [this.nameCtrl, this.costCtrl, this.descriptionCtrl, this.minLevelCtrl]
@@ -168,12 +160,11 @@ export class StoreComponent {
 
     const request$ = editing
       ? this.rewardService.update(editing.id, {
-          name:         this.nameCtrl.value.trim(),
-          description:  this.descriptionCtrl.value.trim() || null,
-          icon:         this.selectedIcon(),
-          cost:         this.costCtrl.value!,
-          minLevel:     this.minLevelCtrl.value ?? null,
-          approvalRule: this.selectedApprovalRule(),
+          name:        this.nameCtrl.value.trim(),
+          description: this.descriptionCtrl.value.trim() || null,
+          icon:        this.selectedIcon(),
+          cost:        this.costCtrl.value!,
+          minLevel:    this.minLevelCtrl.value ?? null,
         })
       : this.rewardService.create({
           familyId,
@@ -212,7 +203,6 @@ export class StoreComponent {
     this.costCtrl.reset(null);
     this.minLevelCtrl.reset(null);
     this.selectedIcon.set('card_giftcard');
-    this.selectedApprovalRule.set('AUTOMATIC');
     this.createError.set('');
   }
 }

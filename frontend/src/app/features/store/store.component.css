@@ -477,34 +477,3 @@
   .create-panel { width: 100vw; }
   .panel-body { padding: 20px 16px; }
 }
-
-/* Approval rule selector — mirrors icon-grid / icon-btn pattern */
-.approval-rule-group {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.approval-btn {
-  padding: 8px 16px;
-  border: 1.5px solid rgba(var(--border-rgb), 0.18);
-  border-radius: 8px;
-  background: transparent;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-sub);
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
-}
-
-.approval-btn:hover {
-  border-color: rgba(var(--border-rgb), 0.35);
-  color: var(--text);
-}
-
-.approval-btn-active {
-  border-color: var(--primary);
-  background: rgba(var(--primary-rgb), 0.08);
-  color: var(--primary);
-}

@@ -14,7 +14,7 @@ const mockReward: RewardResponse = {
   icon: 'local_pizza',
   cost: 100,
   minLevel: 3,
-  approvalRule: 'AUTOMATIC',
+  approvalRule: 'MANUAL',
   familyId: 10,
   createdAt: '2026-01-01T00:00:00',
 };
@@ -60,7 +60,6 @@ describe('StoreComponent — edit flow', () => {
     expect(component.descriptionCtrl.value).toBe('Buena pizza');
     expect(component.costCtrl.value).toBe(100);
     expect(component.minLevelCtrl.value).toBe(3);
-    expect(component.selectedApprovalRule()).toBe('AUTOMATIC');
     expect(component.showCreatePanel()).toBe(true);
   });
 
@@ -74,7 +73,6 @@ describe('StoreComponent — edit flow', () => {
     expect(rewardService.update).toHaveBeenCalledWith(1, expect.objectContaining({
       name: 'Nueva Pizza',
       cost: 100,
-      approvalRule: 'AUTOMATIC',
     }));
     expect(rewardService.create).not.toHaveBeenCalled();
   });

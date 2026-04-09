@@ -27,5 +27,4 @@ export interface UpdateRewardRequest {
   icon: string | null;
   cost: number;
   minLevel: number | null;
-  approvalRule: ApprovalRule;
 }

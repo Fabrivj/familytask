@@ -174,21 +174,6 @@
         </div>
       </div>
 
-      <div class="field">
-        <label class="field-label">REGLA DE APROBACIÓN</label>
-        <div class="approval-rule-group" role="group" aria-label="Regla de aprobación">
-          @for (rule of availableApprovalRules; track rule.value) {
-            <button
-              class="approval-btn"
-              [class.approval-btn-active]="selectedApprovalRule() === rule.value"
-              type="button"
-              (click)="selectApprovalRule(rule.value)"
-              [attr.aria-pressed]="selectedApprovalRule() === rule.value"
-            >{{ rule.label }}</button>
-          }
-        </div>
-      </div>
-
       @if (createError()) {
         <p class="create-error-msg" role="alert">{{ createError() }}</p>
       }

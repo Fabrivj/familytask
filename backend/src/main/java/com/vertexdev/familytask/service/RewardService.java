@@ -50,6 +50,7 @@ public class RewardService {
                     .icon(request.getIcon())
                     .cost(request.getCost())
                     .minLevel(request.getMinLevel())
+                    .approvalRule(ApprovalRule.MANUAL)
                     .build();
 
             rewardRepository.save(reward);
@@ -119,10 +120,7 @@ public class RewardService {
             reward.setIcon(request.getIcon());
             reward.setCost(request.getCost());
             reward.setMinLevel(request.getMinLevel());
-            // Normalize: set AUTOMATIC for legacy DB rows that have NULL
-            reward.setApprovalRule(
-                    request.getApprovalRule() != null ? request.getApprovalRule() : ApprovalRule.AUTOMATIC
-            );
+            reward.setApprovalRule(ApprovalRule.MANUAL);
 
             Reward saved = rewardRepository.save(reward);
             log.info("Reward '{}' updated by user {}", saved.getName(), requester.getEmail());

@@ -69,7 +69,6 @@ class RewardServiceUpdateTest {
         request.setCost(200);
         request.setDescription(null);
         request.setMinLevel(null);
-        request.setApprovalRule(ApprovalRule.MANUAL);
         request.setIcon("local_pizza");
 
         when(rewardRepository.findById(100L)).thenReturn(Optional.of(reward));
@@ -134,12 +133,12 @@ class RewardServiceUpdateTest {
     }
 
     @Test
-    void updateReward_nullApprovalRule_respondsWithAutomatic() {
+    void updateReward_alwaysPersistsManualRule_evenWhenEntityWasPreviouslyAutomatic() {
+        reward.setApprovalRule(ApprovalRule.AUTOMATIC); // simulate legacy row
+
         UpdateRewardRequest request = new UpdateRewardRequest();
         request.setName("Test");
         request.setCost(10);
-        request.setApprovalRule(null);
-        reward.setApprovalRule(null);
 
         when(rewardRepository.findById(100L)).thenReturn(Optional.of(reward));
         when(familyMemberRepository.findByFamilyGroupIdAndUserId(10L, 1L))
@@ -149,6 +148,7 @@ class RewardServiceUpdateTest {
 
         RewardResponse response = rewardService.updateReward(100L, request, parent);
 
-        assertThat(response.getApprovalRule()).isEqualTo(ApprovalRule.AUTOMATIC);
+        assertThat(reward.getApprovalRule()).isEqualTo(ApprovalRule.MANUAL);    // persisted on entity
+        assertThat(response.getApprovalRule()).isEqualTo(ApprovalRule.MANUAL);  // reflected in response
     }
 }
