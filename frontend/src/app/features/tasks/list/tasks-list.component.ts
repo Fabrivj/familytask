@@ -21,7 +21,7 @@ import { TaskService } from '../../../core/services/task.service';
 import { MembersService } from '../../../core/services/members.service';
 import { SpaceService } from '../../../core/services/space.service';
 import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
-import { TaskPriority, TaskResponse, TaskStatus } from '../../../core/models/task.model';
+import { CompleteTaskResponse, TaskPriority, TaskResponse, TaskStatus } from '../../../core/models/task.model';
 import { MemberItem } from '../../../core/models/member.model';
 import { SpaceResponse, spaceTypeIcon } from '../../../core/models/space.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
@@ -403,21 +403,58 @@ export class TasksListComponent {
     this.createError.set('');
   }
 
-  openStatusDropdown(event: MouseEvent, taskId: number): void {
-    if (this.openStatusDropdownId() === taskId) {
+  availableNextStatuses(task: TaskResponse): TaskStatus[] {
+    const s = task.status;
+    if (!s || s === 'COMPLETED') return [];
+    if (this.isParent()) {
+      return s === 'IN_REVIEW' ? ['COMPLETED'] : [];
+    } else {
+      if (s === 'PENDING') return ['IN_PROGRESS'];
+      if (s === 'IN_PROGRESS') return ['IN_REVIEW'];
+      return [];
+    }
+  }
+
+  openStatusDropdown(event: MouseEvent, task: TaskResponse): void {
+    if (this.availableNextStatuses(task).length === 0) return;
+    if (this.openStatusDropdownId() === task.id) {
       this.openStatusDropdownId.set(null);
       this.statusDropdownPos.set(null);
       return;
     }
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     this.statusDropdownPos.set({ top: rect.bottom + 6, left: rect.left });
-    this.openStatusDropdownId.set(taskId);
+    this.openStatusDropdownId.set(task.id);
   }
 
   changeStatus(task: TaskResponse, newStatus: TaskStatus): void {
     this.openStatusDropdownId.set(null);
     this.statusDropdownPos.set(null);
     this.isUpdatingStatus.set(task.id);
+
+    if (newStatus === 'COMPLETED') {
+      this.taskService.complete(task.id).subscribe({
+        next: (result: CompleteTaskResponse) => {
+          this.tasks.update(list => list.map(t => t.id === task.id ? { ...t, status: 'COMPLETED' } : t));
+          this.isUpdatingStatus.set(null);
+          this.snackBar.open(
+            `Tarea completada. Se otorgarán +${result.xpReward} XP y ${result.coinsReward} monedas a ${result.assignedToName}.`,
+            'Cerrar',
+            { duration: 6000, panelClass: 'snack-success' },
+          );
+        },
+        error: (err) => {
+          this.isUpdatingStatus.set(null);
+          this.snackBar.open(
+            err.error?.message || 'No se pudo completar la tarea. Por favor, intente nuevamente.',
+            'Cerrar',
+            { duration: 5000, panelClass: 'snack-error' },
+          );
+        },
+      });
+      return;
+    }
+
     this.taskService.updateStatus(task.id, newStatus).subscribe({
       next: (updated) => {
         this.tasks.update(list => list.map(t => t.id === task.id ? updated : t));
@@ -429,9 +466,7 @@ export class TasksListComponent {
       },
       error: (err) => {
         this.isUpdatingStatus.set(null);
-        const msg = err.status === 403
-          ? 'Acceso no autorizado.'
-          : 'No se pudo actualizar el estado, por favor, intente nuevamente.';
+        const msg = err.error?.message || 'No se pudo actualizar el estado, por favor, intente nuevamente.';
         this.snackBar.open(msg, 'Cerrar', { duration: 5000, panelClass: 'snack-error' });
       },
     });
