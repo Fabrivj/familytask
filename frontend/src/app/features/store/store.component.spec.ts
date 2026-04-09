@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+  import { TestBed } from '@angular/core/testing';
 import { StoreComponent } from './store.component';
 import { RewardService } from '../../core/services/reward.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -115,5 +115,41 @@ describe('StoreComponent — edit flow', () => {
     component.submitCreate();
 
     expect(component.createError()).toBe('No se pudo completar la operación. Intenta de nuevo.');
+  });
+
+  it('submitCreate in create mode calls rewardService.create, not update', () => {
+    rewardService.create.mockReturnValue(of({ ...mockReward, id: 2 }));
+    component.openCreatePanel();
+    component.nameCtrl.setValue('Nueva Recompensa');
+    component.costCtrl.setValue(50);
+
+    component.submitCreate();
+
+    expect(rewardService.create).toHaveBeenCalled();
+    expect(rewardService.update).not.toHaveBeenCalled();
+  });
+
+  it('update request does not include approvalRule field', () => {
+    rewardService.update.mockReturnValue(of(mockReward));
+    component.openEditPanel(mockReward);
+
+    component.submitCreate();
+
+    const payload = rewardService.update.mock.calls[0][1];
+    expect(payload).not.toHaveProperty('approvalRule');
+  });
+
+  it('closeCreatePanel clears editingReward and createError after a failed update', () => {
+    rewardService.update.mockReturnValue(throwError(() => ({
+      error: { message: 'Error' },
+    })));
+    component.openEditPanel(mockReward);
+    component.submitCreate();
+
+    component.closeCreatePanel();
+
+    expect(component.editingReward()).toBeNull();
+    expect(component.createError()).toBe('');
+    expect(component.showCreatePanel()).toBe(false);
   });
 });
