@@ -1,5 +1,6 @@
 package com.vertexdev.familytask.model;
 
+import com.vertexdev.familytask.model.enums.ApprovalRule;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,6 +43,10 @@ public class Reward {
 
     @Column(name = "min_level")
     private Integer minLevel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_rule", length = 20)
+    private ApprovalRule approvalRule;
 
     @Column(nullable = false)
     @Builder.Default
