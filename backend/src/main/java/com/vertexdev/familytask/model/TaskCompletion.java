@@ -33,7 +33,4 @@ public class TaskCompletion {
 
     @Column(name = "verified_at", nullable = false)
     private LocalDateTime verifiedAt;
-
-    @Column(name = "notes", length = 500)
-    private String notes;
 }
