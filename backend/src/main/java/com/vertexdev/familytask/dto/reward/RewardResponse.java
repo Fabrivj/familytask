@@ -1,5 +1,6 @@
 package com.vertexdev.familytask.dto.reward;
 
+import com.vertexdev.familytask.model.enums.ApprovalRule;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class RewardResponse {
     private String icon;
     private Integer cost;
     private Integer minLevel;
+    private ApprovalRule approvalRule;
     private Long familyId;
     private LocalDateTime createdAt;
 }

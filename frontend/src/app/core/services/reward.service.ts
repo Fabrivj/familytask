@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateRewardRequest, RewardResponse } from '../models/reward.model';
+import { CreateRewardRequest, RewardResponse, UpdateRewardRequest } from '../models/reward.model';
 
 @Injectable({ providedIn: 'root' })
 export class RewardService {
@@ -16,6 +16,10 @@ export class RewardService {
 
   create(request: CreateRewardRequest): Observable<RewardResponse> {
     return this.http.post<RewardResponse>(`${environment.apiUrl}/rewards`, request);
+  }
+
+  update(rewardId: number, request: UpdateRewardRequest): Observable<RewardResponse> {
+    return this.http.patch<RewardResponse>(`${environment.apiUrl}/rewards/${rewardId}`, request);
   }
 
   delete(rewardId: number): Observable<{ message: string }> {

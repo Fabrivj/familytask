@@ -84,11 +84,13 @@
 
           @if (isParent()) {
             <div class="card-bottom">
-              <button class="btn-action btn-edit" type="button" [attr.aria-label]="'Editar ' + reward.name" disabled>
+              <button class="btn-action btn-edit" type="button" [attr.aria-label]="'Editar ' + reward.name"
+                      (click)="openEditPanel(reward)">
                 <mat-icon aria-hidden="true">edit</mat-icon>
                 EDITAR
               </button>
-              <button class="btn-icon-danger" type="button" [attr.aria-label]="'Eliminar ' + reward.name" disabled>
+              <button class="btn-icon-danger" type="button" [attr.aria-label]="'Eliminar ' + reward.name"
+                      (click)="openDeleteModal(reward)">
                 <mat-icon aria-hidden="true">delete</mat-icon>
               </button>
             </div>
@@ -109,13 +111,13 @@
     class="create-panel"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="dialog-title"
+    [attr.aria-label]="isEditMode() ? 'Editar recompensa' : 'Nueva recompensa'"
     cdkTrapFocus
     cdkTrapFocusAutoCapture
     (keydown.escape)="closeCreatePanel()"
   >
     <div class="panel-header">
-      <h2 id="dialog-title" class="panel-title">Nueva recompensa</h2>
+      <h2 class="panel-title">{{ isEditMode() ? 'Editar recompensa' : 'Nueva recompensa' }}</h2>
       <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar panel">
         <mat-icon aria-hidden="true">close</mat-icon>
       </button>
@@ -230,10 +232,10 @@
         <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
         <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()" [attr.aria-busy]="isCreating()">
           @if (isCreating()) {
-            <span aria-live="polite">Creando...</span>
+            <span aria-live="polite">{{ isEditMode() ? 'Guardando...' : 'Creando...' }}</span>
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
-            CREAR RECOMPENSA
+            {{ isEditMode() ? 'GUARDAR CAMBIOS' : 'CREAR RECOMPENSA' }}
           }
         </button>
       </div>
@@ -241,6 +243,18 @@
     </form>
   </aside>
 }
+
+
+<app-confirm-dialog
+  [open]="showDeleteModal()"
+  title="¿Eliminar recompensa?"
+  [message]="'¿Estás seguro de que quieres eliminar «' + (rewardToDelete()?.name ?? '') + '»? Esta acción no se puede deshacer.'"
+  variant="danger"
+  confirmLabel="ELIMINAR"
+  cancelLabel="CANCELAR"
+  (confirmed)="confirmDelete()"
+  (cancelled)="closeDeleteModal()"
+/>
 
 </main>
 </app-shell>

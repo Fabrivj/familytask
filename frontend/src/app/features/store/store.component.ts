@@ -18,6 +18,7 @@ import { PermissionsService } from '../../core/services/permissions.service';
 import { RewardService } from '../../core/services/reward.service';
 import { RewardResponse } from '../../core/models/reward.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 const REWARD_ICONS = [
   'card_giftcard', 'local_pizza', 'sports_esports', 'movie',
@@ -42,7 +43,7 @@ const ICON_LABELS: Record<string, string> = {
 
 @Component({
   selector: 'app-store',
-  imports: [ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, AppShellComponent, A11yModule],
+  imports: [ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, AppShellComponent, A11yModule, ConfirmDialogComponent],
   templateUrl: './store.component.html',
   styleUrl: './store.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,7 +69,12 @@ export class StoreComponent {
   readonly showCreatePanel = signal(false);
   readonly isCreating      = signal(false);
   readonly createError     = signal('');
+  readonly editingReward   = signal<RewardResponse | null>(null);
+  readonly isEditMode      = computed(() => this.editingReward() !== null);
   readonly selectedIcon    = signal<string>('card_giftcard');
+
+  readonly showDeleteModal = signal(false);
+  readonly rewardToDelete  = signal<RewardResponse | null>(null);
 
   readonly nameCtrl = new FormControl('', {
     nonNullable: true,
@@ -140,13 +146,23 @@ export class StoreComponent {
   openCreatePanel(): void {
     this.resetForm();
     this.showCreatePanel.set(true);
-    // cdkTrapFocusAutoCapture handles moving focus into the dialog
+  }
+
+  openEditPanel(reward: RewardResponse): void {
+    this.resetForm();
+    this.editingReward.set(reward);
+    this.nameCtrl.setValue(reward.name);
+    this.descriptionCtrl.setValue(reward.description ?? '');
+    this.costCtrl.setValue(reward.cost);
+    this.minLevelCtrl.setValue(reward.minLevel ?? null);
+    this.selectedIcon.set(reward.icon ?? 'card_giftcard');
+    this.showCreatePanel.set(true);
   }
 
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
-    // Return focus to the trigger button
+    this.editingReward.set(null);
     setTimeout(() => this.newRewardBtn?.nativeElement?.focus());
   }
 
@@ -176,8 +192,43 @@ export class StoreComponent {
     target.focus();
   }
 
+  openDeleteModal(reward: RewardResponse): void {
+    this.rewardToDelete.set(reward);
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal.set(false);
+    this.rewardToDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const reward = this.rewardToDelete();
+    if (!reward) return;
+
+    this.rewardService.delete(reward.id).subscribe({
+      next: () => {
+        this.rewards.update(list => list.filter(r => r.id !== reward.id));
+        this.closeDeleteModal();
+        this.snackBar.open('Recompensa eliminada exitosamente.', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'snack-success',
+        });
+      },
+      error: (err) => {
+        this.closeDeleteModal();
+        this.snackBar.open(
+          err.error?.message || 'No se pudo completar la operación. Intenta de nuevo.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-error' },
+        );
+      },
+    });
+  }
+
   submitCreate(): void {
-    [this.nameCtrl, this.costCtrl, this.descriptionCtrl, this.minLevelCtrl].forEach(c => c.markAllAsTouched());
+    [this.nameCtrl, this.costCtrl, this.descriptionCtrl, this.minLevelCtrl]
+      .forEach(c => c.markAllAsTouched());
 
     if (this.nameCtrl.invalid || this.costCtrl.invalid || this.descriptionCtrl.invalid || this.minLevelCtrl.invalid) return;
 
@@ -187,31 +238,48 @@ export class StoreComponent {
     this.isCreating.set(true);
     this.createError.set('');
 
-    this.rewardService.create({
-      familyId,
-      name: this.nameCtrl.value.trim(),
-      description: this.descriptionCtrl.value.trim() || null,
-      icon: this.selectedIcon(),
-      cost: this.costCtrl.value!,
-      minLevel: this.minLevelCtrl.value ?? null,
-    }).subscribe({
-      next: (reward) => {
+    const editing = this.editingReward();
+
+    const request$ = editing
+      ? this.rewardService.update(editing.id, {
+          name:        this.nameCtrl.value.trim(),
+          description: this.descriptionCtrl.value.trim() || null,
+          icon:        this.selectedIcon(),
+          cost:        this.costCtrl.value!,
+          minLevel:    this.minLevelCtrl.value ?? null,
+        })
+      : this.rewardService.create({
+          familyId,
+          name:        this.nameCtrl.value.trim(),
+          description: this.descriptionCtrl.value.trim() || null,
+          icon:        this.selectedIcon(),
+          cost:        this.costCtrl.value!,
+          minLevel:    this.minLevelCtrl.value ?? null,
+        });
+
+    const successMsg  = editing ? 'Recompensa actualizada exitosamente.' : 'Recompensa creada exitosamente.';
+    const fallbackErr = editing
+      ? 'No se pudo completar la operación. Intenta de nuevo.'
+      : 'No se pudo crear la recompensa. Intenta de nuevo.';
+
+    request$.subscribe({
+      next: (saved) => {
         this.isCreating.set(false);
         this.closeCreatePanel();
-        this.rewards.update(list => [reward, ...list]);
-        this.snackBar.open('Recompensa creada exitosamente.', 'Cerrar', {
-          duration: 4000,
-          panelClass: 'snack-success',
-        });
+        this.rewards.update(list =>
+          editing ? list.map(r => r.id === saved.id ? saved : r) : [saved, ...list]
+        );
+        this.snackBar.open(successMsg, 'Cerrar', { duration: 4000, panelClass: 'snack-success' });
       },
       error: (err) => {
-        this.createError.set(err.error?.message || 'No se pudo crear la recompensa. Intenta de nuevo.');
+        this.createError.set(err.error?.message || fallbackErr);
         this.isCreating.set(false);
       },
     });
   }
 
   private resetForm(): void {
+    this.editingReward.set(null);
     this.nameCtrl.reset('');
     this.descriptionCtrl.reset('');
     this.costCtrl.reset(null);
