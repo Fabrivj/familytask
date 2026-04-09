@@ -139,6 +139,53 @@ describe('StoreComponent — edit flow', () => {
     expect(payload).not.toHaveProperty('approvalRule');
   });
 
+  it('openDeleteModal sets rewardToDelete and shows modal', () => {
+    component.openDeleteModal(mockReward);
+
+    expect(component.rewardToDelete()).toEqual(mockReward);
+    expect(component.showDeleteModal()).toBe(true);
+  });
+
+  it('closeDeleteModal resets rewardToDelete and hides modal', () => {
+    component.openDeleteModal(mockReward);
+
+    component.closeDeleteModal();
+
+    expect(component.rewardToDelete()).toBeNull();
+    expect(component.showDeleteModal()).toBe(false);
+  });
+
+  it('confirmDelete removes reward from list and shows success snackbar', () => {
+    rewardService.delete.mockReturnValue(of({ message: 'Recompensa eliminada correctamente.' }));
+    component.rewards.set([mockReward]);
+    component.openDeleteModal(mockReward);
+
+    component.confirmDelete();
+
+    expect(rewardService.delete).toHaveBeenCalledWith(1);
+    expect(component.rewards().find(r => r.id === mockReward.id)).toBeUndefined();
+    expect(component.showDeleteModal()).toBe(false);
+    expect(component.rewardToDelete()).toBeNull();
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Recompensa eliminada exitosamente.', 'Cerrar', expect.any(Object)
+    );
+  });
+
+  it('confirmDelete closes modal and shows error message on service failure', () => {
+    rewardService.delete.mockReturnValue(throwError(() => ({
+      error: { message: 'No se pudo completar la operación. Intenta de nuevo.' },
+    })));
+    component.openDeleteModal(mockReward);
+
+    component.confirmDelete();
+
+    expect(component.showDeleteModal()).toBe(false);
+    expect(component.rewardToDelete()).toBeNull();
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'No se pudo completar la operación. Intenta de nuevo.', 'Cerrar', expect.any(Object)
+    );
+  });
+
   it('closeCreatePanel clears editingReward and createError after a failed update', () => {
     rewardService.update.mockReturnValue(throwError(() => ({
       error: { message: 'Error' },

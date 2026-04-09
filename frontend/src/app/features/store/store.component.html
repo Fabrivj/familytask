@@ -67,7 +67,8 @@
               <mat-icon aria-hidden="true">edit</mat-icon>
               EDITAR
             </button>
-            <button class="btn-icon-danger" type="button" aria-label="Eliminar recompensa" disabled>
+            <button class="btn-icon-danger" type="button" aria-label="Eliminar recompensa"
+                    (click)="openDeleteModal(reward)">
               <mat-icon aria-hidden="true">delete</mat-icon>
             </button>
           </div>
@@ -193,6 +194,18 @@
     </form>
   </aside>
 }
+
+
+<app-confirm-dialog
+  [open]="showDeleteModal()"
+  title="¿Eliminar recompensa?"
+  [message]="'¿Estás seguro de que quieres eliminar «' + (rewardToDelete()?.name ?? '') + '»? Esta acción no se puede deshacer.'"
+  variant="danger"
+  confirmLabel="ELIMINAR"
+  cancelLabel="CANCELAR"
+  (confirmed)="confirmDelete()"
+  (cancelled)="closeDeleteModal()"
+/>
 
 </main>
 </app-shell>

@@ -15,6 +15,7 @@ import { PermissionsService } from '../../core/services/permissions.service';
 import { RewardService } from '../../core/services/reward.service';
 import { RewardResponse } from '../../core/models/reward.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 const REWARD_ICONS = [
   'card_giftcard', 'local_pizza', 'sports_esports', 'movie',
@@ -24,7 +25,7 @@ const REWARD_ICONS = [
 
 @Component({
   selector: 'app-store',
-  imports: [ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, AppShellComponent],
+  imports: [ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, AppShellComponent, ConfirmDialogComponent],
   templateUrl: './store.component.html',
   styleUrl: './store.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,6 +51,9 @@ export class StoreComponent {
   readonly editingReward   = signal<RewardResponse | null>(null);
   readonly isEditMode      = computed(() => this.editingReward() !== null);
   readonly selectedIcon    = signal<string>('card_giftcard');
+
+  readonly showDeleteModal = signal(false);
+  readonly rewardToDelete  = signal<RewardResponse | null>(null);
 
   readonly nameCtrl = new FormControl('', {
     nonNullable: true,
@@ -142,6 +146,40 @@ export class StoreComponent {
 
   selectIcon(icon: string): void {
     this.selectedIcon.set(icon);
+  }
+
+  openDeleteModal(reward: RewardResponse): void {
+    this.rewardToDelete.set(reward);
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal.set(false);
+    this.rewardToDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const reward = this.rewardToDelete();
+    if (!reward) return;
+
+    this.rewardService.delete(reward.id).subscribe({
+      next: () => {
+        this.rewards.update(list => list.filter(r => r.id !== reward.id));
+        this.closeDeleteModal();
+        this.snackBar.open('Recompensa eliminada exitosamente.', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'snack-success',
+        });
+      },
+      error: (err) => {
+        this.closeDeleteModal();
+        this.snackBar.open(
+          err.error?.message || 'No se pudo completar la operación. Intenta de nuevo.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-error' },
+        );
+      },
+    });
   }
 
   submitCreate(): void {
