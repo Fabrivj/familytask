@@ -326,8 +326,11 @@ public class TaskService {
 
         boolean valid = switch (role) {
             case CHILD -> (current == TaskStatus.PENDING && next == TaskStatus.IN_PROGRESS) ||
-                          (current == TaskStatus.IN_PROGRESS && next == TaskStatus.IN_REVIEW);
-            case PARENT -> false; // el padre usa completeTask(), no updateTaskStatus()
+                          (current == TaskStatus.IN_PROGRESS && next == TaskStatus.IN_REVIEW) ||
+                          (current == TaskStatus.IN_REVIEW && next == TaskStatus.IN_PROGRESS) ||
+                          (current == TaskStatus.IN_REVIEW && next == TaskStatus.PENDING);
+            case PARENT -> (current == TaskStatus.IN_REVIEW && next == TaskStatus.IN_PROGRESS) ||
+                           (current == TaskStatus.IN_REVIEW && next == TaskStatus.PENDING);
         };
 
         if (!valid) {

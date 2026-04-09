@@ -407,10 +407,12 @@ export class TasksListComponent {
     const s = task.status;
     if (!s || s === 'COMPLETED') return [];
     if (this.isParent()) {
-      return s === 'IN_REVIEW' ? ['COMPLETED'] : [];
+      if (s === 'IN_REVIEW') return ['IN_PROGRESS', 'PENDING', 'COMPLETED'];
+      return [];
     } else {
       if (s === 'PENDING') return ['IN_PROGRESS'];
       if (s === 'IN_PROGRESS') return ['IN_REVIEW'];
+      if (s === 'IN_REVIEW') return ['IN_PROGRESS', 'PENDING'];
       return [];
     }
   }
