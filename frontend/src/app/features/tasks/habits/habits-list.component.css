@@ -9,14 +9,6 @@
   margin-bottom: 16px;
 }
 
-/* Inherits from global .btn-cta */
-.btn-new-habit {
-  width: auto;
-  padding: 12px 28px;
-  font-size: 14px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
 
 /* ── Filters ──────────────────────────────────────────────────────────── */
 .filters-bar {
@@ -29,7 +21,7 @@
 
 .filter-label {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.12em;
   color: var(--text-sub);
   opacity: 0.6;
@@ -125,7 +117,7 @@
 .empty-msg {
   color: var(--text-sub);
   font-family: 'Rajdhani', sans-serif;
-  font-size: 15px;
+  font-size: var(--text-subtitle);
   text-align: center;
   padding: 80px 0;
 }
@@ -148,7 +140,7 @@
 .habits-table th {
   padding: 14px 16px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: var(--text-micro);
   font-weight: 400;
   letter-spacing: 0.12em;
   color: var(--text-sub);
@@ -354,11 +346,7 @@
   .desktop-only { display: none; }
   .mobile-only  { display: flex; }
 
-  .btn-new-habit {
-    width: 100%;
-    text-align: center;
-    padding: 12px;
-  }
+  .btn-new-habit { width: 100%; }
 
   .search-wrap {
     margin-left: 0;
@@ -412,7 +400,7 @@
 
 .panel-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 20px;
+  font-size: var(--text-h2);
   font-weight: 700;
   color: var(--text);
   margin: 0;

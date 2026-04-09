@@ -1,17 +1,14 @@
 <app-shell>
 <main class="content">
 
-<div class="store-header">
-  <div class="store-header-left">
-    <span class="store-breadcrumb" aria-hidden="true">// GESTIÓN DE FAMILIA</span>
-    <h1 class="store-title">Tienda de Recompensas</h1>
-    <p class="store-subtitle" aria-live="polite" aria-atomic="true">
-      {{ rewards().length }} recompensa{{ rewards().length !== 1 ? 's' : '' }} activa{{ rewards().length !== 1 ? 's' : '' }}
-    </p>
-  </div>
+<div class="header-row">
+  <app-page-header
+    title="Tienda de Recompensas"
+    [subtitle]="rewardsSubtitle()"
+  />
   @if (isParent()) {
-    <button #newRewardBtn class="btn-cta btn-new-reward" type="button" (click)="openCreatePanel()">
-      <span aria-hidden="true">+</span> NUEVA RECOMPENSA
+    <button #newRewardBtn class="btn-pill btn-new-reward" type="button" (click)="openCreatePanel()">
+      <mat-icon aria-hidden="true">add</mat-icon> NUEVA RECOMPENSA
     </button>
   }
 </div>
@@ -24,17 +21,22 @@
     aria-selected="true"
     aria-controls="panel-catalogo"
     type="button"
-  >CATÁLOGO</button>
+  >
+    <mat-icon aria-hidden="true">storefront</mat-icon> CATÁLOGO
+  </button>
   <button
     id="tab-canjes"
     class="tab-btn"
     role="tab"
     aria-selected="false"
     aria-controls="panel-canjes"
+    aria-label="Gestión de canjes"
     aria-disabled="true"
     type="button"
     (click)="$event.preventDefault()"
-  >GESTIÓN DE CANJES</button>
+  >
+    <mat-icon aria-hidden="true">redeem</mat-icon> GESTIÓN DE CANJES
+  </button>
 </div>
 
 <div id="panel-catalogo" role="tabpanel" aria-labelledby="tab-catalogo">
@@ -56,45 +58,74 @@
   } @else {
     <div class="rewards-grid">
       @for (reward of rewards(); track reward.id) {
-        <article class="reward-card" [attr.aria-labelledby]="'reward-name-' + reward.id">
-          <div class="card-top">
-            <div class="card-icon">
-              <mat-icon aria-hidden="true">{{ reward.icon || 'card_giftcard' }}</mat-icon>
-            </div>
-            <div class="card-info">
-              <span class="card-name" [id]="'reward-name-' + reward.id">{{ reward.name }}</span>
-              @if (reward.description) {
-                <span class="card-desc">{{ reward.description }}</span>
-              }
-            </div>
+        <article class="reward-card"
+          [class.reward-card--premium]="isPremium(reward)"
+          [attr.aria-labelledby]="'reward-name-' + reward.id"
+          [style.background]="cardGradient(reward.icon)">
+
+          <!-- Hero emoji -->
+          <div class="card-hero" aria-hidden="true">{{ reward.icon || '🎁' }}</div>
+
+          <!-- Name + description -->
+          <div class="card-body">
+            <h3 class="card-name" [id]="'reward-name-' + reward.id">{{ reward.name }}</h3>
+            @if (reward.description) {
+              <p class="card-desc">{{ reward.description }}</p>
+            }
           </div>
 
-          <div class="card-badges">
+          <!-- Price row -->
+          <div class="card-price-row" role="group" aria-label="Precio y requisitos">
             <div class="card-cost">
-              <mat-icon class="coin-icon" aria-hidden="true">monetization_on</mat-icon>
+              <mat-icon class="badge-icon cost-icon" aria-hidden="true">monetization_on</mat-icon>
               <span class="sr-only">Costo en monedas:</span>
               <span class="cost-value">{{ reward.cost }}</span>
             </div>
-            <div class="card-level" [class.card-level-all]="!reward.minLevel">
-              <mat-icon aria-hidden="true">military_tech</mat-icon>
-              <span class="sr-only">Nivel requerido:</span>
-              <span>{{ reward.minLevel ? 'Niv. mín. ' + reward.minLevel : 'Todos los niveles' }}</span>
-            </div>
+            @if (reward.minLevel) {
+              <div class="card-level" [attr.aria-label]="'Nivel mínimo ' + reward.minLevel">
+                <span class="sr-only">Nivel mínimo requerido: {{ reward.minLevel }}</span>
+                <span class="level-stars" aria-hidden="true">
+                  @for (s of starsArray(reward.minLevel); track s) {
+                    <mat-icon class="star-icon">star</mat-icon>
+                  }
+                </span>
+              </div>
+            } @else {
+              <div class="card-level card-level-all">
+                <span>Todos los niveles</span>
+              </div>
+            }
           </div>
 
+          <!-- Child view: claim CTA -->
+          @if (!isParent()) {
+            <button class="btn-claim" type="button" [attr.aria-label]="'Reclamar ' + reward.name">
+              <mat-icon aria-hidden="true">rocket_launch</mat-icon> RECLAMAR
+            </button>
+          }
+
+          <!-- Parent view: management -->
           @if (isParent()) {
-            <div class="card-bottom">
-              <button class="btn-action btn-edit" type="button" [attr.aria-label]="'Editar ' + reward.name"
-                      (click)="openEditPanel(reward)">
-                <mat-icon aria-hidden="true">edit</mat-icon>
-                EDITAR
-              </button>
-              <button class="btn-icon-danger" type="button" [attr.aria-label]="'Eliminar ' + reward.name"
-                      (click)="openDeleteModal(reward)">
-                <mat-icon aria-hidden="true">delete</mat-icon>
-              </button>
+            <div class="card-bottom" role="group" [attr.aria-label]="'Gestión de ' + reward.name">
+              <div class="card-meta-row" aria-hidden="true">
+                <span class="card-active-badge"><span aria-hidden="true">●</span> ACTIVA</span>
+                <span class="card-claims"><span aria-hidden="true">📦</span> 0 canjes</span>
+              </div>
+              <div class="card-actions">
+                <button class="btn-action btn-edit" type="button"
+                  [attr.aria-label]="'Editar ' + reward.name"
+                  (click)="openEditPanel(reward)">
+                  <mat-icon aria-hidden="true">edit</mat-icon> EDITAR
+                </button>
+                <button class="btn-icon-danger" type="button"
+                  [attr.aria-label]="'Eliminar ' + reward.name"
+                  (click)="openDeleteModal(reward)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
             </div>
           }
+
         </article>
       }
     </div>
@@ -144,7 +175,7 @@
               [attr.aria-checked]="selectedIcon() === icon"
               [attr.tabindex]="selectedIcon() === icon ? 0 : -1"
               [attr.data-icon-index]="i"
-            ><mat-icon aria-hidden="true">{{ icon }}</mat-icon></button>
+            ><span aria-hidden="true">{{ icon }}</span></button>
           }
         </div>
       </fieldset>

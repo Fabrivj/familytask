@@ -25,6 +25,7 @@ import {
   SpaceResponse,
   SpaceType,
   UpdateSpaceRequest,
+  spaceTypeColor,
   spaceTypeIcon,
   spaceTypeLabel,
 } from '../../core/models/space.model';
@@ -67,12 +68,34 @@ export class HomeMapComponent {
   // ─── Helpers expuestos al template ───────────────────────────────────────
   readonly spaceTypeLabel = spaceTypeLabel;
   readonly spaceTypeIcon = spaceTypeIcon;
+  readonly spaceTypeColor = spaceTypeColor;
+
+  spaceIconBg(type: string): string {
+    const hex = spaceTypeColor(type).replace('#', '');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+    return `rgba(${r},${g},${b},0.12)`;
+  }
+
+  spaceIconBorder(type: string): string {
+    const hex = spaceTypeColor(type).replace('#', '');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+    return `rgba(${r},${g},${b},0.35)`;
+  }
+
+  spaceIconBorderDim(type: string): string {
+    const hex = spaceTypeColor(type).replace('#', '');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+    return `rgba(${r},${g},${b},0.18)`;
+  }
   readonly spaceTypeOptions = SPACE_TYPE_OPTIONS;
   readonly priorityLabel = priorityLabel;
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly spaces = signal<SpaceResponse[]>([]);
-  readonly tasks = signal<TaskResponse[]>([]);
+  readonly tasks  = signal<TaskResponse[]>([]);
+
+  /** Current user's name from session — used to highlight their assigned tasks. */
+  readonly currentUserName = computed(() => this.authService.session()?.name ?? null);
   readonly isLoading = signal(false);
   readonly error = signal('');
 
@@ -93,6 +116,14 @@ export class HomeMapComponent {
 
   tasksForSpace(spaceId: number): TaskResponse[] {
     return this.tasksBySpace().get(spaceId) ?? [];
+  }
+
+  /** Tasks visible to the current child — assigned to them OR unassigned. */
+  myTasksForSpace(spaceId: number): TaskResponse[] {
+    const myName = this.currentUserName();
+    return this.tasksForSpace(spaceId).filter(
+      t => t.assignedToId === null || t.assignedToName === myName
+    );
   }
 
   // ─── Delete space (two-modal flow) ──────────────────────────────────────
@@ -148,7 +179,7 @@ export class HomeMapComponent {
 
     forkJoin({
       spaces: this.spaceService.getSpaces(familyId),
-      tasks: this.taskService.getTasks(familyId),
+      tasks:  this.taskService.getTasks(familyId),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

@@ -6,6 +6,7 @@ import {
   computed,
   effect,
   inject,
+  output,
   signal,
 } from '@angular/core';
 import { LowerCasePipe } from '@angular/common';
@@ -82,6 +83,7 @@ export class TasksListComponent {
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly tasks = signal<TaskResponse[]>([]);
+  readonly countChange = output<number>();
   readonly members = signal<MemberItem[]>([]);
   readonly spaces = signal<SpaceResponse[]>([]);
   readonly isLoading = signal(false);
@@ -174,6 +176,7 @@ export class TasksListComponent {
     this.taskService.getTasks(familyId).subscribe({
       next: (tasks) => {
         this.tasks.set(tasks);
+        this.countChange.emit(tasks.length);
         this.isLoading.set(false);
       },
       error: (err) => {

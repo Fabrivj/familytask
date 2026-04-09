@@ -4,6 +4,7 @@ import {
   computed,
   effect,
   inject,
+  output,
   signal,
 } from '@angular/core';
 import { LowerCasePipe } from '@angular/common';
@@ -40,6 +41,7 @@ export class HabitsListComponent {
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly habits   = signal<HabitResponse[]>([]);
+  readonly countChange = output<number>();
   readonly members  = signal<MemberItem[]>([]);
   readonly childMembers = computed(() => this.members().filter(m => m.role === 'CHILD'));
 
@@ -78,6 +80,7 @@ export class HabitsListComponent {
     this.habitService.getHabits(familyId).subscribe({
       next: (habits) => {
         this.habits.set(habits);
+        this.countChange.emit(habits.length);
         this.isLoading.set(false);
       },
       error: (err) => {

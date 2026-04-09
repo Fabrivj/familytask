@@ -38,3 +38,16 @@ export function spaceTypeLabel(type: string): string {
 export function spaceTypeIcon(type: string): string {
   return SPACE_TYPE_OPTIONS.find(o => o.value === type)?.icon ?? 'home';
 }
+
+const SPACE_TYPE_COLORS: Record<string, string> = {
+  BAÑO:       '#00BFFF', // deep sky blue
+  COCINA:     '#FF6000', // vivid orange
+  SALA:       '#C040FF', // electric purple
+  HABITACION: '#FF2D78', // hot pink
+  PATIO:      '#00E676', // neon green
+  OTRO:       '#00EFFF', // app cyan
+};
+
+export function spaceTypeColor(type: string): string {
+  return SPACE_TYPE_COLORS[type] ?? '#00EFFF';
+}

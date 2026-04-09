@@ -23,6 +23,14 @@
   --font-mono:     'Share Tech Mono', monospace;
   --font-display:  'Press Start 2P', monospace;
 
+  /* ── Heading scale ── */
+  --text-h1:       28px;   /* page-level title (one per view)          */
+  --text-h2:       22px;   /* section / panel / modal title            */
+  --text-h3:       18px;   /* card / item title                        */
+  --text-subtitle: 13px;   /* subtitle, caption, placeholder, hint     */
+  --text-label:    11px;   /* field errors, small inline labels        */
+  --text-micro:    10px;   /* badges, table headers, tags, breadcrumbs */
+
   /* ── Spacing & Shape ── */
   --radius:    8px;
   --radius-lg: 16px;
