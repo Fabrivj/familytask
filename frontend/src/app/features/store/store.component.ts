@@ -1,0 +1,176 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from '../../core/services/auth.service';
+import { PermissionsService } from '../../core/services/permissions.service';
+import { RewardService } from '../../core/services/reward.service';
+import { RewardResponse } from '../../core/models/reward.model';
+import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
+
+const REWARD_ICONS = [
+  'card_giftcard', 'local_pizza', 'sports_esports', 'movie',
+  'icecream', 'flight', 'checkroom', 'celebration',
+  'attractions', 'cake', 'emoji_events', 'music_note',
+];
+
+@Component({
+  selector: 'app-store',
+  imports: [ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, AppShellComponent],
+  templateUrl: './store.component.html',
+  styleUrl: './store.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class StoreComponent {
+  private readonly authService = inject(AuthService);
+  private readonly rewardService = inject(RewardService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly permissionsService = inject(PermissionsService);
+
+  readonly familyId = computed(() => this.authService.activeFamily()?.familyId ?? null);
+  readonly isParent = this.permissionsService.isParent;
+
+  readonly availableIcons = REWARD_ICONS;
+
+  readonly rewards     = signal<RewardResponse[]>([]);
+  readonly isLoading   = signal(false);
+  readonly error       = signal('');
+
+  readonly showCreatePanel = signal(false);
+  readonly isCreating      = signal(false);
+  readonly createError     = signal('');
+  readonly selectedIcon    = signal<string>('card_giftcard');
+
+  readonly nameCtrl = new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(60),
+    ],
+  });
+  readonly descriptionCtrl = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.maxLength(500)],
+  });
+  readonly costCtrl = new FormControl<number | null>(null, {
+    validators: [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)],
+  });
+  readonly minLevelCtrl = new FormControl<number | null>(null, {
+    validators: [Validators.min(1), Validators.pattern(/^\d+$/)],
+  });
+
+  constructor() {
+    effect(() => {
+      const id = this.familyId();
+      if (id) this.loadData(id);
+    });
+  }
+
+  private loadData(familyId: number): void {
+    this.isLoading.set(true);
+    this.error.set('');
+
+    this.rewardService.getRewards(familyId).subscribe({
+      next: (rewards) => {
+        this.rewards.set(rewards);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Error al cargar las recompensas. Por favor, intente nuevamente.');
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  getNameError(): string {
+    const c = this.nameCtrl;
+    if (c.hasError('required')) return 'El nombre de la recompensa es obligatorio.';
+    if (c.hasError('minlength') || c.hasError('maxlength')) return 'El nombre debe tener entre 3 y 60 caracteres.';
+    return '';
+  }
+
+  getDescriptionError(): string {
+    if (this.descriptionCtrl.hasError('maxlength')) return 'Máximo 500 caracteres.';
+    return '';
+  }
+
+  getCostError(): string {
+    const c = this.costCtrl;
+    if (c.hasError('required')) return 'El costo debe ser mayor a 0.';
+    if (c.hasError('pattern') || c.hasError('min')) return 'El costo debe ser mayor a 0.';
+    return '';
+  }
+
+  getMinLevelError(): string {
+    const c = this.minLevelCtrl;
+    if (c.hasError('pattern') || c.hasError('min')) return 'El nivel debe ser un número mayor a 0.';
+    return '';
+  }
+
+  openCreatePanel(): void {
+    this.resetForm();
+    this.showCreatePanel.set(true);
+  }
+
+  closeCreatePanel(): void {
+    this.showCreatePanel.set(false);
+    this.createError.set('');
+  }
+
+  selectIcon(icon: string): void {
+    this.selectedIcon.set(icon);
+  }
+
+  submitCreate(): void {
+    [this.nameCtrl, this.costCtrl, this.descriptionCtrl, this.minLevelCtrl].forEach(c => c.markAllAsTouched());
+
+    if (this.nameCtrl.invalid || this.costCtrl.invalid || this.descriptionCtrl.invalid || this.minLevelCtrl.invalid) return;
+
+    const familyId = this.familyId();
+    if (!familyId) return;
+
+    this.isCreating.set(true);
+    this.createError.set('');
+
+    this.rewardService.create({
+      familyId,
+      name: this.nameCtrl.value.trim(),
+      description: this.descriptionCtrl.value.trim() || null,
+      icon: this.selectedIcon(),
+      cost: this.costCtrl.value!,
+      minLevel: this.minLevelCtrl.value ?? null,
+    }).subscribe({
+      next: (reward) => {
+        this.isCreating.set(false);
+        this.closeCreatePanel();
+        this.rewards.update(list => [reward, ...list]);
+        this.snackBar.open('Recompensa creada exitosamente.', 'Cerrar', {
+          duration: 4000,
+          panelClass: 'snack-success',
+        });
+      },
+      error: (err) => {
+        this.createError.set(err.error?.message || 'No se pudo crear la recompensa. Intenta de nuevo.');
+        this.isCreating.set(false);
+      },
+    });
+  }
+
+  private resetForm(): void {
+    this.nameCtrl.reset('');
+    this.descriptionCtrl.reset('');
+    this.costCtrl.reset(null);
+    this.minLevelCtrl.reset(null);
+    this.selectedIcon.set('card_giftcard');
+    this.createError.set('');
+  }
+}
