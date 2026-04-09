@@ -407,6 +407,19 @@
   min-height: 80px;
 }
 
+.icon-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.icon-fieldset legend {
+  padding: 0;
+  float: left;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
 .icon-grid {
   display: flex;
   flex-wrap: wrap;

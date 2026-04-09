@@ -3,13 +3,16 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { A11yModule } from '@angular/cdk/a11y';
 import { AuthService } from '../../core/services/auth.service';
 import { PermissionsService } from '../../core/services/permissions.service';
 import { RewardService } from '../../core/services/reward.service';
@@ -22,9 +25,24 @@ const REWARD_ICONS = [
   'attractions', 'cake', 'emoji_events', 'music_note',
 ];
 
+const ICON_LABELS: Record<string, string> = {
+  card_giftcard: 'Regalo',
+  local_pizza: 'Pizza',
+  sports_esports: 'Videojuegos',
+  movie: 'Película',
+  icecream: 'Helado',
+  flight: 'Viaje',
+  checkroom: 'Ropa',
+  celebration: 'Celebración',
+  attractions: 'Parque de atracciones',
+  cake: 'Pastel',
+  emoji_events: 'Trofeo',
+  music_note: 'Música',
+};
+
 @Component({
   selector: 'app-store',
-  imports: [ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, AppShellComponent],
+  imports: [ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, AppShellComponent, A11yModule],
   templateUrl: './store.component.html',
   styleUrl: './store.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,10 +53,13 @@ export class StoreComponent {
   private readonly snackBar = inject(MatSnackBar);
   private readonly permissionsService = inject(PermissionsService);
 
+  @ViewChild('newRewardBtn') newRewardBtn!: ElementRef<HTMLButtonElement>;
+
   readonly familyId = computed(() => this.authService.activeFamily()?.familyId ?? null);
   readonly isParent = this.permissionsService.isParent;
 
   readonly availableIcons = REWARD_ICONS;
+  readonly iconLabels = ICON_LABELS;
 
   readonly rewards     = signal<RewardResponse[]>([]);
   readonly isLoading   = signal(false);
@@ -119,15 +140,40 @@ export class StoreComponent {
   openCreatePanel(): void {
     this.resetForm();
     this.showCreatePanel.set(true);
+    // cdkTrapFocusAutoCapture handles moving focus into the dialog
   }
 
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+    // Return focus to the trigger button
+    setTimeout(() => this.newRewardBtn?.nativeElement?.focus());
   }
 
   selectIcon(icon: string): void {
     this.selectedIcon.set(icon);
+  }
+
+  /** Roving tabindex: arrow keys move focus within the icon radio group. */
+  onIconKeydown(event: KeyboardEvent): void {
+    const buttons = (event.currentTarget as HTMLElement)
+      .querySelectorAll<HTMLButtonElement>('button[data-icon-index]');
+    const current = event.target as HTMLButtonElement;
+    const idx = parseInt(current.dataset['iconIndex'] ?? '0', 10);
+
+    let next = -1;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      next = (idx + 1) % buttons.length;
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      next = (idx - 1 + buttons.length) % buttons.length;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const target = buttons[next];
+    this.selectIcon(target.querySelector('mat-icon')?.textContent?.trim() ?? '');
+    target.focus();
   }
 
   submitCreate(): void {
