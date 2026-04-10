@@ -1,0 +1,228 @@
+.content {
+  padding: 32px 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Filters ────────────────────────────────────────────── */
+
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1rem 1.25rem;
+  background: var(--surface, #1a1a2e);
+  border: 1px solid var(--border, rgba(255,255,255,.08));
+  border-radius: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 155px;
+}
+
+.filter-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-sub, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.filter-select,
+.filter-input {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 0.5rem;
+  background: var(--bg, #0f0f1a);
+  color: var(--text, #e2e2e2);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  border-color: var(--primary, #7c3aed);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.btn-apply {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.45rem 1rem;
+  background: var(--primary, #7c3aed);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background 0.15s;
+}
+
+.btn-apply:hover { background: var(--primary-dark, #5b21b6); }
+
+.btn-clear {
+  padding: 0.45rem 0.9rem;
+  background: transparent;
+  border: 1px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 0.5rem;
+  color: var(--text-sub, #888);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-clear:hover { background: var(--surface, #1a1a2e); }
+
+/* ── States ─────────────────────────────────────────────── */
+
+.state-center,
+.state-error,
+.state-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3.5rem 1rem;
+  color: var(--text-sub, #888);
+  text-align: center;
+  font-size: 0.9375rem;
+}
+
+.state-error {
+  color: var(--error, #f87171);
+}
+
+/* ── List ───────────────────────────────────────────────── */
+
+.redemption-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.redemption-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface, #1a1a2e);
+  border: 1px solid var(--border, rgba(255,255,255,.08));
+  border-radius: 0.75rem;
+  transition: border-color 0.15s;
+}
+
+.redemption-card:hover {
+  border-color: var(--primary, #7c3aed);
+}
+
+.redemption-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.redemption-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.redemption-name {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--text, #e2e2e2);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.redemption-member,
+.redemption-date {
+  font-size: 0.8125rem;
+  color: var(--text-sub, #888);
+  margin: 0;
+  display: block;
+}
+
+.redemption-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.redemption-cost {
+  font-weight: 700;
+  color: var(--primary, #7c3aed);
+  font-size: 0.9375rem;
+  white-space: nowrap;
+}
+
+.redemption-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge-pending {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fbbf24;
+}
+
+.badge-delivered {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .content { padding: 20px 16px; }
+
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group { min-width: unset; }
+
+  .filter-actions { flex-direction: column; }
+
+  .btn-apply,
+  .btn-clear { width: 100%; justify-content: center; }
+
+  .redemption-card { flex-wrap: wrap; }
+
+  .redemption-right {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+}
