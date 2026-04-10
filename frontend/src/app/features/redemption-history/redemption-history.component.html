@@ -107,7 +107,10 @@
             </span>
             <div class="redemption-info">
               <p class="redemption-name">{{ item.rewardName }}</p>
-              <p class="redemption-member">{{ item.redeemedByName }}</p>
+              <div class="redemption-member">
+                <app-user-avatar [name]="item.redeemedByName" [size]="20" />
+                <span>{{ item.redeemedByName }}</span>
+              </div>
               <time class="redemption-date" [attr.datetime]="item.redeemedAt">
                 {{ item.redeemedAt | date:'dd/MM/yyyy' }}
               </time>

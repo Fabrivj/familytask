@@ -17,6 +17,7 @@ import { RedemptionHistoryResponse, RedemptionStatus } from '../../core/models/r
 import { MemberItem } from '../../core/models/member.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { UserAvatarComponent } from '../../shared/components/user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-redemption-history',
@@ -27,6 +28,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
     MatProgressSpinnerModule,
     AppShellComponent,
     PageHeaderComponent,
+    UserAvatarComponent,
   ],
   templateUrl: './redemption-history.component.html',
   styleUrl: './redemption-history.component.css',
