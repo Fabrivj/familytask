@@ -1,17 +1,14 @@
 <app-shell>
   <main class="content">
 
-    <div class="page-header-row">
-      <app-page-header
-        tag="// MIEMBROS"
-        title="Miembros"
-        [subtitle]="pageSubtitle()"
-      />
-      <button class="btn-invite" type="button" (click)="inviteMember()">
-        <mat-icon aria-hidden="true">add</mat-icon>
-        INVITAR MIEMBRO
+    <app-page-header
+      title="Miembros"
+      [subtitle]="pageSubtitle()"
+    >
+      <button class="btn-icon-invite" type="button" (click)="inviteMember()" aria-label="Invitar miembro">
+        <mat-icon>person_add</mat-icon>
       </button>
-    </div>
+    </app-page-header>
 
     @if (isLoading()) {
       <div class="state-center" role="status" aria-live="polite">

@@ -4,10 +4,12 @@ import {
   computed,
   effect,
   inject,
+  output,
   signal,
 } from '@angular/core';
 import { LowerCasePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { A11yModule } from '@angular/cdk/a11y';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -22,7 +24,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 
 @Component({
   selector: 'app-habits-list',
-  imports: [LowerCasePipe, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, UserAvatarComponent, ConfirmDialogComponent],
+  imports: [A11yModule, LowerCasePipe, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, UserAvatarComponent, ConfirmDialogComponent],
   templateUrl: './habits-list.component.html',
   styleUrl: './habits-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +41,7 @@ export class HabitsListComponent {
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly habits   = signal<HabitResponse[]>([]);
+  readonly countChange = output<number>();
   readonly members  = signal<MemberItem[]>([]);
   readonly childMembers = computed(() => this.members().filter(m => m.role === 'CHILD'));
 
@@ -77,6 +80,7 @@ export class HabitsListComponent {
     this.habitService.getHabits(familyId).subscribe({
       next: (habits) => {
         this.habits.set(habits);
+        this.countChange.emit(habits.length);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -118,6 +122,17 @@ export class HabitsListComponent {
     return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0];
   }
 
+  frequencyIcon(f: string): string {
+    const icons: Record<string, string> = {
+      DAILY: 'wb_sunny',
+      WEEKDAYS: 'view_week',
+      WEEKENDS: 'weekend',
+      WEEKLY: 'date_range',
+      MONTHLY: 'calendar_month',
+    };
+    return icons[f] ?? 'repeat';
+  }
+
   frequencyLabel(f: string): string {
     const labels: Record<string, string> = {
       DAILY: 'Diario',
@@ -157,7 +172,10 @@ export class HabitsListComponent {
   }
 
   // ─── Panel de creación ────────────────────────────────────────────────────
+  private _panelTrigger: HTMLElement | null = null;
+
   openCreatePanel(): void {
+    this._panelTrigger = document.activeElement as HTMLElement;
     this.resetForm();
     this.showCreatePanel.set(true);
   }
@@ -165,6 +183,8 @@ export class HabitsListComponent {
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+    this._panelTrigger?.focus();
+    this._panelTrigger = null;
   }
 
   selectFrequency(f: HabitFrequency): void {
@@ -234,7 +254,10 @@ export class HabitsListComponent {
   }
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────
+  private _deleteTrigger: HTMLElement | null = null;
+
   openDeleteModal(habit: HabitResponse): void {
+    this._deleteTrigger = document.activeElement as HTMLElement;
     this.habitToDelete.set(habit);
     this.showDeleteModal.set(true);
   }
@@ -242,6 +265,8 @@ export class HabitsListComponent {
   closeDeleteModal(): void {
     this.showDeleteModal.set(false);
     this.habitToDelete.set(null);
+    this._deleteTrigger?.focus();
+    this._deleteTrigger = null;
   }
 
   confirmDelete(): void {

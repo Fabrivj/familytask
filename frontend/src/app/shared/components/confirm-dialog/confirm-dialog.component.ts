@@ -7,11 +7,12 @@ import {
   effect,
   viewChild,
 } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-confirm-dialog',
-  imports: [MatIconModule],
+  imports: [A11yModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(keydown.escape)': 'onCancel()',
@@ -20,7 +21,8 @@ import { MatIconModule } from '@angular/material/icon';
     @if (open()) {
       <div class="backdrop" (click)="onCancel()"></div>
       <div class="dialog" role="alertdialog" aria-modal="true"
-        aria-labelledby="confirm-title" aria-describedby="confirm-msg">
+        aria-labelledby="confirm-title" aria-describedby="confirm-msg"
+        cdkTrapFocus>
         @if (variant() === 'danger') {
           <mat-icon class="warning-icon" aria-hidden="true">warning</mat-icon>
         }

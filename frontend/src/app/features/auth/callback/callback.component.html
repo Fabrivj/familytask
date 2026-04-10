@@ -16,17 +16,19 @@
   }
 
   @if (state() === 'error') {
-    <app-neon-card>
-      <ng-container card-header>
-        <p class="tag tag-error">// ERROR</p>
-        <span class="error-icon" aria-hidden="true"><mat-icon>warning</mat-icon></span>
-        <h1 class="card-title">Algo salió mal</h1>
-        <p class="card-sub">{{ errorMessage() }}</p>
-      </ng-container>
-      <button card-cta class="btn-cta" type="button" (click)="goBackToLogin()">
-        Volver al inicio
-      </button>
-    </app-neon-card>
+    <div role="alert">
+      <app-neon-card>
+        <ng-container card-header>
+          <p class="tag tag-error">// ERROR</p>
+          <span class="error-icon" aria-hidden="true"><mat-icon>warning</mat-icon></span>
+          <h1 class="card-title">Algo salió mal</h1>
+          <p class="card-sub">{{ errorMessage() }}</p>
+        </ng-container>
+        <button card-cta class="btn-cta" type="button" (click)="goBackToLogin()">
+          Volver al inicio
+        </button>
+      </app-neon-card>
+    </div>
   }
 
 </app-page-layout>

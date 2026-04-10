@@ -1,3 +1,5 @@
+<a href="#main-content" class="a11y-skip-link">Saltar al contenido principal</a>
+
 <app-page-layout variant="full">
   <div class="app-body">
     <app-sidebar />
@@ -13,7 +15,9 @@
         (logout)="onLogout()"
       />
 
-      <ng-content />
+      <div id="main-content" tabindex="-1">
+        <ng-content />
+      </div>
     </div>
   </div>
 </app-page-layout>

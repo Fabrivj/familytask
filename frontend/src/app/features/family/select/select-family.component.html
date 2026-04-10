@@ -60,6 +60,7 @@
             class="btn-enter"
             [class.btn-enter-active]="isSelected(familia.familyId)"
             type="button"
+            [attr.aria-label]="'Entrar a ' + familia.familyName"
             (click)="$event.stopPropagation(); select(familia.familyId)"
           >
             <mat-icon aria-hidden="true">arrow_forward</mat-icon>

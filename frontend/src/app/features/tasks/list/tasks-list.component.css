@@ -9,14 +9,6 @@
   margin-bottom: 16px;
 }
 
-/* Inherits from global .btn-cta */
-.btn-new-task {
-  width: auto;
-  padding: 12px 28px;
-  font-size: 14px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
 
 
 /* ── Filters ──────────────────────────────────────────────────────────── */
@@ -30,7 +22,7 @@
 
 .filter-label {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.12em;
   color: var(--text-sub);
   opacity: 0.6;
@@ -59,6 +51,11 @@
 .filter-chip:hover {
   border-color: rgba(var(--border-rgb), 0.4);
   color: var(--text);
+}
+
+.filter-chip:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
 }
 
 .filter-active {
@@ -190,9 +187,10 @@
   flex-shrink: 0;
 }
 
-.priority-dot-high   { background: var(--error);   box-shadow: 0 0 6px rgba(var(--error-rgb),   0.5); }
+/* Shape + color: distinguishable without color vision (▲ high, ● medium, ▽ low) */
+.priority-dot-high   { background: var(--error);   clip-path: polygon(50% 0%, 0% 100%, 100% 100%); border-radius: 0; }
 .priority-dot-medium { background: var(--warning); box-shadow: 0 0 6px rgba(var(--warning-rgb), 0.5); }
-.priority-dot-low    { background: var(--success); box-shadow: 0 0 6px rgba(var(--success-rgb), 0.5); }
+.priority-dot-low    { background: var(--success); clip-path: polygon(0% 0%, 100% 0%, 50% 100%); border-radius: 0; }
 
 /* ── State messages ───────────────────────────────────────────────────── */
 .state-center {
@@ -206,7 +204,7 @@
 .empty-msg {
   color: var(--text-sub);
   font-family: 'Rajdhani', sans-serif;
-  font-size: 15px;
+  font-size: var(--text-subtitle);
   text-align: center;
   padding: 80px 0;
 }
@@ -229,7 +227,7 @@
 .tasks-table th {
   padding: 14px 16px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: var(--text-micro);
   font-weight: 400;
   letter-spacing: 0.12em;
   color: var(--text-sub);
@@ -378,6 +376,7 @@
 }
 
 .btn-icon:hover:not(:disabled) { border-color: var(--border); color: var(--border); }
+.btn-icon:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 .btn-icon:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-icon-danger:hover:not(:disabled) { border-color: var(--error); color: var(--error); }
 
@@ -467,11 +466,7 @@
   .desktop-only { display: none; }
   .mobile-only  { display: flex; }
 
-  .btn-new-task {
-    width: 100%;
-    text-align: center;
-    padding: 12px;
-  }
+  .btn-new-task { width: 100%; }
 
   .search-wrap {
     margin-left: 0;
@@ -535,7 +530,7 @@
 
 .panel-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 20px;
+  font-size: var(--text-h2);
   font-weight: 700;
   color: var(--text);
   margin: 0;
@@ -567,6 +562,7 @@
 }
 
 .btn-close:hover { color: var(--text); }
+.btn-close:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
 .btn-close mat-icon {
   font-size: 18px;
@@ -652,10 +648,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .priority-btn:hover { border-color: rgba(var(--border-rgb), 0.35); }
+.priority-btn:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
-.priority-btn-active-high   { border-color: var(--error);   color: var(--error);   background: rgba(var(--error-rgb),   0.07); }
-.priority-btn-active-medium { border-color: var(--warning); color: var(--warning); background: rgba(var(--warning-rgb), 0.07); }
-.priority-btn-active-low    { border-color: var(--success); color: var(--success); background: rgba(var(--success-rgb), 0.07); }
+/* Thicker border + check icon in HTML make selection clear without relying on color alone */
+.priority-btn-active-high   { border-width: 2.5px; border-color: var(--error);   color: var(--error);   background: rgba(var(--error-rgb),   0.07); }
+.priority-btn-active-medium { border-width: 2.5px; border-color: var(--warning); color: var(--warning); background: rgba(var(--warning-rgb), 0.07); }
+.priority-btn-active-low    { border-width: 2.5px; border-color: var(--success); color: var(--success); background: rgba(var(--success-rgb), 0.07); }
+
+.priority-check {
+  font-size: 13px !important;
+  width: 13px !important;
+  height: 13px !important;
+  line-height: 13px !important;
+  margin-left: auto;
+}
 
 /* ── Panel space dropdown (form field style) ──────────────────────────── */
 .panel-space-dropdown-wrap {
@@ -675,6 +681,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .panel-space-trigger.has-value {
   color: var(--text);
+}
+
+.panel-space-trigger:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
 }
 
 .panel-space-placeholder {
@@ -766,6 +777,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .assignee-chip:hover { border-color: rgba(var(--border-rgb), 0.35); }
+.assignee-chip:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
 .assignee-active {
   border-color: var(--text);
@@ -774,6 +786,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* ── Create error (uses global .error-msg base, smaller variant) ──── */
+.create-error-msg::before { content: '⚠ '; }
 .create-error-msg {
   color: var(--error);
   font-family: 'Rajdhani', sans-serif;
@@ -838,7 +851,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .modal-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 22px;
+  font-size: var(--text-h2);
   font-weight: 700;
   color: var(--text);
   margin: 0 0 16px;
@@ -901,6 +914,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   filter: brightness(1.15);
 }
 
+.status-btn:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
+}
+
+.status-dropdown-item:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: -2px;
+  border-radius: 7px;
+}
+
 .status-btn-pending {
   background: rgba(var(--warning-rgb), 0.12);
   border-color: rgba(var(--warning-rgb), 0.35);
@@ -930,6 +954,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   width: 14px !important;
   height: 14px !important;
   opacity: 0.7;
+}
+
+.status-icon {
+  font-size: 13px !important;
+  width: 13px !important;
+  height: 13px !important;
+  line-height: 13px !important;
+  flex-shrink: 0;
 }
 
 .status-dropdown-menu {
@@ -974,6 +1006,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .status-badge {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 2px 10px;
   border-radius: 20px;
   border: 1.5px solid transparent;

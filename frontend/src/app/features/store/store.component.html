@@ -1,115 +1,187 @@
 <app-shell>
 <main class="content">
 
-<div class="store-header">
-  <div class="store-header-left">
-    <span class="store-breadcrumb">// GESTIÓN DE FAMILIA</span>
-    <h1 class="store-title">Tienda de Recompensas</h1>
-    <p class="store-subtitle">{{ rewards().length }} recompensa{{ rewards().length !== 1 ? 's' : '' }} activa{{ rewards().length !== 1 ? 's' : '' }}</p>
-  </div>
+<div class="header-row">
+  <app-page-header
+    title="Tienda de Recompensas"
+    [subtitle]="rewardsSubtitle()"
+  />
   @if (isParent()) {
-    <button class="btn-cta btn-new-reward" type="button" (click)="openCreatePanel()">
-      + NUEVA RECOMPENSA
+    <button #newRewardBtn class="btn-pill btn-new-reward" type="button" (click)="openCreatePanel()">
+      <mat-icon aria-hidden="true">add</mat-icon> NUEVA RECOMPENSA
     </button>
   }
 </div>
 
-<div class="tabs-bar" role="tablist">
-  <button class="tab-btn tab-active" role="tab" aria-selected="true" type="button">CATÁLOGO</button>
-  <button class="tab-btn" role="tab" aria-selected="false" type="button" disabled>GESTIÓN DE CANJES</button>
+<div class="tabs-bar" role="tablist" aria-label="Secciones de la tienda">
+  <button
+    id="tab-catalogo"
+    class="tab-btn tab-active"
+    role="tab"
+    aria-selected="true"
+    aria-controls="panel-catalogo"
+    type="button"
+  >
+    <mat-icon aria-hidden="true">storefront</mat-icon> CATÁLOGO
+  </button>
+  <button
+    id="tab-canjes"
+    class="tab-btn"
+    role="tab"
+    aria-selected="false"
+    aria-controls="panel-canjes"
+    aria-label="Gestión de canjes"
+    aria-disabled="true"
+    type="button"
+    (click)="$event.preventDefault()"
+  >
+    <mat-icon aria-hidden="true">redeem</mat-icon> GESTIÓN DE CANJES
+  </button>
 </div>
 
-@if (isLoading()) {
-  <div class="state-center" role="status" aria-label="Cargando">
-    <mat-spinner diameter="36" />
-  </div>
-} @else if (error()) {
-  <p class="error-msg" role="alert">{{ error() }}</p>
-} @else if (rewards().length === 0) {
-  <div class="empty-state">
-    <mat-icon class="empty-icon" aria-hidden="true">emoji_events</mat-icon>
-    <p class="empty-msg">No hay recompensas en la tienda.</p>
-    @if (isParent()) {
-      <p class="empty-hint">Crea recompensas para motivar a los integrantes del grupo familiar.</p>
-    }
-  </div>
-} @else {
-  <div class="rewards-grid">
-    @for (reward of rewards(); track reward.id) {
-      <article class="reward-card">
-        <div class="card-top">
-          <div class="card-icon">
-            <mat-icon aria-hidden="true">{{ reward.icon || 'card_giftcard' }}</mat-icon>
-          </div>
-          <div class="card-info">
-            <span class="card-name">{{ reward.name }}</span>
+<div id="panel-catalogo" role="tabpanel" aria-labelledby="tab-catalogo">
+
+  @if (isLoading()) {
+    <div class="state-center" role="status" aria-label="Cargando recompensas">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (error()) {
+    <p class="error-msg" role="alert">{{ error() }}</p>
+  } @else if (rewards().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon" aria-hidden="true">emoji_events</mat-icon>
+      <p class="empty-msg">No hay recompensas en la tienda.</p>
+      @if (isParent()) {
+        <p class="empty-hint">Crea recompensas para motivar a los integrantes del grupo familiar.</p>
+      }
+    </div>
+  } @else {
+    <div class="rewards-grid">
+      @for (reward of rewards(); track reward.id) {
+        <article class="reward-card"
+          [class.reward-card--premium]="isPremium(reward)"
+          [attr.aria-labelledby]="'reward-name-' + reward.id"
+          [style.background]="cardGradient(reward.icon)">
+
+          <!-- Hero emoji -->
+          <div class="card-hero" aria-hidden="true">{{ reward.icon || '🎁' }}</div>
+
+          <!-- Name + description -->
+          <div class="card-body">
+            <h3 class="card-name" [id]="'reward-name-' + reward.id">{{ reward.name }}</h3>
             @if (reward.description) {
-              <span class="card-desc">{{ reward.description }}</span>
+              <p class="card-desc">{{ reward.description }}</p>
             }
           </div>
-        </div>
 
-        <div class="card-badges">
-          <div class="card-cost">
-            <mat-icon class="coin-icon" aria-hidden="true">monetization_on</mat-icon>
-            <span class="cost-value">{{ reward.cost }}</span>
+          <!-- Price row -->
+          <div class="card-price-row" role="group" aria-label="Precio y requisitos">
+            <div class="card-cost">
+              <mat-icon class="badge-icon cost-icon" aria-hidden="true">monetization_on</mat-icon>
+              <span class="sr-only">Costo en monedas:</span>
+              <span class="cost-value">{{ reward.cost }}</span>
+            </div>
+            @if (reward.minLevel) {
+              <div class="card-level" [attr.aria-label]="'Nivel mínimo ' + reward.minLevel">
+                <span class="sr-only">Nivel mínimo requerido: {{ reward.minLevel }}</span>
+                <span class="level-stars" aria-hidden="true">
+                  @for (s of starsArray(reward.minLevel); track s) {
+                    <mat-icon class="star-icon">star</mat-icon>
+                  }
+                </span>
+              </div>
+            } @else {
+              <div class="card-level card-level-all">
+                <span>Todos los niveles</span>
+              </div>
+            }
           </div>
-          <div class="card-level" [class.card-level-all]="!reward.minLevel">
-            <mat-icon aria-hidden="true">military_tech</mat-icon>
-            <span>{{ reward.minLevel ? 'Niv. mín. ' + reward.minLevel : 'Todos los niveles' }}</span>
-          </div>
-        </div>
 
-        @if (isParent()) {
-          <div class="card-bottom">
-            <button class="btn-action btn-edit" type="button" aria-label="Editar recompensa"
-                    (click)="openEditPanel(reward)">
-              <mat-icon aria-hidden="true">edit</mat-icon>
-              EDITAR
+          <!-- Child view: claim CTA -->
+          @if (!isParent()) {
+            <button class="btn-claim" type="button" [attr.aria-label]="'Reclamar ' + reward.name">
+              <mat-icon aria-hidden="true">rocket_launch</mat-icon> RECLAMAR
             </button>
-            <button class="btn-icon-danger" type="button" aria-label="Eliminar recompensa"
-                    (click)="openDeleteModal(reward)">
-              <mat-icon aria-hidden="true">delete</mat-icon>
-            </button>
-          </div>
-        }
-      </article>
-    }
-  </div>
-}
+          }
+
+          <!-- Parent view: management -->
+          @if (isParent()) {
+            <div class="card-bottom" role="group" [attr.aria-label]="'Gestión de ' + reward.name">
+              <div class="card-meta-row" aria-hidden="true">
+                <span class="card-active-badge"><span aria-hidden="true">●</span> ACTIVA</span>
+                <span class="card-claims"><span aria-hidden="true">📦</span> 0 canjes</span>
+              </div>
+              <div class="card-actions">
+                <button class="btn-action btn-edit" type="button"
+                  [attr.aria-label]="'Editar ' + reward.name"
+                  (click)="openEditPanel(reward)">
+                  <mat-icon aria-hidden="true">edit</mat-icon> EDITAR
+                </button>
+                <button class="btn-icon-danger" type="button"
+                  [attr.aria-label]="'Eliminar ' + reward.name"
+                  (click)="openDeleteModal(reward)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+
+        </article>
+      }
+    </div>
+  }
+
+</div>
+
+<div id="panel-canjes" role="tabpanel" aria-labelledby="tab-canjes" hidden></div>
 
 @if (showCreatePanel()) {
   <div class="overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog"
-         [attr.aria-label]="isEditMode() ? 'Editar recompensa' : 'Crear nueva recompensa'">
+  <aside
+    class="create-panel"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="isEditMode() ? 'Editar recompensa' : 'Nueva recompensa'"
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+    (keydown.escape)="closeCreatePanel()"
+  >
     <div class="panel-header">
       <h2 class="panel-title">{{ isEditMode() ? 'Editar recompensa' : 'Nueva recompensa' }}</h2>
-      <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
+      <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar panel">
         <mat-icon aria-hidden="true">close</mat-icon>
       </button>
     </div>
 
     <form class="panel-body" (submit)="$event.preventDefault(); submitCreate()" novalidate>
 
-      <div class="field">
-        <label class="field-label">ÍCONO</label>
-        <div class="icon-grid">
-          @for (icon of availableIcons; track icon) {
+      <fieldset class="field icon-fieldset">
+        <legend class="field-label">ÍCONO</legend>
+        <div
+          class="icon-grid"
+          role="radiogroup"
+          aria-label="Seleccionar ícono"
+          (keydown)="onIconKeydown($event)"
+        >
+          @for (icon of availableIcons; track icon; let i = $index) {
             <button
               class="icon-btn"
               [class.icon-btn-active]="selectedIcon() === icon"
               type="button"
               (click)="selectIcon(icon)"
-              [attr.aria-label]="icon"
-              [attr.aria-pressed]="selectedIcon() === icon"
-            ><mat-icon aria-hidden="true">{{ icon }}</mat-icon></button>
+              [attr.aria-label]="iconLabels[icon]"
+              role="radio"
+              [attr.aria-checked]="selectedIcon() === icon"
+              [attr.tabindex]="selectedIcon() === icon ? 0 : -1"
+              [attr.data-icon-index]="i"
+            ><span aria-hidden="true">{{ icon }}</span></button>
           }
         </div>
-      </div>
+      </fieldset>
 
       <div class="field">
-        <label class="field-label" for="r-name">NOMBRE <span class="req">*</span></label>
+        <label class="field-label" for="r-name">NOMBRE <span class="req" aria-hidden="true">*</span></label>
         <input
           id="r-name"
           class="field-input"
@@ -118,14 +190,17 @@
           [formControl]="nameCtrl"
           placeholder="Ej. Pizza el viernes"
           autocomplete="off"
+          required
+          aria-required="true"
+          [attr.aria-describedby]="nameCtrl.invalid && nameCtrl.touched ? 'r-name-error' : null"
         />
         @if (nameCtrl.invalid && nameCtrl.touched) {
-          <span class="field-error" role="alert">{{ getNameError() }}</span>
+          <span id="r-name-error" class="field-error" role="alert">{{ getNameError() }}</span>
         }
       </div>
 
       <div class="field">
-        <label class="field-label" for="r-desc">DESCRIPCIÓN <span class="optional">(OPCIONAL)</span></label>
+        <label class="field-label" for="r-desc">DESCRIPCIÓN <span class="optional" aria-hidden="true">(OPCIONAL)</span></label>
         <textarea
           id="r-desc"
           class="field-input field-textarea"
@@ -133,15 +208,16 @@
           [formControl]="descriptionCtrl"
           rows="3"
           placeholder="Describe qué incluye esta recompensa..."
+          [attr.aria-describedby]="descriptionCtrl.invalid && descriptionCtrl.touched ? 'r-desc-error' : null"
         ></textarea>
         @if (descriptionCtrl.invalid && descriptionCtrl.touched) {
-          <span class="field-error" role="alert">{{ getDescriptionError() }}</span>
+          <span id="r-desc-error" class="field-error" role="alert">{{ getDescriptionError() }}</span>
         }
       </div>
 
       <div class="field-row">
         <div class="field">
-          <label class="field-label" for="r-cost">COSTO EN MONEDAS <span class="req">*</span></label>
+          <label class="field-label" for="r-cost">COSTO EN MONEDAS <span class="req" aria-hidden="true">*</span></label>
           <input
             id="r-cost"
             class="field-input"
@@ -151,13 +227,16 @@
             min="1"
             step="1"
             placeholder="Ej. 100"
+            required
+            aria-required="true"
+            [attr.aria-describedby]="costCtrl.invalid && costCtrl.touched ? 'r-cost-error' : null"
           />
           @if (costCtrl.invalid && costCtrl.touched) {
-            <span class="field-error" role="alert">{{ getCostError() }}</span>
+            <span id="r-cost-error" class="field-error" role="alert">{{ getCostError() }}</span>
           }
         </div>
         <div class="field">
-          <label class="field-label" for="r-level">NIVEL MÍNIMO <span class="optional">(OPCIONAL)</span></label>
+          <label class="field-label" for="r-level">NIVEL MÍNIMO <span class="optional" aria-hidden="true">(OPCIONAL)</span></label>
           <input
             id="r-level"
             class="field-input"
@@ -167,10 +246,11 @@
             min="1"
             step="1"
             placeholder="Ej. 3"
+            aria-describedby="r-level-hint{{ minLevelCtrl.invalid && minLevelCtrl.touched ? ' r-level-error' : '' }}"
           />
-          <span class="field-hint">Sin nivel = disponible para todos</span>
+          <span id="r-level-hint" class="field-hint">Sin nivel = disponible para todos</span>
           @if (minLevelCtrl.invalid && minLevelCtrl.touched) {
-            <span class="field-error" role="alert">{{ getMinLevelError() }}</span>
+            <span id="r-level-error" class="field-error" role="alert">{{ getMinLevelError() }}</span>
           }
         </div>
       </div>
@@ -181,9 +261,9 @@
 
       <div class="panel-actions">
         <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
-        <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
+        <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()" [attr.aria-busy]="isCreating()">
           @if (isCreating()) {
-            {{ isEditMode() ? 'Guardando...' : 'Creando...' }}
+            <span aria-live="polite">{{ isEditMode() ? 'Guardando...' : 'Creando...' }}</span>
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
             {{ isEditMode() ? 'GUARDAR CAMBIOS' : 'CREAR RECOMPENSA' }}

@@ -4,12 +4,11 @@
     <!-- Header -->
     <div class="header-row">
       <app-page-header
-        tag="// MAPA DEL HOGAR"
         title="Mapa del Hogar"
         [subtitle]="spacesSubtitle()"
       />
       @if (isParent()) {
-        <button class="btn-cta btn-new-space" type="button" (click)="openCreatePanel()">
+        <button class="btn-pill btn-new-space" type="button" (click)="openCreatePanel()">
           <mat-icon aria-hidden="true">add</mat-icon>
           NUEVO ESPACIO
         </button>
@@ -40,47 +39,94 @@
       <!-- ── Space Grid ─────────────────────────────────────────────── -->
       <div class="spaces-grid">
         @for (space of spaces(); track space.id) {
-          <article class="space-card">
+          <article class="space-card" [style.--space-color]="spaceTypeColor(space.type)">
+
+              <!-- Header -->
             <div class="card-header">
               <div class="card-meta">
-                <mat-icon class="space-icon" aria-hidden="true">{{ spaceTypeIcon(space.type) }}</mat-icon>
+                <div class="space-icon-wrap"
+                  [style.background]="spaceIconBg(space.type)"
+                  [style.border-color]="spaceIconBorder(space.type)">
+                  <mat-icon class="space-icon" aria-hidden="true"
+                    [style.color]="spaceTypeColor(space.type)">{{ spaceTypeIcon(space.type) }}</mat-icon>
+                </div>
                 <div class="card-labels">
-                  <span class="space-type">{{ spaceTypeLabel(space.type) }}</span>
-                  <span class="space-name">{{ space.name }}</span>
+                  <span class="space-type" [style.color]="spaceTypeColor(space.type)">{{ spaceTypeLabel(space.type) }}</span>
+                  <h2 class="space-name">{{ space.name }}</h2>
                 </div>
               </div>
-            </div>
-            <div class="card-tasks">
-              @if (tasksForSpace(space.id).length === 0) {
-                <p class="placeholder-text">Sin tareas asignadas</p>
-              } @else {
-                @for (task of tasksForSpace(space.id); track task.id) {
-                  <div [class]="'task-pill priority-' + task.priority.toLowerCase()">
-                    <span class="task-pill-title">{{ task.title }}</span>
+              <div class="card-header-right">
+                <span class="task-count-badge">
+                  @if (isParent()) {
+                    {{ tasksForSpace(space.id).length }} tarea{{ tasksForSpace(space.id).length !== 1 ? 's' : '' }}
+                  } @else {
+                    {{ myTasksForSpace(space.id).length }} tarea{{ myTasksForSpace(space.id).length !== 1 ? 's' : '' }}
+                  }
+                </span>
+                @if (isParent()) {
+                  <div class="card-header-actions">
+                    <button class="btn-icon" type="button" aria-label="Editar espacio"
+                      (click)="openEditPanel(space)"
+                      [disabled]="isDeleting() || isMigrating() || isEditing()">
+                      <mat-icon aria-hidden="true">edit</mat-icon>
+                    </button>
+                    <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar espacio"
+                      (click)="requestDeleteSpace(space)"
+                      [disabled]="isDeleting() || isMigrating()">
+                      <mat-icon aria-hidden="true">delete</mat-icon>
+                    </button>
                   </div>
                 }
-              }
+              </div>
             </div>
-            <div class="card-footer">
-              @if (isParent()) {
-                <button class="btn-icon" type="button" aria-label="Editar espacio"
-                  (click)="openEditPanel(space)"
-                  [disabled]="isDeleting() || isMigrating() || isEditing()">
-                  <mat-icon aria-hidden="true">edit</mat-icon>
-                </button>
-                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar espacio"
-                  (click)="requestDeleteSpace(space)"
-                  [disabled]="isDeleting() || isMigrating()">
-                  <mat-icon aria-hidden="true">delete</mat-icon>
-                </button>
-              }
-              @if (isParent()) {
-                <button class="btn-assign" type="button" (click)="navigateToAssignTask(space)">
-                  <mat-icon aria-hidden="true">add</mat-icon>
-                  ASIGNAR TAREA
-                </button>
-              }
+
+            <!-- Task list -->
+            <div class="card-tasks-outer">
+              <div class="card-tasks">
+                @if (isParent() && tasksForSpace(space.id).length === 0) {
+                  <button class="empty-assign-cta" type="button" (click)="navigateToAssignTask(space)">
+                    <mat-icon aria-hidden="true">add</mat-icon>
+                    Asignar primera tarea
+                  </button>
+                } @else if (!isParent() && myTasksForSpace(space.id).length === 0) {
+                  <p class="placeholder-text">No tienes tareas aquí</p>
+                } @else {
+                  @for (task of (isParent() ? tasksForSpace(space.id) : myTasksForSpace(space.id)); track task.id) {
+                    <div [class]="'task-pill priority-' + task.priority.toLowerCase()"
+                         [attr.aria-label]="task.title">
+                      <span class="task-pill-dot" aria-hidden="true"></span>
+                      <span class="task-pill-title">{{ task.title }}</span>
+                      <div class="task-pill-rewards" aria-label="Recompensas">
+                        <span class="pill-xp">
+                          <mat-icon aria-hidden="true">bolt</mat-icon>
+                          <span class="sr-only">XP:</span>{{ task.xpReward }}
+                        </span>
+                        <span class="pill-coins">
+                          <mat-icon aria-hidden="true">monetization_on</mat-icon>
+                          <span class="sr-only">Monedas:</span>{{ task.coinsReward }}
+                        </span>
+                      </div>
+                      @if (isParent() && task.assignedToName) {
+                        <app-user-avatar
+                          [name]="task.assignedToName"
+                          [pictureUrl]="task.assignedToPictureUrl ?? ''"
+                          [size]="16"
+                        />
+                      }
+                    </div>
+                  }
+                }
+              </div>
             </div>
+
+            <!-- Footer: parent → assign CTA | child → totals -->
+            @if (isParent() && tasksForSpace(space.id).length > 0) {
+              <button class="btn-assign" type="button" (click)="navigateToAssignTask(space)">
+                <mat-icon aria-hidden="true">add</mat-icon>
+                ASIGNAR TAREA
+              </button>
+            }
+
           </article>
         }
       </div>
@@ -93,7 +139,7 @@
 @if (showCreatePanel()) {
   <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Crear nuevo espacio" aria-modal="true">
+  <aside class="create-panel" role="dialog" aria-label="Crear nuevo espacio" aria-modal="true" cdkTrapFocus cdkTrapFocusAutoCapture>
     <div class="panel-header">
       <div class="panel-header-left">
         <h2 class="panel-title">Nuevo espacio</h2>
@@ -125,8 +171,8 @@
       </div>
 
       <!-- Tipo de espacio -->
-      <div class="field">
-        <label class="field-label">TIPO DE ESPACIO <span class="req">*</span></label>
+      <fieldset class="field field-fieldset">
+        <legend class="field-label">TIPO DE ESPACIO <span class="req">*</span></legend>
         <div class="type-grid">
           @for (opt of spaceTypeOptions; track opt.value) {
             <button
@@ -135,16 +181,20 @@
               type="button"
               (click)="selectType(opt.value)"
               [attr.aria-pressed]="selectedType() === opt.value"
+              [style.border-color]="selectedType() === opt.value ? spaceTypeColor(opt.value) : spaceIconBorderDim(opt.value)"
+              [style.background]="selectedType() === opt.value ? spaceIconBg(opt.value) : null"
             >
-              <mat-icon class="type-icon" aria-hidden="true">{{ opt.icon }}</mat-icon>
-              <span class="type-label">{{ opt.label }}</span>
+              <mat-icon class="type-icon" aria-hidden="true"
+                [style.color]="spaceTypeColor(opt.value)">{{ opt.icon }}</mat-icon>
+              <span class="type-label"
+                [style.color]="selectedType() === opt.value ? spaceTypeColor(opt.value) : null">{{ opt.label }}</span>
             </button>
           }
         </div>
         @if (typeError()) {
           <span class="field-error" role="alert">El tipo de espacio es obligatorio.</span>
         }
-      </div>
+      </fieldset>
 
       <!-- Error global -->
       @if (createError()) {
@@ -172,7 +222,7 @@
 @if (showEditPanel()) {
   <div class="overlay panel-overlay" (click)="closeEditPanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Editar espacio" aria-modal="true">
+  <aside class="create-panel" role="dialog" aria-label="Editar espacio" aria-modal="true" cdkTrapFocus cdkTrapFocusAutoCapture>
     <div class="panel-header">
       <div class="panel-header-left">
         <h2 class="panel-title">Editar espacio</h2>
@@ -204,8 +254,8 @@
       </div>
 
       <!-- Tipo de espacio -->
-      <div class="field">
-        <label class="field-label">TIPO DE ESPACIO <span class="req">*</span></label>
+      <fieldset class="field field-fieldset">
+        <legend class="field-label">TIPO DE ESPACIO <span class="req">*</span></legend>
         <div class="type-grid">
           @for (opt of spaceTypeOptions; track opt.value) {
             <button
@@ -214,16 +264,20 @@
               type="button"
               (click)="selectType(opt.value)"
               [attr.aria-pressed]="selectedType() === opt.value"
+              [style.border-color]="selectedType() === opt.value ? spaceTypeColor(opt.value) : spaceIconBorderDim(opt.value)"
+              [style.background]="selectedType() === opt.value ? spaceIconBg(opt.value) : null"
             >
-              <mat-icon class="type-icon" aria-hidden="true">{{ opt.icon }}</mat-icon>
-              <span class="type-label">{{ opt.label }}</span>
+              <mat-icon class="type-icon" aria-hidden="true"
+                [style.color]="spaceTypeColor(opt.value)">{{ opt.icon }}</mat-icon>
+              <span class="type-label"
+                [style.color]="selectedType() === opt.value ? spaceTypeColor(opt.value) : null">{{ opt.label }}</span>
             </button>
           }
         </div>
         @if (typeError()) {
           <span class="field-error" role="alert">El tipo de espacio es obligatorio.</span>
         }
-      </div>
+      </fieldset>
 
       <!-- Error global -->
       @if (editError()) {
@@ -261,7 +315,7 @@
 <!-- ═══════════ MODAL 2: MIGRATE TASKS ═══════════ -->
 @if (showMigrateModal()) {
   <div class="overlay migrate-overlay" (click)="cancelMigrate()" aria-hidden="true"></div>
-  <div class="migrate-modal" role="dialog" aria-label="Migrar tareas" aria-modal="true">
+  <div class="migrate-modal" role="dialog" aria-label="Migrar tareas" aria-modal="true" cdkTrapFocus cdkTrapFocusAutoCapture>
     <h3 class="migrate-title">Espacio con tareas asignadas</h3>
 
     @if (hasTargetSpaces()) {

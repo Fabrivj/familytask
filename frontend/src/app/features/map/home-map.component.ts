@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { A11yModule } from '@angular/cdk/a11y';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -24,6 +25,7 @@ import {
   SpaceResponse,
   SpaceType,
   UpdateSpaceRequest,
+  spaceTypeColor,
   spaceTypeIcon,
   spaceTypeLabel,
 } from '../../core/models/space.model';
@@ -33,16 +35,19 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { UserAvatarComponent } from '../../shared/components/user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-home-map',
   imports: [
+    A11yModule,
     ReactiveFormsModule,
     MatIconModule,
     MatProgressSpinnerModule,
     AppShellComponent,
     PageHeaderComponent,
     ConfirmDialogComponent,
+    UserAvatarComponent,
   ],
   templateUrl: './home-map.component.html',
   styleUrl: './home-map.component.css',
@@ -63,12 +68,34 @@ export class HomeMapComponent {
   // ─── Helpers expuestos al template ───────────────────────────────────────
   readonly spaceTypeLabel = spaceTypeLabel;
   readonly spaceTypeIcon = spaceTypeIcon;
+  readonly spaceTypeColor = spaceTypeColor;
+
+  spaceIconBg(type: string): string {
+    const hex = spaceTypeColor(type).replace('#', '');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+    return `rgba(${r},${g},${b},0.12)`;
+  }
+
+  spaceIconBorder(type: string): string {
+    const hex = spaceTypeColor(type).replace('#', '');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+    return `rgba(${r},${g},${b},0.35)`;
+  }
+
+  spaceIconBorderDim(type: string): string {
+    const hex = spaceTypeColor(type).replace('#', '');
+    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+    return `rgba(${r},${g},${b},0.18)`;
+  }
   readonly spaceTypeOptions = SPACE_TYPE_OPTIONS;
   readonly priorityLabel = priorityLabel;
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly spaces = signal<SpaceResponse[]>([]);
-  readonly tasks = signal<TaskResponse[]>([]);
+  readonly tasks  = signal<TaskResponse[]>([]);
+
+  /** Current user's name from session — used to highlight their assigned tasks. */
+  readonly currentUserName = computed(() => this.authService.session()?.name ?? null);
   readonly isLoading = signal(false);
   readonly error = signal('');
 
@@ -89,6 +116,14 @@ export class HomeMapComponent {
 
   tasksForSpace(spaceId: number): TaskResponse[] {
     return this.tasksBySpace().get(spaceId) ?? [];
+  }
+
+  /** Tasks visible to the current child — assigned to them OR unassigned. */
+  myTasksForSpace(spaceId: number): TaskResponse[] {
+    const myName = this.currentUserName();
+    return this.tasksForSpace(spaceId).filter(
+      t => t.assignedToId === null || t.assignedToName === myName
+    );
   }
 
   // ─── Delete space (two-modal flow) ──────────────────────────────────────
@@ -144,7 +179,7 @@ export class HomeMapComponent {
 
     forkJoin({
       spaces: this.spaceService.getSpaces(familyId),
-      tasks: this.taskService.getTasks(familyId),
+      tasks:  this.taskService.getTasks(familyId),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -161,7 +196,10 @@ export class HomeMapComponent {
   }
 
   // ─── Panel ───────────────────────────────────────────────────────────────
+  private _panelTrigger: HTMLElement | null = null;
+
   openCreatePanel(): void {
+    this._panelTrigger = document.activeElement as HTMLElement;
     this.resetForm();
     this.showEditPanel.set(false);
     this.showCreatePanel.set(true);
@@ -170,9 +208,12 @@ export class HomeMapComponent {
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+    this._panelTrigger?.focus();
+    this._panelTrigger = null;
   }
 
   openEditPanel(space: SpaceResponse): void {
+    this._panelTrigger = document.activeElement as HTMLElement;
     this.showCreatePanel.set(false);
     this.spaceToEdit.set(space);
     this.nameCtrl.reset(space.name);
@@ -186,6 +227,8 @@ export class HomeMapComponent {
     this.showEditPanel.set(false);
     this.spaceToEdit.set(null);
     this.editError.set('');
+    this._panelTrigger?.focus();
+    this._panelTrigger = null;
   }
 
   submitEdit(): void {

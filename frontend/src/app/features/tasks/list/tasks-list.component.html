@@ -1,11 +1,3 @@
-    @if (isParent()) {
-      <div class="action-row">
-        <button class="btn-cta btn-new-task" type="button" (click)="openCreatePanel()">
-          + NUEVA TAREA
-        </button>
-      </div>
-    }
-
     <!-- ── Filters ───────────────────────────────────────────────── -->
     <div class="filters-bar" role="group" aria-label="Filtros de tareas">
       <span class="filter-label">PRIORIDAD</span>
@@ -17,7 +9,7 @@
           (click)="togglePriority(p)"
           [attr.aria-pressed]="filterPriority() === p"
         >
-          <span class="priority-dot priority-dot-{{ p | lowercase }}"></span>
+          <span class="priority-dot priority-dot-{{ p | lowercase }}" aria-hidden="true"></span>
           {{ priorityLabel(p) }}
         </button>
       }
@@ -129,7 +121,7 @@
               <tr>
                 <!-- TAREA -->
                 <td class="col-task">
-                  <span class="priority-dot priority-dot-{{ task.priority | lowercase }}"></span>
+                  <span class="priority-dot priority-dot-{{ task.priority | lowercase }}" aria-hidden="true"></span>
                   <div class="task-info">
                     <span class="task-name">{{ task.title }}</span>
                     @if (task.description) {
@@ -181,8 +173,10 @@
                       (click)="openStatusDropdown($event, task)"
                       [disabled]="isUpdatingStatus() === task.id || availableNextStatuses(task).length === 0"
                       [attr.aria-expanded]="openStatusDropdownId() === task.id"
-                      aria-haspopup="listbox"
+                      aria-haspopup="menu"
+                      [attr.aria-label]="'Estado de ' + task.title + ': ' + statusLabel(task.status)"
                     >
+                      <mat-icon class="status-icon" aria-hidden="true">{{ statusIcon(task.status) }}</mat-icon>
                       {{ statusLabel(task.status) }}
                       @if (availableNextStatuses(task).length > 0) {
                         <mat-icon class="status-chevron" aria-hidden="true">
@@ -218,7 +212,10 @@
             <div class="card-row-top">
               <span class="task-name">{{ task.title }}</span>
               @if (task.status !== null) {
-                <span class="status-badge status-badge-{{ task.status | lowercase }}">{{ statusLabel(task.status) }}</span>
+                <span class="status-badge status-badge-{{ task.status | lowercase }}">
+                  <mat-icon class="status-icon" aria-hidden="true">{{ statusIcon(task.status) }}</mat-icon>
+                  {{ statusLabel(task.status) }}
+                </span>
               } @else {
                 <span class="text-muted">—</span>
               }
@@ -268,7 +265,7 @@
 @if (showCreatePanel()) {
   <div class="overlay panel-overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" [attr.aria-label]="isEditMode() ? 'Editar tarea' : 'Crear nueva tarea'">
+  <aside class="create-panel" role="dialog" [attr.aria-label]="isEditMode() ? 'Editar tarea' : 'Crear nueva tarea'" cdkTrapFocus cdkTrapFocusAutoCapture>
     <div class="panel-header">
       <div class="panel-header-left">
         <h2 class="panel-title">{{ isEditMode() ? 'Editar tarea' : 'Nueva tarea' }}</h2>
@@ -314,29 +311,41 @@
       </div>
 
       <!-- Prioridad -->
-      <div class="field">
-        <label class="field-label">PRIORIDAD <span class="req">*</span></label>
+      <fieldset class="field field-fieldset">
+        <legend class="field-label">PRIORIDAD <span class="req">*</span></legend>
         <div class="priority-toggle">
           <button
             class="priority-btn"
             [class.priority-btn-active-high]="selectedPriority() === 'HIGH'"
+            [attr.aria-pressed]="selectedPriority() === 'HIGH'"
             type="button"
             (click)="selectPriority('HIGH')"
-          ><span class="priority-dot priority-dot-high"></span> ALTA</button>
+          >
+            <span class="priority-dot priority-dot-high" aria-hidden="true"></span> ALTA
+            @if (selectedPriority() === 'HIGH') { <mat-icon class="priority-check" aria-hidden="true">check</mat-icon> }
+          </button>
           <button
             class="priority-btn"
             [class.priority-btn-active-medium]="selectedPriority() === 'MEDIUM'"
+            [attr.aria-pressed]="selectedPriority() === 'MEDIUM'"
             type="button"
             (click)="selectPriority('MEDIUM')"
-          ><span class="priority-dot priority-dot-medium"></span> MEDIA</button>
+          >
+            <span class="priority-dot priority-dot-medium" aria-hidden="true"></span> MEDIA
+            @if (selectedPriority() === 'MEDIUM') { <mat-icon class="priority-check" aria-hidden="true">check</mat-icon> }
+          </button>
           <button
             class="priority-btn"
             [class.priority-btn-active-low]="selectedPriority() === 'LOW'"
+            [attr.aria-pressed]="selectedPriority() === 'LOW'"
             type="button"
             (click)="selectPriority('LOW')"
-          ><span class="priority-dot priority-dot-low"></span> BAJA</button>
+          >
+            <span class="priority-dot priority-dot-low" aria-hidden="true"></span> BAJA
+            @if (selectedPriority() === 'LOW') { <mat-icon class="priority-check" aria-hidden="true">check</mat-icon> }
+          </button>
         </div>
-      </div>
+      </fieldset>
 
       <!-- XP y Monedas -->
       <div class="field-row">
@@ -447,6 +456,7 @@
             class="assignee-chip"
             [class.assignee-active]="selectedAssignee() === null"
             type="button"
+            [attr.aria-pressed]="selectedAssignee() === null"
             (click)="selectedAssignee.set(null)"
           >Sin asignar</button>
           @for (m of childMembers(); track m.id) {
@@ -454,6 +464,7 @@
               class="assignee-chip"
               [class.assignee-active]="selectedAssignee() === m.id"
               type="button"
+              [attr.aria-pressed]="selectedAssignee() === m.id"
               (click)="selectAssignee(m.id)"
             >
               <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="22" />
@@ -488,7 +499,7 @@
 @if (activeStatusTask() !== null && statusDropdownPos() !== null) {
   <ul
     class="status-dropdown-menu status-dropdown-fixed"
-    role="listbox"
+    role="menu"
     aria-label="Cambiar estado"
     [style.top.px]="statusDropdownPos()!.top"
     [style.left.px]="statusDropdownPos()!.left"
@@ -496,8 +507,11 @@
     @for (s of availableNextStatuses(activeStatusTask()!); track s) {
       <li
         class="status-dropdown-item"
-        role="option"
+        role="menuitem"
+        tabindex="0"
         (click)="changeStatus(activeStatusTask()!, s)"
+        (keydown.enter)="changeStatus(activeStatusTask()!, s)"
+        (keydown.space)="$event.preventDefault(); changeStatus(activeStatusTask()!, s)"
       >{{ statusLabel(s) }}</li>
     }
   </ul>

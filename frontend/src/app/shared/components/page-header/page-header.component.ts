@@ -16,11 +16,16 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[class.centered]': 'centered()',
   },
   template: `
-    <p class="tag">{{ tag() }}</p>
-    <h1 class="title">{{ title() }}</h1>
-    @if (subtitle()) {
-      <p class="subtitle">{{ subtitle() }}</p>
-    }
+    <div class="inner">
+      <div class="text">
+        @if (tag()) { <p class="tag">{{ tag() }}</p> }
+        <h1 class="title">{{ title() }}</h1>
+        @if (subtitle()) {
+          <p class="subtitle">{{ subtitle() }}</p>
+        }
+      </div>
+      <ng-content />
+    </div>
   `,
   styles: [`
     :host {
@@ -30,6 +35,12 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
     :host.centered {
       text-align: center;
+    }
+
+    .inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     .tag {
@@ -64,7 +75,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   `],
 })
 export class PageHeaderComponent {
-  readonly tag = input.required<string>();
+  readonly tag = input<string>('');
   readonly title = input.required<string>();
   readonly subtitle = input<string>('');
   readonly centered = input<boolean>(false);

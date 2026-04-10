@@ -11,7 +11,7 @@
         <div class="pip on"></div>
       </div>
       <p class="tag">// PASO 3 DE 3</p>
-      <h1 class="card-title" role="heading" aria-level="1">Invita a tu familia</h1>
+      <h1 class="card-title">Invita a tu familia</h1>
       <p class="card-sub">
         Genera un link para que cada miembro se una a
         <strong class="family-highlight">{{ familyName() }}</strong>
@@ -73,10 +73,18 @@
             class="btn-copy"
             type="button"
             (click)="copyLink()"
-            [attr.aria-label]="linkCopied() ? 'Copiado' : 'Copiar link'"
+            [attr.aria-label]="linkCopied() ? 'Link copiado al portapapeles' : 'Copiar link de invitación'"
           >
-            @if (linkCopied()) { <mat-icon>check</mat-icon> } @else { Copiar }
+            @if (linkCopied()) {
+              <mat-icon aria-hidden="true">check</mat-icon>
+              Copiado
+            } @else {
+              Copiar
+            }
           </button>
+        </div>
+        <div aria-live="polite" aria-atomic="true" class="sr-only">
+          @if (linkCopied()) { Link de invitación copiado al portapapeles. }
         </div>
 
         <div class="link-info">

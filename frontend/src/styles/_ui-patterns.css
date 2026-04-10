@@ -110,7 +110,7 @@
 /* ── Tag ── */
 .tag {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.22em;
   color: var(--primary);
   text-transform: uppercase;
@@ -121,7 +121,7 @@
 .card-title {
   font-family: 'Rajdhani', sans-serif;
   font-weight: 700;
-  font-size: 22px;
+  font-size: var(--text-h2);
   color: var(--text);
   letter-spacing: 0.03em;
   margin-bottom: 6px;
@@ -129,7 +129,7 @@
 
 /* ── Card Subtitle ── */
 .card-sub {
-  font-size: 13px;
+  font-size: var(--text-subtitle);
   color: var(--text-sub);
   line-height: 1.6;
 }
@@ -176,12 +176,14 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 22px rgba(var(--primary-rgb), 0.27);
-  transition: opacity 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.4), inset 0 0 8px rgba(var(--primary-rgb), 0.05);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  transition: box-shadow 0.2s, text-shadow 0.2s, opacity 0.2s;
 }
 
 .btn-cta:hover:not(:disabled) {
-  box-shadow: 0 4px 32px rgba(var(--primary-rgb), 0.4);
+  box-shadow: 0 0 16px rgba(var(--primary-rgb), 0.8), 0 0 32px rgba(var(--primary-rgb), 0.3), inset 0 0 12px rgba(var(--primary-rgb), 0.08);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
 }
 
 .btn-cta:disabled {
@@ -200,18 +202,71 @@
   flex-shrink: 0;
 }
 
+/* ── Pill button (header add / invite actions) ── */
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  min-height: 44px;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  color: var(--primary);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+  box-shadow: 0 0 8px rgba(var(--border-rgb), 0.5), inset 0 0 8px rgba(var(--border-rgb), 0.05);
+  text-shadow: 0 0 8px rgba(var(--primary-rgb), 0.8);
+  transition: box-shadow 0.2s, background 0.2s, text-shadow 0.2s;
+}
+
+.btn-pill:hover:not(:disabled) {
+  background: rgba(var(--border-rgb), 0.07);
+  box-shadow: 0 0 16px rgba(var(--border-rgb), 0.8), 0 0 32px rgba(var(--border-rgb), 0.3), inset 0 0 12px rgba(var(--border-rgb), 0.08);
+  text-shadow: 0 0 12px rgba(var(--primary-rgb), 1), 0 0 24px rgba(var(--primary-rgb), 0.5);
+}
+
+.btn-pill:focus-visible {
+  outline: 3px solid var(--border);
+  outline-offset: 4px;
+}
+
+.btn-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-pill mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-pill { transition: none; }
+}
+
 /* ── Outline variant ── */
 .btn-cta.btn-outline {
   background: transparent;
   border: 1.5px solid rgba(var(--border-rgb), 0.25);
   color: var(--text-sub);
   box-shadow: none;
+  text-shadow: none;
 }
 
 .btn-cta.btn-outline:hover:not(:disabled) {
   border-color: var(--border);
   color: var(--text);
-  box-shadow: none;
+  box-shadow: 0 0 10px rgba(var(--border-rgb), 0.25);
+  text-shadow: 0 0 6px rgba(var(--border-rgb), 0.3);
 }
 
 /* ── Form Fields ── */
@@ -223,7 +278,7 @@
 
 .field-label {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: var(--text-micro);
   letter-spacing: 0.12em;
   color: var(--text-sub);
   text-transform: uppercase;
@@ -258,8 +313,12 @@
 
 .field-error {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 11px;
+  font-size: var(--text-label);
   color: var(--error);
+}
+
+.field-error::before {
+  content: '⚠ ';
 }
 
 /* ── Overlay ── */
@@ -286,6 +345,10 @@
   border-radius: 8px;
   background: rgba(var(--error-rgb), 0.05);
   margin: 0;
+}
+
+.error-msg::before {
+  content: '⚠ ';
 }
 
 /* ── Help Row ── */
