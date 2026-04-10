@@ -67,10 +67,12 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       margin: 8px 0 0;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 767px) {
       :host {
-        margin-bottom: 28px;
+        margin-bottom: 20px;
       }
+      .tag { margin-bottom: 6px; }
+      .subtitle { font-size: 13px; }
     }
   `],
 })

@@ -55,10 +55,9 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
       line-height: 1.2;
     }
 
-    @media (max-width: 600px) {
-      .user-email {
-        display: none;
-      }
+    @media (max-width: 767px) {
+      .info { display: none; }
+      :host { padding: 4px; }
     }
   `],
 })

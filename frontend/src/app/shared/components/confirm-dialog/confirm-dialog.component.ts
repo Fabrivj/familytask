@@ -161,6 +161,26 @@ import { MatIconModule } from '@angular/material/icon';
       outline-offset: 2px;
     }
 
+    @media (max-width: 767px) {
+      .dialog {
+        padding: 24px 20px 18px;
+        width: calc(100vw - 32px);
+      }
+
+      .actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
+
+      .btn-cancel,
+      .btn-confirm {
+        width: 100%;
+        padding: 13px;
+        font-size: 14px;
+        text-align: center;
+      }
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to   { opacity: 1; }

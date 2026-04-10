@@ -92,3 +92,7 @@
   .label { display: none; }
   .nav-item { padding: 10px 4px; }
 }
+
+@media (max-width: 767px) {
+  :host { display: none; }
+}
