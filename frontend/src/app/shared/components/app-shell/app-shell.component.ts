@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
+import { BottomNavComponent } from '../bottom-nav/bottom-nav.component';
 import { PageLayoutComponent } from '../page-layout/page-layout.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopBarComponent } from '../top-bar/top-bar.component';
@@ -11,8 +12,9 @@ import { TopBarComponent } from '../top-bar/top-bar.component';
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageLayoutComponent, SidebarComponent, TopBarComponent],
+  imports: [PageLayoutComponent, SidebarComponent, TopBarComponent, BottomNavComponent],
   templateUrl: './app-shell.component.html',
+  styleUrl: './app-shell.component.css',
 })
 export class AppShellComponent {
   private readonly authService = inject(AuthService);

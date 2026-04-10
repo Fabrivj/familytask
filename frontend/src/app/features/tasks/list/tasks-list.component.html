@@ -208,32 +208,28 @@
       <!-- ── Mobile Cards ──────────────────────────────────────── -->
       <div class="cards mobile-only">
         @for (task of filteredTasks(); track task.id) {
-          <article class="task-card">
-            <div class="card-row-top">
-              <span class="task-name">{{ task.title }}</span>
+          <article class="task-card priority-{{ task.priority | lowercase }}">
+
+            <div class="card-body">
+              <div class="card-title-row">
+                <span class="priority-dot priority-dot-{{ task.priority | lowercase }}" aria-hidden="true"></span>
+                <span class="task-name">{{ task.title }}</span>
+              </div>
               @if (task.status !== null) {
                 <span class="status-badge status-badge-{{ task.status | lowercase }}">
                   <mat-icon class="status-icon" aria-hidden="true">{{ statusIcon(task.status) }}</mat-icon>
                   {{ statusLabel(task.status) }}
                 </span>
-              } @else {
-                <span class="text-muted">—</span>
+              }
+              @if (task.description) {
+                <p class="card-desc">{{ task.description }}</p>
               }
             </div>
 
-            <div class="card-row-sub">
-              <span class="task-desc">{{ task.description }}</span>
-              <span class="col-date">{{ formatDate(task.dueDate) }}</span>
-            </div>
-
-            <div class="card-row-meta">
+            <div class="card-meta">
               @if (task.assignedToName) {
                 <span class="member-chip-inline">
-                  <app-user-avatar
-                    [name]="task.assignedToName"
-                    [pictureUrl]="task.assignedToPictureUrl ?? ''"
-                    [size]="20"
-                  />
+                  <app-user-avatar [name]="task.assignedToName" [pictureUrl]="task.assignedToPictureUrl ?? ''" [size]="18" />
                   {{ task.assignedToName.split(' ')[0] }}
                 </span>
               }
@@ -242,19 +238,27 @@
                 {{ task.homeSpaceName }}
               </span>
               <span class="reward-xp">+{{ task.xpReward }} XP</span>
-              <span class="reward-coins"><span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span> {{ task.coinsReward }}</span>
+              <span class="reward-coins">
+                <span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span>
+                {{ task.coinsReward }}
+              </span>
+              @if (task.dueDate) {
+                <span class="card-date">{{ formatDate(task.dueDate) }}</span>
+              }
             </div>
 
             @if (isParent()) {
-              <div class="card-row-actions">
-                <button class="btn-icon" type="button" aria-label="Editar tarea" (click)="openEditPanel(task)">
+              <div class="card-actions-bar">
+                <button class="card-btn-edit" type="button" aria-label="Editar tarea" (click)="openEditPanel(task)">
                   <mat-icon aria-hidden="true">edit</mat-icon>
+                  EDITAR
                 </button>
-                <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar tarea" (click)="openDeleteModal(task)">
+                <button class="card-btn-delete" type="button" aria-label="Eliminar tarea" (click)="openDeleteModal(task)">
                   <mat-icon aria-hidden="true">delete</mat-icon>
                 </button>
               </div>
             }
+
           </article>
         }
       </div>

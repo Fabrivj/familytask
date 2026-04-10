@@ -797,7 +797,10 @@
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
-  .content { padding: 20px 16px 40px; }
+  .content { padding: 20px 16px 80px; }
+
+  /* Tap targets */
+  .btn-icon { width: 44px; height: 44px; }
 
   .header-row {
     flex-direction: column;
@@ -811,6 +814,12 @@
 
   .type-grid { grid-template-columns: repeat(2, 1fr); }
 
-  .create-panel { width: 100vw; }
+  .create-panel {
+    left: 0;
+    width: 100%;
+    top: 0;
+    height: 100%;
+    border-left: none;
+  }
   .panel-body { padding: 20px 16px; }
 }
