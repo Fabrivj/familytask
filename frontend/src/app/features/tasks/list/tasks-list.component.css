@@ -912,6 +912,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   color: var(--primary);
 }
 
+.status-btn-in_review {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.35);
+  color: #a855f7;
+}
+
 .status-btn-completed {
   background: rgba(var(--success-rgb), 0.12);
   border-color: rgba(var(--success-rgb), 0.35);
@@ -996,6 +1002,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: rgba(var(--primary-rgb), 0.12);
   border-color: rgba(var(--primary-rgb), 0.35);
   color: var(--primary);
+}
+
+.status-badge-in_review {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.35);
+  color: #a855f7;
 }
 
 .status-badge-completed {

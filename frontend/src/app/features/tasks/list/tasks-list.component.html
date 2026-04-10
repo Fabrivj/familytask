@@ -170,16 +170,18 @@
                     <button
                       class="status-btn status-btn-{{ task.status | lowercase }}"
                       type="button"
-                      (click)="openStatusDropdown($event, task.id)"
-                      [disabled]="isUpdatingStatus() === task.id"
+                      (click)="openStatusDropdown($event, task)"
+                      [disabled]="isUpdatingStatus() === task.id || availableNextStatuses(task).length === 0"
                       [attr.aria-expanded]="openStatusDropdownId() === task.id"
                       aria-haspopup="listbox"
                     >
                       <mat-icon class="status-icon" aria-hidden="true">{{ statusIcon(task.status) }}</mat-icon>
                       {{ statusLabel(task.status) }}
-                      <mat-icon class="status-chevron" aria-hidden="true">
-                        {{ openStatusDropdownId() === task.id ? 'expand_less' : 'expand_more' }}
-                      </mat-icon>
+                      @if (availableNextStatuses(task).length > 0) {
+                        <mat-icon class="status-chevron" aria-hidden="true">
+                          {{ openStatusDropdownId() === task.id ? 'expand_less' : 'expand_more' }}
+                        </mat-icon>
+                      }
                     </button>
                   } @else {
                     <span class="text-muted">—</span>
@@ -499,12 +501,11 @@
     [style.top.px]="statusDropdownPos()!.top"
     [style.left.px]="statusDropdownPos()!.left"
   >
-    @for (s of ['PENDING', 'IN_PROGRESS', 'COMPLETED']; track s) {
+    @for (s of availableNextStatuses(activeStatusTask()!); track s) {
       <li
         class="status-dropdown-item"
         role="option"
-        [class.active]="activeStatusTask()!.status === s"
-        (click)="changeStatus(activeStatusTask()!, $any(s))"
+        (click)="changeStatus(activeStatusTask()!, s)"
       >{{ statusLabel(s) }}</li>
     }
   </ul>
