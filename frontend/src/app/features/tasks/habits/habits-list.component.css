@@ -178,6 +178,83 @@
   gap: 2px;
 }
 
+.habit-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Streak badge ────────────────────────────────────────────────────── */
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  border: 1px solid rgba(var(--border-rgb), 0.15);
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+.streak-active {
+  border-color: rgba(251, 146, 60, 0.4);
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.06);
+}
+
+.streak-icon {
+  font-size: 12px !important;
+  width: 12px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  flex-shrink: 0;
+}
+
+/* ── Complete button ─────────────────────────────────────────────────── */
+.btn-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: 1.5px solid rgba(var(--success-rgb), 0.4);
+  border-radius: 6px;
+  background: transparent;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--success);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-complete:hover:not(:disabled) {
+  background: rgba(var(--success-rgb), 0.08);
+  border-color: var(--success);
+}
+
+.btn-complete:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-complete mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+}
+
+.btn-complete-done {
+  border-color: rgba(var(--success-rgb), 0.2);
+  color: var(--success);
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn-complete-full { width: 100%; justify-content: center; }
+
 .habit-name {
   font-family: 'Rajdhani', sans-serif;
   font-size: 14px;
@@ -342,6 +419,11 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.card-row-action {
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */

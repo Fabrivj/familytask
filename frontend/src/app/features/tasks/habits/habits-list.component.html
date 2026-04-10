@@ -45,7 +45,7 @@
           <th>FRECUENCIA</th>
           <th>ASIGNADO A</th>
           <th>RECOMPENSA</th>
-          @if (isParent()) {<th>ACCIONES</th>}
+          <th>ACCIONES</th>
         </tr>
       </thead>
       <tbody>
@@ -53,7 +53,15 @@
           <tr>
             <td class="col-habit">
               <div class="habit-info">
-                <span class="habit-name">{{ habit.title }}</span>
+                <div class="habit-name-row">
+                  <span class="habit-name">{{ habit.title }}</span>
+                  @if (habit.currentStreak) {
+                    <span class="streak-badge" [class.streak-active]="habit.currentStreak > 0">
+                      <mat-icon class="streak-icon" aria-hidden="true">local_fire_department</mat-icon>
+                      {{ habit.currentStreak }}
+                    </span>
+                  }
+                </div>
                 @if (habit.description) {
                   <span class="habit-desc">{{ habit.description }}</span>
                 }
@@ -88,18 +96,40 @@
                 </span>
               </div>
             </td>
-            @if (isParent()) {
-              <td>
-                <div class="col-actions">
+            <td>
+              <div class="col-actions">
+                @if (isParent()) {
                   <button class="btn-icon" type="button" aria-label="Editar hábito" disabled>
                     <mat-icon aria-hidden="true">edit</mat-icon>
                   </button>
                   <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" (click)="openDeleteModal(habit)">
                     <mat-icon aria-hidden="true">delete</mat-icon>
                   </button>
-                </div>
-              </td>
-            }
+                } @else if (habit.assignedToId === currentUserId()) {
+                  @if (habit.completedInCurrentPeriod) {
+                    <span class="btn-complete btn-complete-done" aria-label="Hábito completado hoy">
+                      <mat-icon aria-hidden="true">check_circle</mat-icon>
+                      COMPLETADO
+                    </span>
+                  } @else {
+                    <button
+                      class="btn-complete"
+                      type="button"
+                      aria-label="Completar hábito"
+                      [disabled]="isCompletingHabit() === habit.id"
+                      (click)="completeHabit(habit)"
+                    >
+                      @if (isCompletingHabit() === habit.id) {
+                        <mat-spinner diameter="14" />
+                      } @else {
+                        <mat-icon aria-hidden="true">check</mat-icon>
+                      }
+                      COMPLETAR
+                    </button>
+                  }
+                }
+              </div>
+            </td>
           </tr>
         }
       </tbody>
@@ -127,7 +157,37 @@
             <span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span>
             {{ habit.coinsReward }}
           </span>
+          @if (habit.currentStreak) {
+            <span class="streak-badge streak-active">
+              <mat-icon class="streak-icon" aria-hidden="true">local_fire_department</mat-icon>
+              {{ habit.currentStreak }}
+            </span>
+          }
         </div>
+        @if (!isParent() && habit.assignedToId === currentUserId()) {
+          <div class="card-row-action">
+            @if (habit.completedInCurrentPeriod) {
+              <span class="btn-complete btn-complete-done">
+                <mat-icon aria-hidden="true">check_circle</mat-icon>
+                COMPLETADO HOY
+              </span>
+            } @else {
+              <button
+                class="btn-complete btn-complete-full"
+                type="button"
+                [disabled]="isCompletingHabit() === habit.id"
+                (click)="completeHabit(habit)"
+              >
+                @if (isCompletingHabit() === habit.id) {
+                  <mat-spinner diameter="14" />
+                } @else {
+                  <mat-icon aria-hidden="true">check</mat-icon>
+                }
+                COMPLETAR HOY
+              </button>
+            }
+          </div>
+        }
       </article>
     }
   </div>
