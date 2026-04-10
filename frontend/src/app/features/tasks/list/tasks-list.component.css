@@ -53,6 +53,11 @@
   color: var(--text);
 }
 
+.filter-chip:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
+}
+
 .filter-active {
   border-color: var(--primary);
   color: var(--primary);
@@ -371,6 +376,7 @@
 }
 
 .btn-icon:hover:not(:disabled) { border-color: var(--border); color: var(--border); }
+.btn-icon:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 .btn-icon:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-icon-danger:hover:not(:disabled) { border-color: var(--error); color: var(--error); }
 
@@ -556,6 +562,7 @@
 }
 
 .btn-close:hover { color: var(--text); }
+.btn-close:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
 .btn-close mat-icon {
   font-size: 18px;
@@ -641,6 +648,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .priority-btn:hover { border-color: rgba(var(--border-rgb), 0.35); }
+.priority-btn:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
 /* Thicker border + check icon in HTML make selection clear without relying on color alone */
 .priority-btn-active-high   { border-width: 2.5px; border-color: var(--error);   color: var(--error);   background: rgba(var(--error-rgb),   0.07); }
@@ -673,6 +681,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .panel-space-trigger.has-value {
   color: var(--text);
+}
+
+.panel-space-trigger:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
 }
 
 .panel-space-placeholder {
@@ -764,6 +777,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .assignee-chip:hover { border-color: rgba(var(--border-rgb), 0.35); }
+.assignee-chip:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
 .assignee-active {
   border-color: var(--text);
@@ -898,6 +912,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .status-btn:not(:disabled):hover {
   filter: brightness(1.15);
+}
+
+.status-btn:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
+}
+
+.status-dropdown-item:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: -2px;
+  border-radius: 7px;
 }
 
 .status-btn-pending {

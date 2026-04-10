@@ -52,6 +52,11 @@
   color: var(--text);
 }
 
+.filter-chip:focus-visible {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
+}
+
 .filter-active {
   border-color: var(--primary);
   color: var(--primary);
@@ -290,6 +295,7 @@
 }
 
 .btn-icon:hover:not(:disabled) { border-color: var(--border); color: var(--border); }
+.btn-icon:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 .btn-icon:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-icon-danger:hover:not(:disabled) { border-color: var(--error); color: var(--error); }
 
@@ -432,6 +438,7 @@
 }
 
 .btn-close:hover { color: var(--text); }
+.btn-close:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
 .btn-close mat-icon {
   font-size: 18px;
@@ -491,6 +498,7 @@
 }
 
 .freq-btn:hover { border-color: rgba(var(--border-rgb), 0.35); }
+.freq-btn:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
 .freq-btn mat-icon {
   font-size: 16px;
@@ -566,6 +574,7 @@
 }
 
 .assignee-chip:hover { border-color: rgba(var(--border-rgb), 0.35); }
+.assignee-chip:focus-visible { outline: 2px solid var(--border); outline-offset: 2px; }
 
 .assignee-active {
   border-color: var(--text);

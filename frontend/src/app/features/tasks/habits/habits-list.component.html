@@ -188,23 +188,23 @@
         <legend class="field-label">FRECUENCIA <span class="req">*</span></legend>
         <div class="freq-toggle">
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'DAILY'"
-                  type="button" (click)="selectFrequency('DAILY')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'DAILY'" (click)="selectFrequency('DAILY')">
             <mat-icon aria-hidden="true">wb_sunny</mat-icon> DIARIO
           </button>
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKDAYS'"
-                  type="button" (click)="selectFrequency('WEEKDAYS')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'WEEKDAYS'" (click)="selectFrequency('WEEKDAYS')">
             <mat-icon aria-hidden="true">view_week</mat-icon> LUN–VIE
           </button>
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKENDS'"
-                  type="button" (click)="selectFrequency('WEEKENDS')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'WEEKENDS'" (click)="selectFrequency('WEEKENDS')">
             <mat-icon aria-hidden="true">weekend</mat-icon> FIN DE SEMANA
           </button>
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKLY'"
-                  type="button" (click)="selectFrequency('WEEKLY')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'WEEKLY'" (click)="selectFrequency('WEEKLY')">
             <mat-icon aria-hidden="true">date_range</mat-icon> SEMANAL
           </button>
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'MONTHLY'"
-                  type="button" (click)="selectFrequency('MONTHLY')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'MONTHLY'" (click)="selectFrequency('MONTHLY')">
             <mat-icon aria-hidden="true">calendar_month</mat-icon> MENSUAL
           </button>
         </div>
@@ -255,6 +255,7 @@
               class="assignee-chip"
               [class.assignee-active]="selectedAssignee() === null"
               type="button"
+              [attr.aria-pressed]="selectedAssignee() === null"
               (click)="selectedAssignee.set(null)"
             >Sin asignar</button>
             @for (m of childMembers(); track m.id) {
@@ -262,6 +263,7 @@
                 class="assignee-chip"
                 [class.assignee-active]="selectedAssignee() === m.id"
                 type="button"
+                [attr.aria-pressed]="selectedAssignee() === m.id"
                 (click)="selectedAssignee.set(m.id)"
               >
                 <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="22" />

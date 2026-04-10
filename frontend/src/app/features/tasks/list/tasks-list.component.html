@@ -173,7 +173,8 @@
                       (click)="openStatusDropdown($event, task)"
                       [disabled]="isUpdatingStatus() === task.id || availableNextStatuses(task).length === 0"
                       [attr.aria-expanded]="openStatusDropdownId() === task.id"
-                      aria-haspopup="listbox"
+                      aria-haspopup="menu"
+                      [attr.aria-label]="'Estado de ' + task.title + ': ' + statusLabel(task.status)"
                     >
                       <mat-icon class="status-icon" aria-hidden="true">{{ statusIcon(task.status) }}</mat-icon>
                       {{ statusLabel(task.status) }}
@@ -455,6 +456,7 @@
             class="assignee-chip"
             [class.assignee-active]="selectedAssignee() === null"
             type="button"
+            [attr.aria-pressed]="selectedAssignee() === null"
             (click)="selectedAssignee.set(null)"
           >Sin asignar</button>
           @for (m of childMembers(); track m.id) {
@@ -462,6 +464,7 @@
               class="assignee-chip"
               [class.assignee-active]="selectedAssignee() === m.id"
               type="button"
+              [attr.aria-pressed]="selectedAssignee() === m.id"
               (click)="selectAssignee(m.id)"
             >
               <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="22" />
@@ -496,7 +499,7 @@
 @if (activeStatusTask() !== null && statusDropdownPos() !== null) {
   <ul
     class="status-dropdown-menu status-dropdown-fixed"
-    role="listbox"
+    role="menu"
     aria-label="Cambiar estado"
     [style.top.px]="statusDropdownPos()!.top"
     [style.left.px]="statusDropdownPos()!.left"
@@ -504,8 +507,11 @@
     @for (s of availableNextStatuses(activeStatusTask()!); track s) {
       <li
         class="status-dropdown-item"
-        role="option"
+        role="menuitem"
+        tabindex="0"
         (click)="changeStatus(activeStatusTask()!, s)"
+        (keydown.enter)="changeStatus(activeStatusTask()!, s)"
+        (keydown.space)="$event.preventDefault(); changeStatus(activeStatusTask()!, s)"
       >{{ statusLabel(s) }}</li>
     }
   </ul>
