@@ -110,24 +110,43 @@
   <div class="cards mobile-only">
     @for (habit of filteredHabits(); track habit.id) {
       <article class="habit-card">
-        <div class="card-row-top">
-          <span class="habit-name">{{ habit.title }}</span>
+
+        <div class="card-body">
+          <div class="card-title-row">
+            <span class="habit-name">{{ habit.title }}</span>
+          </div>
           <span class="freq-badge freq-{{ habit.frequency | lowercase }}">
+            <mat-icon class="freq-badge-icon" aria-hidden="true">{{ frequencyIcon(habit.frequency) }}</mat-icon>
             {{ frequencyLabel(habit.frequency) }}
           </span>
+          @if (habit.description) {
+            <p class="card-desc">{{ habit.description }}</p>
+          }
         </div>
-        @if (habit.description) {
-          <div class="card-row-sub">
-            <span class="habit-desc">{{ habit.description }}</span>
-          </div>
-        }
-        <div class="card-row-meta">
+
+        <div class="card-meta">
+          @if (habit.assignedToName) {
+            <span class="member-chip-inline">
+              <app-user-avatar [name]="habit.assignedToName" [pictureUrl]="habit.assignedToPictureUrl ?? ''" [size]="18" />
+              {{ memberShortName(habit.assignedToName) }}
+            </span>
+          }
           <span class="reward-xp">+{{ habit.xpReward }} XP</span>
           <span class="reward-coins">
             <span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span>
             {{ habit.coinsReward }}
           </span>
         </div>
+
+        @if (isParent()) {
+          <div class="card-actions-bar">
+            <button class="card-btn-full" type="button" aria-label="Eliminar hábito" (click)="openDeleteModal(habit)">
+              <mat-icon aria-hidden="true">delete</mat-icon>
+              ELIMINAR
+            </button>
+          </div>
+        }
+
       </article>
     }
   </div>

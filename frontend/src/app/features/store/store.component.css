@@ -456,9 +456,12 @@
 .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
 
 @media (max-width: 767px) {
-  .header-row { flex-direction: column; }
-  .btn-new-reward { width: 100%; }
+  .content { padding: 20px 16px 80px; }
+  .header-row { flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .btn-new-reward { width: 100%; justify-content: center; }
   .rewards-grid { grid-template-columns: 1fr; }
+  .tabs-bar { flex-wrap: wrap; }
+  .tab-btn { flex: 1; justify-content: center; }
 }
 
 .create-panel {
@@ -630,6 +633,13 @@
 }
 
 @media (max-width: 767px) {
-  .create-panel { width: 100vw; }
+  .create-panel {
+    left: 0;
+    width: 100%;
+    top: 0;
+    height: 100%;
+    border-left: none;
+  }
   .panel-body { padding: 20px 16px; }
+  .field-row { grid-template-columns: 1fr; }
 }

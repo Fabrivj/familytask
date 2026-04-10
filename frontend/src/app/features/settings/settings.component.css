@@ -70,9 +70,9 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   .content {
-    padding: 28px 16px 40px;
+    padding: 20px 16px 80px;
   }
 
   .config-card {
