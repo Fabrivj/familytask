@@ -88,6 +88,12 @@ export const routes: Routes = [
       import('./features/tasks/tasks-habits/tasks-habits.component').then(m => m.TasksHabitsComponent),
   },
   {
+    path: 'ranking',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/ranking/ranking.component').then(m => m.RankingComponent),
+  },
+  {
     path: '**',
     redirectTo: '',
   },
