@@ -51,6 +51,7 @@ public class TaskService {
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
     private final FamilyPermissions familyPermissions;
+    private final ExperienceService experienceService;
 
     public TaskResponse createTask(CreateTaskRequest request, User creator) {
         FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
@@ -297,10 +298,21 @@ public class TaskService {
                     .build();
             taskCompletionRepository.save(completion);
 
-            // TODO: otorgar XP y monedas al CHILD asignado (fuera del scope de FAMT-34)
+            FamilyMember childMember = familyMemberRepository
+                    .findByFamilyGroupIdAndUserId(task.getFamilyGroup().getId(), assignment.getUser().getId())
+                    .orElseThrow(() -> new TaskException("MEMBER_NOT_FOUND",
+                            "No se encontró el perfil del hijo en esta familia.", 404));
 
-            log.info("Task '{}' completed by parent {} — assigned to {}",
-                    task.getTitle(), requester.getEmail(), assignment.getUser().getEmail());
+            ExperienceService.AwardResult award = experienceService.awardXpAndCoins(
+                    childMember,
+                    task.getXpReward() != null ? task.getXpReward() : 0,
+                    task.getCoinsReward() != null ? task.getCoinsReward() : 0
+            );
+
+            log.info("Task '{}' completed by parent {} — assigned to {} | +{}XP +{}coins → level {}{}",
+                    task.getTitle(), requester.getEmail(), assignment.getUser().getEmail(),
+                    task.getXpReward(), task.getCoinsReward(), award.newLevel(),
+                    award.leveledUp() ? " (LEVEL UP!)" : "");
 
             return CompleteTaskResponse.builder()
                     .taskId(task.getId())
@@ -309,6 +321,12 @@ public class TaskService {
                     .xpReward(task.getXpReward())
                     .coinsReward(task.getCoinsReward())
                     .completedAt(completion.getCompletedAt())
+                    .newTotalXp(award.newTotalXp())
+                    .newTotalCoins(award.newTotalCoins())
+                    .newLevel(award.newLevel())
+                    .previousLevel(award.previousLevel())
+                    .leveledUp(award.leveledUp())
+                    .xpToNextLevel(award.xpToNextLevel())
                     .build();
         } catch (TaskException e) {
             throw e;

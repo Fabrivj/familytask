@@ -9,6 +9,13 @@
       title="Tu panel familiar"
     />
 
+    @if (isChild() && selfMember()) {
+      <section class="section">
+        <h2 class="section-label">Tu progreso</h2>
+        <app-child-stats [member]="selfMember()!" />
+      </section>
+    }
+
     @if ((session()?.families ?? []).length > 0) {
       <section class="section">
         <h2 class="section-label">Tus familias</h2>

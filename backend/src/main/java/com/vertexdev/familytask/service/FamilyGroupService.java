@@ -36,6 +36,7 @@ public class FamilyGroupService {
     private final InvitationRepository invitationRepository;
     private final TaskAssignmentRepository taskAssignmentRepository;
     private final FamilyPermissions familyPermissions;
+    private final ExperienceService experienceService;
 
     @Transactional
     public FamilyResponse createFamily(CreateFamilyRequest request, User creator) {
@@ -98,15 +99,7 @@ public class FamilyGroupService {
         List<MemberItemResponse> members = familyMemberRepository
                 .findByFamilyGroupIdAndIsActiveTrue(familyId)
                 .stream()
-                .map(m -> MemberItemResponse.builder()
-                        .id(m.getUser().getId())
-                        .name(m.getUser().getName())
-                        .email(m.getUser().getEmail())
-                        .pictureUrl(m.getUser().getPictureUrl())
-                        .role(m.getRole().name())
-                        .isAdmin(m.getIsAdmin())
-                        .joinedAt(m.getJoinedAt())
-                        .build())
+                .map(m -> toMemberItemResponse(m, familyId))
                 .toList();
 
         List<PendingInvitationResponse> pending = invitationRepository
@@ -125,6 +118,16 @@ public class FamilyGroupService {
                 .members(members)
                 .pendingInvitations(pending)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public MemberItemResponse getMyStats(Long familyId, User requester) {
+        FamilyMember me = familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyId, requester.getId())
+                .filter(FamilyMember::getIsActive)
+                .orElseThrow(() -> new FamilyException("FORBIDDEN", "No eres miembro activo de esta familia.", 403));
+
+        return toMemberItemResponse(me, familyId);
     }
 
     @Transactional
@@ -198,5 +201,25 @@ public class FamilyGroupService {
                 userId, familyId, request.getRole(), requester.getEmail());
 
         return new MessageResponse("Rol actualizado exitosamente.");
+    }
+
+    private MemberItemResponse toMemberItemResponse(FamilyMember m, Long familyId) {
+        long completed = taskAssignmentRepository.countByUserIdAndFamilyGroupIdAndStatus(
+                m.getUser().getId(), familyId, com.vertexdev.familytask.model.enums.TaskStatus.COMPLETED);
+
+        return MemberItemResponse.builder()
+                .id(m.getUser().getId())
+                .name(m.getUser().getName())
+                .email(m.getUser().getEmail())
+                .pictureUrl(m.getUser().getPictureUrl())
+                .role(m.getRole().name())
+                .isAdmin(m.getIsAdmin())
+                .joinedAt(m.getJoinedAt())
+                .totalXp(m.getTotalXp())
+                .currentLevel(m.getCurrentLevel())
+                .totalCoins(m.getTotalCoins())
+                .xpToNextLevel(experienceService.xpToNextLevel(m.getTotalXp()))
+                .completedTaskCount(completed)
+                .build();
     }
 }

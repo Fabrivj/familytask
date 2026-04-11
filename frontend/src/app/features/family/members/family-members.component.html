@@ -49,17 +49,17 @@
 
               <div class="card-stats" aria-label="Estadísticas">
                 <div class="stat">
-                  <span class="stat-val">—</span>
+                  <span class="stat-val">{{ member.role === 'CHILD' ? (member.currentLevel ?? 1) : '—' }}</span>
                   <span class="stat-lbl">{{ member.role === 'PARENT' ? 'FAMILIAS' : 'NIVEL' }}</span>
                 </div>
                 <div class="stat-sep" aria-hidden="true"></div>
                 <div class="stat">
-                  <span class="stat-val">—</span>
-                  <span class="stat-lbl">TAREAS</span>
+                  <span class="stat-val">{{ member.completedTaskCount ?? 0 }}</span>
+                  <span class="stat-lbl">COMPLETADAS</span>
                 </div>
                 <div class="stat-sep" aria-hidden="true"></div>
                 <div class="stat">
-                  <span class="stat-val">—</span>
+                  <span class="stat-val">{{ member.role === 'CHILD' ? (member.totalCoins ?? 0) : '—' }}</span>
                   <span class="stat-lbl">MONEDAS</span>
                 </div>
               </div>
@@ -67,9 +67,11 @@
               @if (member.role === 'CHILD') {
                 <div class="xp-row" aria-label="Experiencia">
                   <mat-icon class="xp-bolt" aria-hidden="true">bolt</mat-icon>
-                  <span class="xp-label">XP — NIVEL 1</span>
-                  <div class="xp-track"><div class="xp-fill" style="width: 0%"></div></div>
-                  <span class="xp-count">0 / 1000</span>
+                  <span class="xp-label">XP — NIVEL {{ member.currentLevel ?? 1 }}</span>
+                  <div class="xp-track">
+                    <div class="xp-fill" [style.width.%]="xpPercent(member)"></div>
+                  </div>
+                  <span class="xp-count">{{ xpInLevel(member) }} / {{ xpNeededInLevel(member) }}</span>
                 </div>
               }
 

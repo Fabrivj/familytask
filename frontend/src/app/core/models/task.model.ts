@@ -50,4 +50,10 @@ export interface CompleteTaskResponse {
   xpReward: number;
   coinsReward: number;
   completedAt: string;
+  newTotalXp: number;
+  newTotalCoins: number;
+  newLevel: number;
+  previousLevel: number;
+  leveledUp: boolean;
+  xpToNextLevel: number;
 }
