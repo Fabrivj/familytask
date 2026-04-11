@@ -16,6 +16,11 @@ public class CompleteTaskResponse {
     private Integer coinsReward;
     private LocalDateTime completedAt;
 
-    // TODO: cuando se implemente el otorgamiento de puntos y monedas,
-    // agregar aquí los campos confirming the actual grant (e.g. newTotalXp, newTotalCoins)
+    // Resultado del otorgamiento de XP y monedas
+    private Integer newTotalXp;
+    private Integer newTotalCoins;
+    private Integer newLevel;
+    private Integer previousLevel;
+    private Boolean leveledUp;
+    private Integer xpToNextLevel;
 }

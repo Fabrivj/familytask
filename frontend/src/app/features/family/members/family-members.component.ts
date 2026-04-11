@@ -199,6 +199,19 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     return role === 'PARENT' ? 'Tutor' : 'Hijo/a';
   }
 
+  xpNeededInLevel(member: MemberItem): number {
+    return 100 * (member.currentLevel ?? 1);
+  }
+
+  xpInLevel(member: MemberItem): number {
+    return this.xpNeededInLevel(member) - (member.xpToNextLevel ?? 0);
+  }
+
+  xpPercent(member: MemberItem): number {
+    const needed = this.xpNeededInLevel(member);
+    return Math.min(100, Math.max(0, (this.xpInLevel(member) / needed) * 100));
+  }
+
   daysAgo(dateStr: string): number {
     return Math.max(0, Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000));
   }

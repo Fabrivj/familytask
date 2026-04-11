@@ -6,6 +6,11 @@ export interface MemberItem {
   role: 'PARENT' | 'CHILD';
   isAdmin: boolean;
   joinedAt: string;
+  totalXp?: number;
+  currentLevel?: number;
+  totalCoins?: number;
+  xpToNextLevel?: number;
+  completedTaskCount?: number;
 }
 
 export interface PendingInvitation {

@@ -15,4 +15,9 @@ public class MemberItemResponse {
     private String role;
     private Boolean isAdmin;
     private LocalDateTime joinedAt;
+    private Integer totalXp;
+    private Integer currentLevel;
+    private Integer totalCoins;
+    private Integer xpToNextLevel;
+    private Long completedTaskCount;
 }
