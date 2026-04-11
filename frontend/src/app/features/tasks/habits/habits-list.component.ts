@@ -17,7 +17,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
 import { HabitService } from '../../../core/services/habit.service';
 import { MembersService } from '../../../core/services/members.service';
-import { HabitFrequency, HabitResponse } from '../../../core/models/habit.model';
+import { CompleteHabitResponse, HabitFrequency, HabitResponse } from '../../../core/models/habit.model';
 import { MemberItem } from '../../../core/models/member.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -38,12 +38,43 @@ export class HabitsListComponent {
 
   readonly familyId = computed(() => this.authService.activeFamily()?.familyId ?? null);
   readonly isParent = this.permissionsService.isParent;
+  readonly currentUserId = computed(() => this.authService.currentUserId());
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly habits   = signal<HabitResponse[]>([]);
   readonly countChange = output<number>();
   readonly members  = signal<MemberItem[]>([]);
   readonly childMembers = computed(() => this.members().filter(m => m.role === 'CHILD'));
+
+  // ─── Completar hábito ─────────────────────────────────────────────────────
+  readonly isCompletingHabit = signal<number | null>(null);
+
+  completeHabit(habit: HabitResponse): void {
+    this.isCompletingHabit.set(habit.id);
+    this.habitService.complete(habit.id).subscribe({
+      next: (result: CompleteHabitResponse) => {
+        this.habits.update(list => list.map(h =>
+          h.id === habit.id
+            ? { ...h, completedInCurrentPeriod: true, currentStreak: result.currentStreak, longestStreak: result.longestStreak }
+            : h
+        ));
+        this.isCompletingHabit.set(null);
+        this.snackBar.open(
+          `¡Hábito completado! +${result.xpReward} XP y ${result.coinsReward} monedas. 🔥 Racha: ${result.currentStreak} día${result.currentStreak === 1 ? '' : 's'}`,
+          'Cerrar',
+          { duration: 6000, panelClass: 'snack-success' },
+        );
+      },
+      error: (err) => {
+        this.isCompletingHabit.set(null);
+        this.snackBar.open(
+          err.error?.message || 'No se pudo registrar el hábito. Por favor, intente nuevamente.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-error' },
+        );
+      },
+    });
+  }
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────
   readonly showDeleteModal = signal(false);

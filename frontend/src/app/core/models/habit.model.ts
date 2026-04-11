@@ -11,6 +11,20 @@ export interface HabitResponse {
   assignedToId: number | null;
   assignedToName: string | null;
   assignedToPictureUrl: string | null;
+  currentStreak: number | null;
+  longestStreak: number | null;
+  completedInCurrentPeriod: boolean | null;
+}
+
+export interface CompleteHabitResponse {
+  habitId: number;
+  habitTitle: string;
+  assignedToName: string;
+  xpReward: number;
+  coinsReward: number;
+  currentStreak: number;
+  longestStreak: number;
+  completionDate: string;
 }
 
 export interface CreateHabitRequest {
