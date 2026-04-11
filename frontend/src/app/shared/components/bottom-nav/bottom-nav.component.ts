@@ -16,6 +16,13 @@ import { PermissionsService } from '../../../core/services/permissions.service';
     @if (moreOpen()) {
       <div class="more-backdrop" (click)="closeMore()" aria-hidden="true"></div>
       <div class="more-sheet" role="menu">
+        <button class="sheet-item" type="button"
+          [class.active]="isActive('/ranking')"
+          (click)="navigateFrom('/ranking')"
+          aria-label="Ranking">
+          <mat-icon aria-hidden="true">leaderboard</mat-icon>
+          Ranking
+        </button>
         @if (isParent()) {
           <button class="sheet-item" type="button"
             [class.active]="isActive('/family/members')"

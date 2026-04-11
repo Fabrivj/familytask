@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { switchMap } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { FamilyService } from '../../core/services/family.service';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
@@ -19,6 +21,7 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatSlideToggleModule,
     AppShellComponent,
     PageHeaderComponent,
   ],
@@ -26,7 +29,7 @@ const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
   styleUrl: './settings.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SettingsComponent {
+export class SettingsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly familyService = inject(FamilyService);
 
@@ -40,14 +43,32 @@ export class SettingsComponent {
     ],
   });
 
+  readonly rankingEnabledCtrl = new FormControl<boolean>(true, { nonNullable: true });
+
   readonly isLoading = signal(false);
   readonly apiError = signal('');
   readonly successMessage = signal('');
+  readonly isLoadingConfig = signal(true);
 
   constructor() {
     const familyId = this.authService.getActiveFamilyId();
     const currentName = this.authService.families().find(f => f.familyId === familyId)?.familyName ?? '';
     this.nameCtrl.setValue(currentName);
+  }
+
+  ngOnInit(): void {
+    const familyId = this.authService.getActiveFamilyId();
+    if (!familyId) return;
+
+    this.familyService.getFamilyConfig(familyId).subscribe({
+      next: (config) => {
+        this.rankingEnabledCtrl.setValue(config.rankingEnabled ?? true);
+        this.isLoadingConfig.set(false);
+      },
+      error: () => {
+        this.isLoadingConfig.set(false);
+      },
+    });
   }
 
   getNameError(): string {
@@ -69,9 +90,13 @@ export class SettingsComponent {
     this.successMessage.set('');
     this.nameCtrl.disable();
 
-    this.familyService.updateName(familyId, { name: this.nameCtrl.value.trim() }).subscribe({
-      next: (family) => {
+    this.familyService.updateName(familyId, { name: this.nameCtrl.value.trim() }).pipe(
+      switchMap((family) => {
         this.authService.updateFamilyName(familyId, family.name);
+        return this.familyService.updateSettings(familyId, this.rankingEnabledCtrl.value);
+      })
+    ).subscribe({
+      next: () => {
         this.successMessage.set('Configuración actualizada exitosamente.');
         this.isLoading.set(false);
         this.nameCtrl.enable();

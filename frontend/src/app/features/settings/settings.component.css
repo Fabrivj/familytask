@@ -69,6 +69,11 @@
   background: rgba(var(--success-rgb), 0.05);
 }
 
+/* ── Card spacing ── */
+.config-card + .config-card {
+  margin-top: 24px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 767px) {
   .content {
