@@ -35,4 +35,8 @@ public class FamilyGroup {
     @OneToMany(mappedBy = "familyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Invitation> invitations = new ArrayList<>();
+
+    @Column(name = "ranking_enabled", nullable = false)
+    @Builder.Default
+    private Boolean rankingEnabled = true;
 }
