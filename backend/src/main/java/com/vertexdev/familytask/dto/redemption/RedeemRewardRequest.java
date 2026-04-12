@@ -7,6 +7,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RedeemRewardRequest {
 
     @NotNull(message = "El identificador de la recompensa es obligatorio.")
