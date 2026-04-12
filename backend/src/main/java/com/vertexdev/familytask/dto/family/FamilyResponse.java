@@ -9,4 +9,5 @@ public class FamilyResponse {
     private Long id;
     private String name;
     private String role;
+    private Boolean rankingEnabled;
 }

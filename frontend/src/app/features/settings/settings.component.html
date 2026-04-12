@@ -53,5 +53,31 @@
 
     </section>
 
+    <section class="config-card" aria-label="Configuración de ranking">
+
+      <div class="config-card-header">
+        <mat-icon class="header-icon" aria-hidden="true">leaderboard</mat-icon>
+        <span class="config-card-label">RANKING</span>
+      </div>
+
+      <div class="config-card-body">
+        <label class="field-label">RANKING VISIBLE PARA TODOS LOS MIEMBROS</label>
+        <div class="toggle-row">
+          <mat-slide-toggle
+            [formControl]="rankingEnabledCtrl"
+            [disabled]="rankingUpdating()"
+            (change)="toggleRanking()">
+          </mat-slide-toggle>
+          <span class="toggle-label-text" [class.is-on]="rankingEnabledCtrl.value">
+            {{ rankingEnabledCtrl.value ? 'Habilitado' : 'Deshabilitado' }}
+          </span>
+        </div>
+        @if (rankingError()) {
+          <p class="api-error" role="alert">{{ rankingError() }}</p>
+        }
+      </div>
+
+    </section>
+
   </main>
 </app-shell>
