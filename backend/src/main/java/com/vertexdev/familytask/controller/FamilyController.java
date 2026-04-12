@@ -5,6 +5,7 @@ import com.vertexdev.familytask.dto.family.CreateFamilyRequest;
 import com.vertexdev.familytask.dto.family.FamilyMembersResponse;
 import com.vertexdev.familytask.dto.family.FamilyResponse;
 import com.vertexdev.familytask.dto.family.MemberItemResponse;
+import com.vertexdev.familytask.dto.family.UpdateFamilySettingsRequest;
 import com.vertexdev.familytask.dto.family.UpdateRoleRequest;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.FamilyGroupService;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -77,6 +80,34 @@ public class FamilyController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         MessageResponse response = familyGroupService.updateMemberRole(familyId, userId, request, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{familyId}/settings")
+    public ResponseEntity<FamilyResponse> getFamilySettings(
+            @PathVariable Long familyId,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        FamilyResponse response = familyGroupService.getFamilySettings(familyId, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{familyId}/settings")
+    public ResponseEntity<FamilyResponse> updateSettings(
+            @PathVariable Long familyId,
+            @Valid @RequestBody UpdateFamilySettingsRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        FamilyResponse response = familyGroupService.updateSettings(familyId, request, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{familyId}/ranking")
+    public ResponseEntity<List<MemberItemResponse>> getRanking(
+            @PathVariable Long familyId,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        List<MemberItemResponse> response = familyGroupService.getRanking(familyId, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 }

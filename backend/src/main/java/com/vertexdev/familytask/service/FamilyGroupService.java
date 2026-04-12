@@ -6,6 +6,7 @@ import com.vertexdev.familytask.dto.family.FamilyMembersResponse;
 import com.vertexdev.familytask.dto.family.FamilyResponse;
 import com.vertexdev.familytask.dto.family.MemberItemResponse;
 import com.vertexdev.familytask.dto.family.PendingInvitationResponse;
+import com.vertexdev.familytask.dto.family.UpdateFamilySettingsRequest;
 import com.vertexdev.familytask.dto.family.UpdateRoleRequest;
 import com.vertexdev.familytask.exception.FamilyException;
 import com.vertexdev.familytask.model.FamilyGroup;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -62,6 +64,7 @@ public class FamilyGroupService {
                 .id(familyGroup.getId())
                 .name(familyGroup.getName())
                 .role(Role.PARENT.name())
+                .rankingEnabled(familyGroup.getRankingEnabled())
                 .build();
     }
 
@@ -85,6 +88,7 @@ public class FamilyGroupService {
                 .id(familyGroup.getId())
                 .name(familyGroup.getName())
                 .role(Role.PARENT.name())
+                .rankingEnabled(familyGroup.getRankingEnabled())
                 .build();
     }
 
@@ -201,6 +205,68 @@ public class FamilyGroupService {
                 userId, familyId, request.getRole(), requester.getEmail());
 
         return new MessageResponse("Rol actualizado exitosamente.");
+    }
+
+    @Transactional(readOnly = true)
+    public FamilyResponse getFamilySettings(Long familyId, User requester) {
+        FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
+                .orElseThrow(() -> new FamilyException("FAMILY_NOT_FOUND", "Grupo familiar no encontrado.", 404));
+
+        FamilyMember member = familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyId, requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new FamilyException("FORBIDDEN", "No tienes permisos para ver la configuración de este grupo.", 403));
+
+        return FamilyResponse.builder()
+                .id(familyGroup.getId())
+                .name(familyGroup.getName())
+                .role(member.getRole().name())
+                .rankingEnabled(familyGroup.getRankingEnabled())
+                .build();
+    }
+
+    @Transactional
+    public FamilyResponse updateSettings(Long familyId, UpdateFamilySettingsRequest request, User authenticatedUser) {
+        FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
+                .orElseThrow(() -> new FamilyException("FAMILY_NOT_FOUND", "Grupo familiar no encontrado.", 404));
+
+        FamilyMember member = familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyId, authenticatedUser.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new FamilyException("FORBIDDEN", "No tienes permisos para modificar este grupo.", 403));
+
+        familyGroup.setRankingEnabled(request.getRankingEnabled());
+        familyGroupRepository.save(familyGroup);
+        log.info("Family {} settings updated by {}: rankingEnabled={}", familyId, authenticatedUser.getEmail(), request.getRankingEnabled());
+
+        return FamilyResponse.builder()
+                .id(familyGroup.getId())
+                .name(familyGroup.getName())
+                .role(member.getRole().name())
+                .rankingEnabled(familyGroup.getRankingEnabled())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MemberItemResponse> getRanking(Long familyId, User requester) {
+        FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
+                .orElseThrow(() -> new FamilyException("FAMILY_NOT_FOUND", "Grupo familiar no encontrado.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyId, requester.getId())
+                .filter(FamilyMember::getIsActive)
+                .orElseThrow(() -> new FamilyException("FORBIDDEN", "No eres miembro activo de esta familia.", 403));
+
+        if (!Boolean.TRUE.equals(familyGroup.getRankingEnabled())) {
+            throw new FamilyException("RANKING_DISABLED", "El ranking no está habilitado para esta familia.", 403);
+        }
+
+        return familyMemberRepository
+                .findByFamilyGroupIdAndIsActiveTrue(familyId)
+                .stream()
+                .sorted(Comparator.comparingInt(FamilyMember::getTotalXp).reversed())
+                .map(m -> toMemberItemResponse(m, familyId))
+                .toList();
     }
 
     private MemberItemResponse toMemberItemResponse(FamilyMember m, Long familyId) {

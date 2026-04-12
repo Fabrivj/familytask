@@ -11,6 +11,7 @@ export interface FamilyResponse {
   id: number;
   name: string;
   role: string;
+  rankingEnabled?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -41,6 +42,19 @@ export class FamilyService {
   removeMember(familyId: number, userId: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(
       `${environment.apiUrl}/families/${familyId}/members/${userId}`
+    );
+  }
+
+  getFamilyConfig(familyId: number): Observable<FamilyResponse> {
+    return this.http.get<FamilyResponse>(
+      `${environment.apiUrl}/families/${familyId}/settings`
+    );
+  }
+
+  updateSettings(familyId: number, rankingEnabled: boolean): Observable<FamilyResponse> {
+    return this.http.patch<FamilyResponse>(
+      `${environment.apiUrl}/families/${familyId}/settings`,
+      { rankingEnabled }
     );
   }
 }

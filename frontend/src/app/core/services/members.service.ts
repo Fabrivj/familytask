@@ -22,4 +22,11 @@ export class MembersService {
       `${environment.apiUrl}/families/${familyId}/members/me`
     );
   }
+
+  /** Ranking de miembros activos ordenados por XP. Accesible para cualquier miembro activo. */
+  getRanking(familyId: number): Observable<MemberItem[]> {
+    return this.http.get<MemberItem[]>(
+      `${environment.apiUrl}/families/${familyId}/ranking`
+    );
+  }
 }

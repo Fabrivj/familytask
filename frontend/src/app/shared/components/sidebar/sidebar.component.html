@@ -54,6 +54,14 @@
       </button>
     </li>
 
+    <li>
+      <button class="nav-item" type="button" (click)="navigate('/ranking')"
+        [class.active]="isActive('/ranking')" aria-label="Ranking">
+        <mat-icon aria-hidden="true">leaderboard</mat-icon>
+        <span class="label">RANKING</span>
+      </button>
+    </li>
+
     @if (!isParent()) {
       <li>
         <button class="nav-item" type="button" (click)="navigate('/badges')"

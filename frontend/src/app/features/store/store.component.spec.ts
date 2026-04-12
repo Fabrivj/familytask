@@ -1,9 +1,12 @@
-  import { TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { StoreComponent } from './store.component';
 import { RewardService } from '../../core/services/reward.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PermissionsService } from '../../core/services/permissions.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RedemptionService } from '../../core/services/redemption.service';
+import { RedemptionHistoryService } from '../../core/services/redemption-history.service';
+import { MembersService } from '../../core/services/members.service';
 import { of, throwError } from 'rxjs';
 import { RewardResponse } from '../../core/models/reward.model';
 
@@ -19,7 +22,7 @@ const mockReward: RewardResponse = {
   createdAt: '2026-01-01T00:00:00',
 };
 
-describe('StoreComponent — edit flow', () => {
+describe('StoreComponent â€” edit flow', () => {
   let component: StoreComponent;
   let rewardService: {
     getRewards: ReturnType<typeof vi.fn>;
@@ -45,6 +48,9 @@ describe('StoreComponent — edit flow', () => {
         { provide: AuthService, useValue: { activeFamily: () => ({ familyId: 10 }) } },
         { provide: PermissionsService, useValue: { isParent: () => true } },
         { provide: MatSnackBar, useValue: snackBar },
+        { provide: RedemptionService, useValue: { requestRedemption: vi.fn() } },
+        { provide: RedemptionHistoryService, useValue: { getHistory: vi.fn().mockReturnValue(of([])) } },
+        { provide: MembersService, useValue: { getMembers: vi.fn().mockReturnValue(of({ members: [] })), getMyStats: vi.fn() } },
       ],
     }).compileComponents();
 
@@ -109,12 +115,12 @@ describe('StoreComponent — edit flow', () => {
 
   it('shows general error from service on update failure', () => {
     rewardService.update.mockReturnValue(throwError(() => ({
-      error: { message: 'No se pudo completar la operación. Intenta de nuevo.' },
+      error: { message: 'No se pudo completar la operaciÃ³n. Intenta de nuevo.' },
     })));
     component.openEditPanel(mockReward);
     component.submitCreate();
 
-    expect(component.createError()).toBe('No se pudo completar la operación. Intenta de nuevo.');
+    expect(component.createError()).toBe('No se pudo completar la operaciÃ³n. Intenta de nuevo.');
   });
 
   it('submitCreate in create mode calls rewardService.create, not update', () => {
@@ -173,7 +179,7 @@ describe('StoreComponent — edit flow', () => {
 
   it('confirmDelete closes modal and shows error message on service failure', () => {
     rewardService.delete.mockReturnValue(throwError(() => ({
-      error: { message: 'No se pudo completar la operación. Intenta de nuevo.' },
+      error: { message: 'No se pudo completar la operaciÃ³n. Intenta de nuevo.' },
     })));
     component.openDeleteModal(mockReward);
 
@@ -182,7 +188,7 @@ describe('StoreComponent — edit flow', () => {
     expect(component.showDeleteModal()).toBe(false);
     expect(component.rewardToDelete()).toBeNull();
     expect(snackBar.open).toHaveBeenCalledWith(
-      'No se pudo completar la operación. Intenta de nuevo.', 'Cerrar', expect.any(Object)
+      'No se pudo completar la operaciÃ³n. Intenta de nuevo.', 'Cerrar', expect.any(Object)
     );
   });
 

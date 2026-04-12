@@ -16,44 +16,57 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { AuthService } from '../../core/services/auth.service';
 import { PermissionsService } from '../../core/services/permissions.service';
 import { RewardService } from '../../core/services/reward.service';
+import { RedemptionService } from '../../core/services/redemption.service';
+import { MembersService } from '../../core/services/members.service';
 import { RewardResponse } from '../../core/models/reward.model';
+import { MemberItem } from '../../core/models/member.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { RedemptionHistoryPanelComponent } from '../../shared/components/redemption-history-panel/redemption-history-panel.component';
 
 const REWARD_ICONS = [
-  '🎁', '🍕', '🎮', '🎬',
-  '🍦', '✈️', '👗', '🎉',
-  '🎡', '🎂', '🏆', '🎵',
-  '🍔', '⚽', '📚', '🎨',
-  '🏖️', '🏊', '💵',
+  '\u{1F381}', '\u{1F355}', '\u{1F3AE}', '\u{1F3AC}',
+  '\u{1F366}', '\u{2708}\u{FE0F}', '\u{1F457}', '\u{1F389}',
+  '\u{1F3A1}', '\u{1F382}', '\u{1F3C6}', '\u{1F3B5}',
+  '\u{1F354}', '\u{26BD}', '\u{1F4DA}', '\u{1F3A8}',
+  '\u{1F3D6}\u{FE0F}', '\u{1F3CA}', '\u{1F4B5}',
 ];
 
 const ICON_LABELS: Record<string, string> = {
-  '🎁': 'Regalo',
-  '🍕': 'Pizza',
-  '🎮': 'Videojuegos',
-  '🎬': 'Película',
-  '🍦': 'Helado',
-  '✈️': 'Viaje',
-  '👗': 'Ropa',
-  '🎉': 'Celebración',
-  '🎡': 'Parque de atracciones',
-  '🎂': 'Pastel',
-  '🏆': 'Trofeo',
-  '🎵': 'Música',
-  '🍔': 'Hamburguesa',
-  '⚽': 'Deporte',
-  '📚': 'Libros',
-  '🎨': 'Arte',
-  '🏖️': 'Playa',
-  '🏊': 'Piscina',
-  '💵': 'Billetes',
+  '\u{1F381}': 'Regalo',
+  '\u{1F355}': 'Pizza',
+  '\u{1F3AE}': 'Videojuegos',
+  '\u{1F3AC}': 'Pelicula',
+  '\u{1F366}': 'Helado',
+  '\u{2708}\u{FE0F}': 'Viaje',
+  '\u{1F457}': 'Ropa',
+  '\u{1F389}': 'Celebracion',
+  '\u{1F3A1}': 'Parque de atracciones',
+  '\u{1F382}': 'Pastel',
+  '\u{1F3C6}': 'Trofeo',
+  '\u{1F3B5}': 'Musica',
+  '\u{1F354}': 'Hamburguesa',
+  '\u{26BD}': 'Deporte',
+  '\u{1F4DA}': 'Libros',
+  '\u{1F3A8}': 'Arte',
+  '\u{1F3D6}\u{FE0F}': 'Playa',
+  '\u{1F3CA}': 'Piscina',
+  '\u{1F4B5}': 'Billetes',
 };
 
 @Component({
   selector: 'app-store',
-  imports: [ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, AppShellComponent, A11yModule, PageHeaderComponent, ConfirmDialogComponent],
+  imports: [
+    ReactiveFormsModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    AppShellComponent,
+    A11yModule,
+    PageHeaderComponent,
+    ConfirmDialogComponent,
+    RedemptionHistoryPanelComponent,
+  ],
   templateUrl: './store.component.html',
   styleUrl: './store.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,6 +74,8 @@ const ICON_LABELS: Record<string, string> = {
 export class StoreComponent {
   private readonly authService = inject(AuthService);
   private readonly rewardService = inject(RewardService);
+  private readonly redemptionService = inject(RedemptionService);
+  private readonly membersService = inject(MembersService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly permissionsService = inject(PermissionsService);
 
@@ -72,41 +87,36 @@ export class StoreComponent {
   readonly availableIcons = REWARD_ICONS;
   readonly iconLabels = ICON_LABELS;
 
-  readonly rewards     = signal<RewardResponse[]>([]);
+  readonly rewards = signal<RewardResponse[]>([]);
+  readonly activeTab = signal<'rewards' | 'history'>('rewards');
   readonly rewardsSubtitle = computed(() => {
     const n = this.rewards().length;
     return `${n} recompensa${n !== 1 ? 's' : ''} activa${n !== 1 ? 's' : ''}`;
   });
 
-  /** Average minLevel of rewards that have one set. */
   private readonly avgLevel = computed(() => {
     const leveled = this.rewards().filter(r => r.minLevel != null);
     if (!leveled.length) return 0;
     return leveled.reduce((sum, r) => sum + r.minLevel!, 0) / leveled.length;
   });
 
-  /** Returns true if this reward's level is above the group average. */
-  isPremium(reward: RewardResponse): boolean {
-    return !!reward.minLevel && reward.minLevel > this.avgLevel();
-  }
-
-  /** Returns an array of length = minLevel (capped at 10) for star rendering. */
-  starsArray(minLevel: number): number[] {
-    return Array.from({ length: Math.min(minLevel, 10) });
-  }
-
-  readonly isLoading   = signal(false);
-  readonly error       = signal('');
+  readonly isLoading = signal(false);
+  readonly error = signal('');
 
   readonly showCreatePanel = signal(false);
-  readonly isCreating      = signal(false);
-  readonly createError     = signal('');
-  readonly editingReward   = signal<RewardResponse | null>(null);
-  readonly isEditMode      = computed(() => this.editingReward() !== null);
-  readonly selectedIcon    = signal<string>('🎁');
+  readonly isCreating = signal(false);
+  readonly createError = signal('');
+  readonly editingReward = signal<RewardResponse | null>(null);
+  readonly isEditMode = computed(() => this.editingReward() !== null);
+  readonly selectedIcon = signal<string>('\u{1F381}');
 
   readonly showDeleteModal = signal(false);
-  readonly rewardToDelete  = signal<RewardResponse | null>(null);
+  readonly rewardToDelete = signal<RewardResponse | null>(null);
+
+  readonly myStats = signal<MemberItem | null>(null);
+  readonly isRedeeming = signal(false);
+  readonly rewardToClaim = signal<RewardResponse | null>(null);
+  readonly showClaimDialog = signal(false);
 
   readonly nameCtrl = new FormControl('', {
     nonNullable: true,
@@ -134,6 +144,33 @@ export class StoreComponent {
     });
   }
 
+  isPremium(reward: RewardResponse): boolean {
+    return !!reward.minLevel && reward.minLevel > this.avgLevel();
+  }
+
+  starsArray(minLevel: number): number[] {
+    return Array.from({ length: Math.min(minLevel, 10) });
+  }
+
+  canAfford(reward: RewardResponse): boolean {
+    const coins = this.myStats()?.totalCoins ?? 0;
+    return coins >= reward.cost;
+  }
+
+  meetsLevel(reward: RewardResponse): boolean {
+    if (!reward.minLevel) return true;
+    return (this.myStats()?.currentLevel ?? 1) >= reward.minLevel;
+  }
+
+  claimBlockReason(reward: RewardResponse): string | null {
+    const noCoins = !this.canAfford(reward);
+    const noLevel = !this.meetsLevel(reward);
+    if (noCoins && noLevel) return 'No tienes monedas suficientes y no alcanzas el nivel minimo requerido para esta recompensa.';
+    if (noCoins) return 'No tienes monedas suficientes para canjear esta recompensa.';
+    if (noLevel) return 'No alcanzas el nivel minimo requerido para esta recompensa.';
+    return null;
+  }
+
   private loadData(familyId: number): void {
     this.isLoading.set(true);
     this.error.set('');
@@ -148,6 +185,13 @@ export class StoreComponent {
         this.isLoading.set(false);
       },
     });
+
+    if (!this.isParent()) {
+      this.membersService.getMyStats(familyId).subscribe({
+        next: (stats) => this.myStats.set(stats),
+        error: () => {},
+      });
+    }
   }
 
   getNameError(): string {
@@ -158,7 +202,7 @@ export class StoreComponent {
   }
 
   getDescriptionError(): string {
-    if (this.descriptionCtrl.hasError('maxlength')) return 'Máximo 500 caracteres.';
+    if (this.descriptionCtrl.hasError('maxlength')) return 'Maximo 500 caracteres.';
     return '';
   }
 
@@ -171,7 +215,7 @@ export class StoreComponent {
 
   getMinLevelError(): string {
     const c = this.minLevelCtrl;
-    if (c.hasError('pattern') || c.hasError('min')) return 'El nivel debe ser un número mayor a 0.';
+    if (c.hasError('pattern') || c.hasError('min')) return 'El nivel debe ser un numero mayor a 0.';
     return '';
   }
 
@@ -187,7 +231,7 @@ export class StoreComponent {
     this.descriptionCtrl.setValue(reward.description ?? '');
     this.costCtrl.setValue(reward.cost);
     this.minLevelCtrl.setValue(reward.minLevel ?? null);
-    this.selectedIcon.set(reward.icon ?? '🎁');
+    this.selectedIcon.set(reward.icon ?? '\u{1F381}');
     this.showCreatePanel.set(true);
   }
 
@@ -199,9 +243,9 @@ export class StoreComponent {
   }
 
   cardGradient(icon: string | null): string {
-    const warm = new Set(['🍕', '🍦', '🎂', '🍔']);
-    const cool = new Set(['🎮', '🎬', '🎡', '⚽', '📚', '🏖️', '🏊']);
-    const gold = new Set(['🏆', '🎉', '🎁', '✈️', '💵']);
+    const warm = new Set(['\u{1F355}', '\u{1F366}', '\u{1F382}', '\u{1F354}']);
+    const cool = new Set(['\u{1F3AE}', '\u{1F3AC}', '\u{1F3A1}', '\u{26BD}', '\u{1F4DA}', '\u{1F3D6}\u{FE0F}', '\u{1F3CA}']);
+    const gold = new Set(['\u{1F3C6}', '\u{1F389}', '\u{1F381}', '\u{2708}\u{FE0F}', '\u{1F4B5}']);
     const i = icon ?? '';
     if (warm.has(i)) return 'linear-gradient(145deg, rgba(255,100,50,0.10) 0%, rgba(255,180,30,0.07) 100%)';
     if (cool.has(i)) return 'linear-gradient(145deg, rgba(60,100,255,0.10) 0%, rgba(120,60,255,0.07) 100%)';
@@ -213,7 +257,6 @@ export class StoreComponent {
     this.selectedIcon.set(icon);
   }
 
-  /** Roving tabindex: arrow keys move focus within the icon radio group. */
   onIconKeydown(event: KeyboardEvent): void {
     const buttons = (event.currentTarget as HTMLElement)
       .querySelectorAll<HTMLButtonElement>('button[data-icon-index]');
@@ -261,7 +304,7 @@ export class StoreComponent {
       error: (err) => {
         this.closeDeleteModal();
         this.snackBar.open(
-          err.error?.message || 'No se pudo completar la operación. Intenta de nuevo.',
+          err.error?.message || 'No se pudo completar la operacion. Intenta de nuevo.',
           'Cerrar',
           { duration: 5000, panelClass: 'snack-error' },
         );
@@ -285,24 +328,24 @@ export class StoreComponent {
 
     const request$ = editing
       ? this.rewardService.update(editing.id, {
-          name:        this.nameCtrl.value.trim(),
+          name: this.nameCtrl.value.trim(),
           description: this.descriptionCtrl.value.trim() || null,
-          icon:        this.selectedIcon(),
-          cost:        this.costCtrl.value!,
-          minLevel:    this.minLevelCtrl.value ?? null,
+          icon: this.selectedIcon(),
+          cost: this.costCtrl.value!,
+          minLevel: this.minLevelCtrl.value ?? null,
         })
       : this.rewardService.create({
           familyId,
-          name:        this.nameCtrl.value.trim(),
+          name: this.nameCtrl.value.trim(),
           description: this.descriptionCtrl.value.trim() || null,
-          icon:        this.selectedIcon(),
-          cost:        this.costCtrl.value!,
-          minLevel:    this.minLevelCtrl.value ?? null,
+          icon: this.selectedIcon(),
+          cost: this.costCtrl.value!,
+          minLevel: this.minLevelCtrl.value ?? null,
         });
 
-    const successMsg  = editing ? 'Recompensa actualizada exitosamente.' : 'Recompensa creada exitosamente.';
+    const successMsg = editing ? 'Recompensa actualizada exitosamente.' : 'Recompensa creada exitosamente.';
     const fallbackErr = editing
-      ? 'No se pudo completar la operación. Intenta de nuevo.'
+      ? 'No se pudo completar la operacion. Intenta de nuevo.'
       : 'No se pudo crear la recompensa. Intenta de nuevo.';
 
     request$.subscribe({
@@ -321,13 +364,56 @@ export class StoreComponent {
     });
   }
 
+  openClaimDialog(reward: RewardResponse): void {
+    this.rewardToClaim.set(reward);
+    this.showClaimDialog.set(true);
+  }
+
+  closeClaimDialog(): void {
+    this.showClaimDialog.set(false);
+    this.rewardToClaim.set(null);
+  }
+
+  confirmClaim(): void {
+    const reward = this.rewardToClaim();
+    const familyId = this.familyId();
+    if (!reward || !familyId) return;
+
+    this.closeClaimDialog();
+    this.isRedeeming.set(true);
+
+    this.redemptionService.requestRedemption({ rewardId: reward.id, familyId }).subscribe({
+      next: () => {
+        this.isRedeeming.set(false);
+        this.myStats.update(s => s ? { ...s, totalCoins: (s.totalCoins ?? 0) - reward.cost } : s);
+        this.snackBar.open(
+          'Canje solicitado exitosamente. Queda pendiente de entrega.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-success' },
+        );
+      },
+      error: (err) => {
+        this.isRedeeming.set(false);
+        this.snackBar.open(
+          err.error?.message || 'No se pudo procesar el canje. Intenta de nuevo.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-error' },
+        );
+      },
+    });
+  }
+
   private resetForm(): void {
     this.editingReward.set(null);
     this.nameCtrl.reset('');
     this.descriptionCtrl.reset('');
     this.costCtrl.reset(null);
     this.minLevelCtrl.reset(null);
-    this.selectedIcon.set('🎁');
+    this.selectedIcon.set('\u{1F381}');
     this.createError.set('');
+  }
+
+  switchTab(tab: 'rewards' | 'history'): void {
+    this.activeTab.set(tab);
   }
 }
