@@ -38,3 +38,14 @@ build/
 .claude/skills/
 .claude/worktrees/
 .claude/settings.local.json
+
+### Screenshots / temp images at root ###
+*.jpeg
+*.jpg
+*.png
+*.gif
+!frontend/public/**
+!frontend/src/**
+
+### Presentation output ###
+presentation/*.pptx

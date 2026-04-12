@@ -13,7 +13,33 @@
   }
 </div>
 
-<!-- Child balance bar -->
+<div class="tabs-bar" role="tablist" aria-label="Secciones de tienda">
+  <button
+    class="tab-btn"
+    [class.tab-active]="activeTab() === 'rewards'"
+    type="button"
+    role="tab"
+    [attr.aria-selected]="activeTab() === 'rewards'"
+    (click)="switchTab('rewards')"
+  >
+    <mat-icon aria-hidden="true">store</mat-icon>
+    RECOMPENSAS
+  </button>
+  <button
+    class="tab-btn"
+    [class.tab-active]="activeTab() === 'history'"
+    type="button"
+    role="tab"
+    [attr.aria-selected]="activeTab() === 'history'"
+    (click)="switchTab('history')"
+  >
+    <mat-icon aria-hidden="true">history</mat-icon>
+    HISTORIAL DE RECOMPENSAS
+  </button>
+</div>
+
+@if (activeTab() === 'rewards') {
+
 @if (!isParent() && myStats()) {
   <div class="child-balance-bar" role="status" aria-live="polite" aria-label="Tu saldo actual">
     <div class="balance-item">
@@ -54,10 +80,8 @@
         [attr.aria-labelledby]="'reward-name-' + reward.id"
         [style.background]="cardGradient(reward.icon)">
 
-        <!-- Hero emoji -->
         <div class="card-hero" aria-hidden="true">{{ reward.icon || '🎁' }}</div>
 
-        <!-- Name + description -->
         <div class="card-body">
           <h3 class="card-name" [id]="'reward-name-' + reward.id">{{ reward.name }}</h3>
           @if (reward.description) {
@@ -65,7 +89,6 @@
           }
         </div>
 
-        <!-- Price row -->
         <div class="card-price-row" role="group" aria-label="Precio y requisitos">
           <div class="card-cost">
             <mat-icon class="badge-icon cost-icon" aria-hidden="true">monetization_on</mat-icon>
@@ -73,8 +96,8 @@
             <span class="cost-value">{{ reward.cost }}</span>
           </div>
           @if (reward.minLevel) {
-            <div class="card-level" [attr.aria-label]="'Nivel mínimo ' + reward.minLevel">
-              <span class="sr-only">Nivel mínimo requerido: {{ reward.minLevel }}</span>
+            <div class="card-level" [attr.aria-label]="'Nivel minimo ' + reward.minLevel">
+              <span class="sr-only">Nivel minimo requerido: {{ reward.minLevel }}</span>
               <span class="level-stars" aria-hidden="true">
                 @for (s of starsArray(reward.minLevel); track s) {
                   <mat-icon class="star-icon">star</mat-icon>
@@ -88,7 +111,6 @@
           }
         </div>
 
-        <!-- Child view: claim CTA -->
         @if (!isParent()) {
           <span class="claim-wrapper" [class.claim-wrapper--locked]="!!claimBlockReason(reward)">
             <button
@@ -98,7 +120,7 @@
               [attr.aria-disabled]="!!claimBlockReason(reward) || isRedeeming()"
               [attr.aria-busy]="isRedeeming()"
               [attr.aria-describedby]="claimBlockReason(reward) ? 'tip-' + reward.id : null"
-              [attr.aria-label]="claimBlockReason(reward) ? (reward.name + ': bloqueado') : ('Reclamar ' + reward.name + ' — ' + reward.cost + ' monedas')"
+              [attr.aria-label]="claimBlockReason(reward) ? (reward.name + ': bloqueado') : ('Reclamar ' + reward.name + ' - ' + reward.cost + ' monedas')"
               (click)="!!claimBlockReason(reward) || isRedeeming() ? null : openClaimDialog(reward)"
               (keydown.enter)="!!claimBlockReason(reward) || isRedeeming() ? null : openClaimDialog(reward)"
               (keydown.space)="!!claimBlockReason(reward) || isRedeeming() ? $event.preventDefault() : openClaimDialog(reward)"
@@ -122,11 +144,10 @@
           </span>
         }
 
-        <!-- Parent view: management -->
         @if (isParent()) {
-          <div class="card-bottom" role="group" [attr.aria-label]="'Gestión de ' + reward.name">
+          <div class="card-bottom" role="group" [attr.aria-label]="'Gestion de ' + reward.name">
             <div class="card-meta-row" aria-hidden="true">
-              <span class="card-active-badge"><span aria-hidden="true">●</span> ACTIVA</span>
+              <span class="card-active-badge"><span aria-hidden="true">•</span> ACTIVA</span>
               <span class="card-claims"><span aria-hidden="true">📦</span> 0 canjes</span>
             </div>
             <div class="card-actions">
@@ -149,7 +170,6 @@
   </div>
 }
 
-<!-- ── Create / Edit panel ───────────────────────────────────────────── -->
 @if (showCreatePanel()) {
   <div class="overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
@@ -172,11 +192,11 @@
     <form class="panel-body" (submit)="$event.preventDefault(); submitCreate()" novalidate>
 
       <fieldset class="field icon-fieldset">
-        <legend class="field-label">ÍCONO</legend>
+        <legend class="field-label">ICONO</legend>
         <div
           class="icon-grid"
           role="radiogroup"
-          aria-label="Seleccionar ícono"
+          aria-label="Seleccionar icono"
           (keydown)="onIconKeydown($event)"
         >
           @for (icon of availableIcons; track icon; let i = $index) {
@@ -215,14 +235,14 @@
       </div>
 
       <div class="field">
-        <label class="field-label" for="r-desc">DESCRIPCIÓN <span class="optional" aria-hidden="true">(OPCIONAL)</span></label>
+        <label class="field-label" for="r-desc">DESCRIPCION <span class="optional" aria-hidden="true">(OPCIONAL)</span></label>
         <textarea
           id="r-desc"
           class="field-input field-textarea"
           [class.has-error]="descriptionCtrl.invalid && descriptionCtrl.touched"
           [formControl]="descriptionCtrl"
           rows="3"
-          placeholder="Describe qué incluye esta recompensa..."
+          placeholder="Describe que incluye esta recompensa..."
           [attr.aria-describedby]="descriptionCtrl.invalid && descriptionCtrl.touched ? 'r-desc-error' : null"
         ></textarea>
         @if (descriptionCtrl.invalid && descriptionCtrl.touched) {
@@ -251,7 +271,7 @@
           }
         </div>
         <div class="field">
-          <label class="field-label" for="r-level">NIVEL MÍNIMO <span class="optional" aria-hidden="true">(OPCIONAL)</span></label>
+          <label class="field-label" for="r-level">NIVEL MINIMO <span class="optional" aria-hidden="true">(OPCIONAL)</span></label>
           <input
             id="r-level"
             class="field-input"
@@ -292,8 +312,8 @@
 
 <app-confirm-dialog
   [open]="showDeleteModal()"
-  title="¿Eliminar recompensa?"
-  [message]="'¿Estás seguro de que quieres eliminar «' + (rewardToDelete()?.name ?? '') + '»? Esta acción no se puede deshacer.'"
+  title="Eliminar recompensa?"
+  [message]="'Estas seguro de que quieres eliminar «' + (rewardToDelete()?.name ?? '') + '»? Esta accion no se puede deshacer.'"
   variant="danger"
   confirmLabel="ELIMINAR"
   cancelLabel="CANCELAR"
@@ -303,14 +323,20 @@
 
 <app-confirm-dialog
   [open]="showClaimDialog()"
-  [title]="'¿Canjear ' + (rewardToClaim()?.name ?? '') + '?'"
-  [message]="'Se descontarán ' + (rewardToClaim()?.cost ?? 0) + ' monedas de tu saldo.'"
-  subMessage="El canje quedará pendiente hasta que el Padre/Tutor lo marque como entregado."
+  [title]="'Canjear ' + (rewardToClaim()?.name ?? '') + '?'"
+  [message]="'Se descontaran ' + (rewardToClaim()?.cost ?? 0) + ' monedas de tu saldo.'"
+  subMessage="El canje quedara pendiente hasta que el Padre/Tutor lo marque como entregado."
   confirmLabel="CANJEAR"
   cancelLabel="CANCELAR"
   (confirmed)="confirmClaim()"
   (cancelled)="closeClaimDialog()"
 />
+
+} @else {
+
+<app-redemption-history-panel [collapsibleFilters]="true" />
+
+}
 
 </main>
 </app-shell>

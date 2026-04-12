@@ -1,12 +1,14 @@
 package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.dto.redemption.RedeemRewardRequest;
+import com.vertexdev.familytask.dto.redemption.RedemptionHistoryResponse;
 import com.vertexdev.familytask.dto.redemption.RedemptionResponse;
 import com.vertexdev.familytask.exception.RedemptionException;
 import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.RedemptionRequest;
 import com.vertexdev.familytask.model.Reward;
 import com.vertexdev.familytask.model.User;
+import com.vertexdev.familytask.model.enums.RedemptionStatus;
 import com.vertexdev.familytask.model.enums.Role;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
@@ -17,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,6 +32,49 @@ public class RedemptionService {
     private final FamilyMemberRepository familyMemberRepository;
     private final RewardRepository rewardRepository;
     private final RedemptionRepository redemptionRepository;
+
+    @Transactional(readOnly = true)
+    public List<RedemptionHistoryResponse> getHistory(
+            Long familyId,
+            Long memberId,
+            RedemptionStatus status,
+            LocalDate dateFrom,
+            LocalDate dateTo,
+            User requester) {
+
+        familyGroupRepository.findById(familyId)
+                .orElseThrow(() -> new RedemptionException(
+                        "FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(familyId, requester.getId())
+                .filter(FamilyMember::getIsActive)
+                .orElseThrow(() -> new RedemptionException(
+                        "ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        LocalDateTime from = dateFrom != null ? dateFrom.atStartOfDay() : LocalDateTime.of(1900, 1, 1, 0, 0, 0);
+        LocalDateTime to = dateTo != null ? dateTo.atTime(23, 59, 59) : LocalDateTime.of(2099, 12, 31, 23, 59, 59);
+
+        try {
+            String statusStr = status != null ? status.toString() : null;
+            return redemptionRepository
+                    .findHistory(
+                            familyId,
+                            memberId,
+                            statusStr,
+                            from,
+                            to)
+                    .stream()
+                    .map(this::toHistoryResponse)
+                    .toList();
+        } catch (RedemptionException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to fetch redemption history for family {}: {}", familyId, e.getMessage());
+            throw new RedemptionException(
+                    "FETCH_FAILED", "Error al cargar el historial de canjes.", 500);
+        }
+    }
 
     @Transactional
     public RedemptionResponse requestRedemption(RedeemRewardRequest request, User requester) {
@@ -69,10 +116,11 @@ public class RedemptionService {
                     .build();
 
             RedemptionRequest saved = redemptionRepository.save(redemption);
+
             log.info("Redemption requested by user {} for reward '{}' in family {}",
                     requester.getEmail(), reward.getName(), reward.getFamilyGroup().getName());
 
-            return toResponse(saved);
+            return toRedemptionResponse(saved);
         } catch (RedemptionException e) {
             throw e;
         } catch (Exception e) {
@@ -94,11 +142,24 @@ public class RedemptionService {
         return redemptionRepository
                 .findByFamilyGroupIdAndRequestedByIdOrderByRequestedAtDesc(familyId, member.getId())
                 .stream()
-                .map(this::toResponse)
+                .map(this::toRedemptionResponse)
                 .toList();
     }
 
-    private RedemptionResponse toResponse(RedemptionRequest redemption) {
+    private RedemptionHistoryResponse toHistoryResponse(RedemptionRequest redemption) {
+        return RedemptionHistoryResponse.builder()
+                .id(redemption.getId())
+                .rewardName(redemption.getReward().getName())
+                .rewardIcon(redemption.getReward().getIcon())
+                .rewardCost(redemption.getCoinsSpent())
+                .redeemedByUserId(redemption.getRequestedBy().getUser().getId())
+                .redeemedByName(redemption.getRequestedBy().getUser().getName())
+                .status(redemption.getStatus())
+                .redeemedAt(redemption.getRequestedAt())
+                .build();
+    }
+
+    private RedemptionResponse toRedemptionResponse(RedemptionRequest redemption) {
         return RedemptionResponse.builder()
                 .id(redemption.getId())
                 .rewardId(redemption.getReward().getId())
