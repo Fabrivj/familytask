@@ -61,13 +61,20 @@
       </div>
 
       <div class="config-card-body">
-        <label class="field-label" for="ranking-toggle">RANKING VISIBLE PARA TODOS LOS MIEMBROS</label>
-        <mat-slide-toggle
-          id="ranking-toggle"
-          [formControl]="rankingEnabledCtrl"
-          color="primary">
-          {{ rankingEnabledCtrl.value ? 'Habilitado' : 'Deshabilitado' }}
-        </mat-slide-toggle>
+        <label class="field-label">RANKING VISIBLE PARA TODOS LOS MIEMBROS</label>
+        <div class="toggle-row">
+          <mat-slide-toggle
+            [formControl]="rankingEnabledCtrl"
+            [disabled]="rankingUpdating()"
+            (change)="toggleRanking()">
+          </mat-slide-toggle>
+          <span class="toggle-label-text" [class.is-on]="rankingEnabledCtrl.value">
+            {{ rankingEnabledCtrl.value ? 'Habilitado' : 'Deshabilitado' }}
+          </span>
+        </div>
+        @if (rankingError()) {
+          <p class="api-error" role="alert">{{ rankingError() }}</p>
+        }
       </div>
 
     </section>

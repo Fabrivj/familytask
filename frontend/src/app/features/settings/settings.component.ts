@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { switchMap } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { FamilyService } from '../../core/services/family.service';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
@@ -49,6 +48,8 @@ export class SettingsComponent implements OnInit {
   readonly apiError = signal('');
   readonly successMessage = signal('');
   readonly isLoadingConfig = signal(true);
+  readonly rankingUpdating = signal(false);
+  readonly rankingError = signal('');
 
   constructor() {
     const familyId = this.authService.getActiveFamilyId();
@@ -90,13 +91,9 @@ export class SettingsComponent implements OnInit {
     this.successMessage.set('');
     this.nameCtrl.disable();
 
-    this.familyService.updateName(familyId, { name: this.nameCtrl.value.trim() }).pipe(
-      switchMap((family) => {
+    this.familyService.updateName(familyId, { name: this.nameCtrl.value.trim() }).subscribe({
+      next: (family) => {
         this.authService.updateFamilyName(familyId, family.name);
-        return this.familyService.updateSettings(familyId, this.rankingEnabledCtrl.value);
-      })
-    ).subscribe({
-      next: () => {
         this.successMessage.set('Configuración actualizada exitosamente.');
         this.isLoading.set(false);
         this.nameCtrl.enable();
@@ -105,6 +102,25 @@ export class SettingsComponent implements OnInit {
         this.apiError.set(err.error?.message ?? 'No se pudo actualizar la configuración. Intenta nuevamente.');
         this.isLoading.set(false);
         this.nameCtrl.enable();
+      },
+    });
+  }
+
+  toggleRanking(): void {
+    const familyId = this.authService.getActiveFamilyId();
+    if (!familyId) return;
+
+    this.rankingUpdating.set(true);
+    this.rankingError.set('');
+
+    this.familyService.updateSettings(familyId, this.rankingEnabledCtrl.value).subscribe({
+      next: () => {
+        this.rankingUpdating.set(false);
+      },
+      error: (err) => {
+        this.rankingEnabledCtrl.setValue(!this.rankingEnabledCtrl.value);
+        this.rankingError.set(err.error?.message ?? 'No se pudo actualizar el ranking.');
+        this.rankingUpdating.set(false);
       },
     });
   }
