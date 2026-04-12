@@ -16,6 +16,15 @@ public interface RedemptionRepository extends JpaRepository<RedemptionRequest, L
             Long familyGroupId, Long requestedById);
 
     @Query("""
+        SELECT r.reward.id, COUNT(r)
+        FROM RedemptionRequest r
+        WHERE r.familyGroup.id = :familyGroupId
+          AND r.status = com.vertexdev.familytask.model.enums.RedemptionStatus.PENDING
+        GROUP BY r.reward.id
+    """)
+    List<Object[]> countPendingPerReward(@Param("familyGroupId") Long familyGroupId);
+
+    @Query("""
         SELECT r FROM RedemptionRequest r
         JOIN FETCH r.reward reward
         JOIN FETCH r.requestedBy member

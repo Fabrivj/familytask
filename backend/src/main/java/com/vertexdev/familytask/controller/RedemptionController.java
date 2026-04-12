@@ -3,6 +3,7 @@ package com.vertexdev.familytask.controller;
 import com.vertexdev.familytask.dto.redemption.RedeemRewardRequest;
 import com.vertexdev.familytask.dto.redemption.RedemptionHistoryResponse;
 import com.vertexdev.familytask.dto.redemption.RedemptionResponse;
+import com.vertexdev.familytask.dto.redemption.UpdateRedemptionStatusRequest;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.RedemptionStatus;
 import com.vertexdev.familytask.service.RedemptionService;
@@ -56,5 +57,15 @@ public class RedemptionController {
 
         List<RedemptionResponse> redemptions = redemptionService.getMyRedemptions(familyId, authenticatedUser);
         return ResponseEntity.ok(redemptions);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<RedemptionResponse> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateRedemptionStatusRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        RedemptionResponse response = redemptionService.updateRedemptionStatus(id, request, authenticatedUser);
+        return ResponseEntity.ok(response);
     }
 }
