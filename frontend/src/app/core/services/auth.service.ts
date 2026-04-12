@@ -40,6 +40,9 @@ export class AuthService {
   /** familyName of the active family. Empty string if no active family. */
   readonly activeFamilyName = computed(() => this.activeFamily()?.familyName ?? '');
 
+  /** ID of the currently authenticated user. */
+  readonly currentUserId = computed(() => this._session()?.userId ?? null);
+
   constructor(private http: HttpClient, private router: Router) {}
 
   // ─── Step 1: Redirect the user to Google ──────────────────────────────────

@@ -16,7 +16,10 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { AuthService } from '../../core/services/auth.service';
 import { PermissionsService } from '../../core/services/permissions.service';
 import { RewardService } from '../../core/services/reward.service';
+import { RedemptionService } from '../../core/services/redemption.service';
+import { MembersService } from '../../core/services/members.service';
 import { RewardResponse } from '../../core/models/reward.model';
+import { MemberItem } from '../../core/models/member.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -61,6 +64,8 @@ const ICON_LABELS: Record<string, string> = {
 export class StoreComponent {
   private readonly authService = inject(AuthService);
   private readonly rewardService = inject(RewardService);
+  private readonly redemptionService = inject(RedemptionService);
+  private readonly membersService = inject(MembersService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly permissionsService = inject(PermissionsService);
 
@@ -108,6 +113,37 @@ export class StoreComponent {
   readonly showDeleteModal = signal(false);
   readonly rewardToDelete  = signal<RewardResponse | null>(null);
 
+  // ── Child stats & redemptions ──────────────────────────────────────────
+  readonly myStats         = signal<MemberItem | null>(null);
+  readonly isRedeeming     = signal(false);
+  readonly rewardToClaim   = signal<RewardResponse | null>(null);
+  readonly showClaimDialog = signal(false);
+
+  /** True when the child has enough coins for the given reward. */
+  canAfford(reward: RewardResponse): boolean {
+    const coins = this.myStats()?.totalCoins ?? 0;
+    return coins >= reward.cost;
+  }
+
+  /** True when the child meets the level requirement (or there is none). */
+  meetsLevel(reward: RewardResponse): boolean {
+    if (!reward.minLevel) return true;
+    return (this.myStats()?.currentLevel ?? 1) >= reward.minLevel;
+  }
+
+  /**
+   * Returns the tooltip text explaining why the claim button is locked,
+   * or null when the child can freely claim.
+   */
+  claimBlockReason(reward: RewardResponse): string | null {
+    const noCoins = !this.canAfford(reward);
+    const noLevel = !this.meetsLevel(reward);
+    if (noCoins && noLevel) return 'No tienes monedas suficientes y no alcanzas el nivel mínimo requerido para esta recompensa.';
+    if (noCoins) return 'No tienes monedas suficientes para canjear esta recompensa.';
+    if (noLevel) return 'No alcanzas el nivel mínimo requerido para esta recompensa.';
+    return null;
+  }
+
   readonly nameCtrl = new FormControl('', {
     nonNullable: true,
     validators: [
@@ -148,6 +184,13 @@ export class StoreComponent {
         this.isLoading.set(false);
       },
     });
+
+    if (!this.isParent()) {
+      this.membersService.getMyStats(familyId).subscribe({
+        next: (stats) => this.myStats.set(stats),
+        error: () => {},
+      });
+    }
   }
 
   getNameError(): string {
@@ -317,6 +360,47 @@ export class StoreComponent {
       error: (err) => {
         this.createError.set(err.error?.message || fallbackErr);
         this.isCreating.set(false);
+      },
+    });
+  }
+
+  // ── Redemption (child flow) ────────────────────────────────────────────
+
+  openClaimDialog(reward: RewardResponse): void {
+    this.rewardToClaim.set(reward);
+    this.showClaimDialog.set(true);
+  }
+
+  closeClaimDialog(): void {
+    this.showClaimDialog.set(false);
+    this.rewardToClaim.set(null);
+  }
+
+  confirmClaim(): void {
+    const reward = this.rewardToClaim();
+    const familyId = this.familyId();
+    if (!reward || !familyId) return;
+
+    this.closeClaimDialog();
+    this.isRedeeming.set(true);
+
+    this.redemptionService.requestRedemption({ rewardId: reward.id, familyId }).subscribe({
+      next: () => {
+        this.isRedeeming.set(false);
+        this.myStats.update(s => s ? { ...s, totalCoins: (s.totalCoins ?? 0) - reward.cost } : s);
+        this.snackBar.open(
+          'Canje solicitado exitosamente. Queda pendiente de entrega.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-success' },
+        );
+      },
+      error: (err) => {
+        this.isRedeeming.set(false);
+        this.snackBar.open(
+          err.error?.message || 'No se pudo procesar el canje. Intenta de nuevo.',
+          'Cerrar',
+          { duration: 5000, panelClass: 'snack-error' },
+        );
       },
     });
   }

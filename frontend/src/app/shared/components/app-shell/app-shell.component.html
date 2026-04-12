@@ -15,9 +15,11 @@
         (logout)="onLogout()"
       />
 
-      <div id="main-content" tabindex="-1">
+      <div id="main-content" class="shell-content" tabindex="-1">
         <ng-content />
       </div>
+
+      <app-bottom-nav />
     </div>
   </div>
 </app-page-layout>

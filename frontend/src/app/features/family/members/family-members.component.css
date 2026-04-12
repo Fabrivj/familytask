@@ -633,25 +633,126 @@
   .members-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 767px) {
+  .content { padding: 20px 16px 80px; }
   .members-grid { grid-template-columns: 1fr; }
-  .content { padding: 20px 16px 40px; }
-  .header-row { flex-direction: row; align-items: center; }
+
+  /* ── Invite cards ── */
+  .invite-list { gap: 10px; }
 
   .invite-row {
+    display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 0;
+    padding: 0;
+    background: var(--panel);
+    border: 1px solid rgba(var(--border-rgb), 0.15);
+    border-left: 3px solid rgba(var(--border-rgb), 0.5);
+    border-radius: 12px;
+    overflow: hidden;
+    align-items: stretch;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
 
+  .invite-row:hover {
+    border-color: rgba(var(--border-rgb), 0.32);
+    border-left-color: var(--border);
+    box-shadow: 0 2px 20px rgba(var(--border-rgb), 0.07);
+  }
+
+  /* Hidden on mobile — redundant or replaced by layout */
+  .invite-icon  { display: none; }
+  .pending-badge { display: none; }
+
+  /* Info area */
   .invite-info {
-    width: 100%;
+    order: 1;
     flex-basis: 100%;
-    order: -1;
+    flex: none;
+    padding: 16px 18px 14px;
+    min-width: 0;
+  }
+
+  .invite-email {
+    font-size: 15px;
+    white-space: normal;
+    word-break: break-all;
+    display: block;
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
   }
 
   .invite-meta {
     white-space: normal;
     overflow: visible;
-    text-overflow: clip;
+    text-overflow: unset;
+    font-size: 11px;
+    line-height: 1.65;
+    opacity: 0.55;
   }
+
+  /* Action footer */
+  .btn-copy {
+    order: 2;
+    flex: 1;
+    height: 46px;
+    padding: 0 14px;
+    gap: 8px;
+    border-radius: 0 0 0 9px;
+    border: none;
+    border-top: 1px solid rgba(var(--border-rgb), 0.1);
+    background: rgba(var(--border-rgb), 0.05);
+    color: var(--border);
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-shadow: none;
+    transition: background 0.18s, color 0.18s;
+    white-space: nowrap;
+  }
+
+  .btn-copy:hover,
+  .btn-copy:active {
+    background: rgba(var(--border-rgb), 0.12);
+    color: #fff;
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(var(--border-rgb), 0.6);
+  }
+
+  .btn-copy-icon {
+    font-size: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
+    line-height: 15px !important;
+  }
+
+  .btn-cancel-invite {
+    order: 3;
+    width: 54px;
+    height: 46px;
+    border-radius: 0 0 9px 0;
+    border: none;
+    border-top: 1px solid rgba(var(--border-rgb), 0.1);
+    border-left: 1px solid rgba(var(--border-rgb), 0.08);
+    background: transparent;
+    color: rgba(var(--primary-rgb), 0.35);
+    transition: background 0.18s, color 0.18s;
+  }
+
+  .btn-cancel-invite:hover,
+  .btn-cancel-invite:active {
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+  }
+
+  .btn-cancel-invite mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  .cancel-spinner { width: 16px; height: 16px; }
 }

@@ -2,6 +2,7 @@ package com.vertexdev.familytask.service;
 
 import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.habit.AssignHabitRequest;
+import com.vertexdev.familytask.dto.habit.CompleteHabitResponse;
 import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
 import com.vertexdev.familytask.exception.HabitException;
@@ -9,11 +10,13 @@ import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.Habit;
 import com.vertexdev.familytask.model.HabitAssignment;
+import com.vertexdev.familytask.model.HabitCompletion;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.model.enums.HabitFrequency;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.HabitAssignmentRepository;
+import com.vertexdev.familytask.repository.HabitCompletionRepository;
 import com.vertexdev.familytask.repository.HabitRepository;
 import com.vertexdev.familytask.repository.UserRepository;
 import com.vertexdev.familytask.util.FamilyPermissions;
@@ -22,6 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 import java.util.List;
 
 @Service
@@ -33,6 +39,7 @@ public class HabitService {
     private final FamilyMemberRepository familyMemberRepository;
     private final HabitRepository habitRepository;
     private final HabitAssignmentRepository habitAssignmentRepository;
+    private final HabitCompletionRepository habitCompletionRepository;
     private final UserRepository userRepository;
     private final FamilyPermissions familyPermissions;
 
@@ -169,8 +176,147 @@ public class HabitService {
         }
     }
 
+    @Transactional
+    public CompleteHabitResponse completeHabit(Long habitId, User requester) {
+        Habit habit = habitRepository.findById(habitId)
+                .filter(h -> Boolean.TRUE.equals(h.getIsActive()))
+                .orElseThrow(() -> new HabitException("HABIT_NOT_FOUND", "Hábito no encontrado.", 404));
+
+        HabitAssignment assignment = habitAssignmentRepository.findByHabitId(habitId)
+                .filter(a -> Boolean.TRUE.equals(a.getIsActive()))
+                .orElseThrow(() -> new HabitException("NOT_ASSIGNED", "Este hábito no está asignado.", 400));
+
+        if (!assignment.getUser().getId().equals(requester.getId())) {
+            throw new HabitException("ACCESS_DENIED", "Acceso no autorizado.", 403);
+        }
+
+        LocalDate today = LocalDate.now();
+        HabitFrequency frequency = habit.getFrequency();
+
+        validateDayOfWeek(frequency, today);
+
+        if (alreadyCompletedInPeriod(assignment.getId(), frequency, today)) {
+            throw new HabitException("ALREADY_COMPLETED", "Ya completaste este hábito en el periodo actual.", 400);
+        }
+
+        try {
+            habitCompletionRepository.save(
+                HabitCompletion.builder()
+                    .habitAssignment(assignment)
+                    .completionDate(today)
+                    .build()
+            );
+
+            updateStreak(assignment, frequency, today);
+            habitAssignmentRepository.save(assignment);
+
+            log.info("Habit '{}' completed by user {} on {}", habit.getTitle(), requester.getEmail(), today);
+
+            return CompleteHabitResponse.builder()
+                    .habitId(habit.getId())
+                    .habitTitle(habit.getTitle())
+                    .assignedToName(requester.getName())
+                    .xpReward(habit.getXpReward())
+                    .coinsReward(habit.getCoinsReward())
+                    .currentStreak(assignment.getCurrentStreak())
+                    .longestStreak(assignment.getLongestStreak())
+                    .completionDate(today)
+                    .build();
+        } catch (HabitException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to complete habit {} for user {}: {}", habitId, requester.getEmail(), e.getMessage());
+            throw new HabitException("COMPLETE_FAILED", "No se pudo registrar el hábito. Por favor, intente nuevamente.", 500);
+        }
+    }
+
+    private void validateDayOfWeek(HabitFrequency frequency, LocalDate date) {
+        DayOfWeek day = date.getDayOfWeek();
+        boolean isWeekend = day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
+        if (frequency == HabitFrequency.WEEKDAYS && isWeekend) {
+            throw new HabitException("INVALID_DAY", "Este hábito solo se puede completar en días de semana.", 400);
+        }
+        if (frequency == HabitFrequency.WEEKENDS && !isWeekend) {
+            throw new HabitException("INVALID_DAY", "Este hábito solo se puede completar en fines de semana.", 400);
+        }
+    }
+
+    private boolean alreadyCompletedInPeriod(Long assignmentId, HabitFrequency frequency, LocalDate today) {
+        return switch (frequency) {
+            case DAILY, WEEKDAYS, WEEKENDS ->
+                habitCompletionRepository.existsByHabitAssignmentIdAndCompletionDate(assignmentId, today);
+            case WEEKLY -> {
+                LocalDate monday = today.with(WeekFields.ISO.dayOfWeek(), 1);
+                LocalDate sunday = monday.plusDays(6);
+                yield habitCompletionRepository.existsByHabitAssignmentIdAndCompletionDateBetween(assignmentId, monday, sunday);
+            }
+            case MONTHLY -> {
+                LocalDate start = today.withDayOfMonth(1);
+                LocalDate end = today.withDayOfMonth(today.lengthOfMonth());
+                yield habitCompletionRepository.existsByHabitAssignmentIdAndCompletionDateBetween(assignmentId, start, end);
+            }
+        };
+    }
+
+    private void updateStreak(HabitAssignment assignment, HabitFrequency frequency, LocalDate today) {
+        LocalDate last = assignment.getLastActivity();
+        int newStreak;
+
+        if (last == null || !isConsecutivePeriod(frequency, last, today)) {
+            newStreak = 1;
+        } else {
+            newStreak = assignment.getCurrentStreak() + 1;
+        }
+
+        assignment.setCurrentStreak(newStreak);
+        assignment.setLastActivity(today);
+        if (newStreak > assignment.getLongestStreak()) {
+            assignment.setLongestStreak(newStreak);
+        }
+    }
+
+    private boolean isConsecutivePeriod(HabitFrequency frequency, LocalDate last, LocalDate today) {
+        return switch (frequency) {
+            case DAILY -> last.plusDays(1).equals(today);
+            case WEEKLY -> {
+                LocalDate prevMonday = today.with(WeekFields.ISO.dayOfWeek(), 1).minusWeeks(1);
+                LocalDate prevSunday = prevMonday.plusDays(6);
+                yield !last.isBefore(prevMonday) && !last.isAfter(prevSunday);
+            }
+            case WEEKDAYS -> {
+                LocalDate prevWeekday = today.minusDays(1);
+                while (prevWeekday.getDayOfWeek() == DayOfWeek.SATURDAY
+                        || prevWeekday.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                    prevWeekday = prevWeekday.minusDays(1);
+                }
+                yield last.equals(prevWeekday);
+            }
+            case WEEKENDS -> {
+                LocalDate prevWeekendDay = today.minusDays(1);
+                while (prevWeekendDay.getDayOfWeek() != DayOfWeek.SATURDAY
+                        && prevWeekendDay.getDayOfWeek() != DayOfWeek.SUNDAY) {
+                    prevWeekendDay = prevWeekendDay.minusDays(1);
+                }
+                yield last.equals(prevWeekendDay);
+            }
+            case MONTHLY -> {
+                LocalDate firstOfThisMonth = today.withDayOfMonth(1);
+                LocalDate firstOfLastMonth = firstOfThisMonth.minusMonths(1);
+                LocalDate lastOfLastMonth = firstOfThisMonth.minusDays(1);
+                yield !last.isBefore(firstOfLastMonth) && !last.isAfter(lastOfLastMonth);
+            }
+        };
+    }
+
     private HabitResponse toResponse(Habit habit) {
         HabitAssignment assignment = habit.getAssignment();
+        Boolean completedInCurrentPeriod = null;
+        if (assignment != null && Boolean.TRUE.equals(assignment.getIsActive())) {
+            LocalDate today = LocalDate.now();
+            completedInCurrentPeriod = alreadyCompletedInPeriod(
+                assignment.getId(), habit.getFrequency(), today
+            );
+        }
         return HabitResponse.builder()
                 .id(habit.getId())
                 .title(habit.getTitle())
@@ -182,6 +328,9 @@ public class HabitService {
                 .assignedToId(assignment != null ? assignment.getUser().getId() : null)
                 .assignedToName(assignment != null ? assignment.getUser().getName() : null)
                 .assignedToPictureUrl(assignment != null ? assignment.getUser().getPictureUrl() : null)
+                .currentStreak(assignment != null ? assignment.getCurrentStreak() : null)
+                .longestStreak(assignment != null ? assignment.getLongestStreak() : null)
+                .completedInCurrentPeriod(completedInCurrentPeriod)
                 .build();
     }
 }

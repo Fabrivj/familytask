@@ -85,6 +85,7 @@ public class AuthService {
                 .toList();
 
         return AuthResponse.builder()
+                .userId(user.getId())
                 .token(token)
                 .email(user.getEmail())
                 .name(user.getName())

@@ -53,6 +53,13 @@ import { PermissionsService } from '../../../core/services/permissions.service';
     .content {
       padding: 24px;
     }
+    @media (max-width: 767px) {
+      .content { padding: 20px 16px 80px; }
+      .tabs-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .tabs { width: 100%; }
+      .tab { flex: 1; justify-content: center; padding: 10px 12px; }
+      .btn-add { width: 100%; justify-content: center; }
+    }
     .tabs-row {
       display: flex;
       align-items: center;

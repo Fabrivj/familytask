@@ -166,9 +166,23 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
       flex-shrink: 0;
     }
 
-    @media (max-width: 600px) {
-      :host { padding: 0 16px; }
-      .center { display: none; }
+    @media (max-width: 767px) {
+      :host {
+        padding: 0 12px;
+        grid-template-columns: auto 1fr auto;
+        gap: 6px;
+      }
+      .logo { font-size: 9px; }
+      .family-chip {
+        font-size: 11px;
+        padding: 0 10px 0 8px;
+        height: 30px;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .family-chip mat-icon { display: none; }
+      .right { gap: 6px; }
     }
   `],
 })

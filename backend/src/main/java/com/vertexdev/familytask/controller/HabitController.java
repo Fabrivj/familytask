@@ -2,6 +2,7 @@ package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.habit.AssignHabitRequest;
+import com.vertexdev.familytask.dto.habit.CompleteHabitResponse;
 import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
 import com.vertexdev.familytask.model.User;
@@ -53,6 +54,20 @@ public class HabitController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         return ResponseEntity.ok(habitService.assignHabit(id, request, authenticatedUser));
+    }
+
+    /**
+     * Marks a habit as completed for the current period.
+     * Only the CHILD assigned to the habit can call this endpoint.
+     *
+     * POST /api/habits/{id}/complete
+     */
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<CompleteHabitResponse> completeHabit(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        return ResponseEntity.ok(habitService.completeHabit(id, authenticatedUser));
     }
 
     @DeleteMapping("/{id}")

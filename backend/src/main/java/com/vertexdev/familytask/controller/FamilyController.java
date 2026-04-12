@@ -4,6 +4,7 @@ import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.family.CreateFamilyRequest;
 import com.vertexdev.familytask.dto.family.FamilyMembersResponse;
 import com.vertexdev.familytask.dto.family.FamilyResponse;
+import com.vertexdev.familytask.dto.family.MemberItemResponse;
 import com.vertexdev.familytask.dto.family.UpdateRoleRequest;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.FamilyGroupService;
@@ -37,6 +38,15 @@ public class FamilyController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         FamilyResponse response = familyGroupService.updateFamilyName(id, request, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{familyId}/members/me")
+    public ResponseEntity<MemberItemResponse> getMyStats(
+            @PathVariable Long familyId,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        MemberItemResponse response = familyGroupService.getMyStats(familyId, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 

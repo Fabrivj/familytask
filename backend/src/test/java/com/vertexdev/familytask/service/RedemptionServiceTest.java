@@ -6,7 +6,9 @@ import com.vertexdev.familytask.model.*;
 import com.vertexdev.familytask.model.enums.RedemptionStatus;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
+import com.vertexdev.familytask.repository.RedemptionHistoryRepository;
 import com.vertexdev.familytask.repository.RedemptionRepository;
+import com.vertexdev.familytask.repository.RewardRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +31,9 @@ class RedemptionServiceTest {
 
     @Mock private FamilyGroupRepository familyGroupRepository;
     @Mock private FamilyMemberRepository familyMemberRepository;
+    @Mock private RewardRepository rewardRepository;
     @Mock private RedemptionRepository redemptionRepository;
+    @Mock private RedemptionHistoryRepository redemptionHistoryRepository;
     @InjectMocks private RedemptionService redemptionService;
 
     private User user;
@@ -69,7 +73,7 @@ class RedemptionServiceTest {
         when(familyGroupRepository.findById(10L)).thenReturn(Optional.of(family));
         when(familyMemberRepository.findByFamilyGroupIdAndUserId(10L, 1L))
                 .thenReturn(Optional.of(member));
-        when(redemptionRepository.findHistory(eq(10L), isNull(), isNull(), isNull(), isNull()))
+        when(redemptionHistoryRepository.findHistory(eq(10L), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(List.of(redemption));
 
         List<RedemptionHistoryResponse> result =
@@ -89,14 +93,14 @@ class RedemptionServiceTest {
         when(familyGroupRepository.findById(10L)).thenReturn(Optional.of(family));
         when(familyMemberRepository.findByFamilyGroupIdAndUserId(10L, 1L))
                 .thenReturn(Optional.of(member));
-        when(redemptionRepository.findHistory(eq(10L), isNull(), eq(RedemptionStatus.DELIVERED), isNull(), isNull()))
+        when(redemptionHistoryRepository.findHistory(eq(10L), isNull(), eq(RedemptionStatus.DELIVERED), isNull(), isNull()))
                 .thenReturn(List.of());
 
         List<RedemptionHistoryResponse> result =
                 redemptionService.getHistory(10L, null, RedemptionStatus.DELIVERED, null, null, user);
 
         assertThat(result).isEmpty();
-        verify(redemptionRepository).findHistory(eq(10L), isNull(), eq(RedemptionStatus.DELIVERED), isNull(), isNull());
+        verify(redemptionHistoryRepository).findHistory(eq(10L), isNull(), eq(RedemptionStatus.DELIVERED), isNull(), isNull());
     }
 
     @Test
@@ -104,14 +108,14 @@ class RedemptionServiceTest {
         when(familyGroupRepository.findById(10L)).thenReturn(Optional.of(family));
         when(familyMemberRepository.findByFamilyGroupIdAndUserId(10L, 1L))
                 .thenReturn(Optional.of(member));
-        when(redemptionRepository.findHistory(eq(10L), eq(2L), isNull(), isNull(), isNull()))
+        when(redemptionHistoryRepository.findHistory(eq(10L), eq(2L), isNull(), isNull(), isNull()))
                 .thenReturn(List.of());
 
         List<RedemptionHistoryResponse> result =
                 redemptionService.getHistory(10L, 2L, null, null, null, user);
 
         assertThat(result).isEmpty();
-        verify(redemptionRepository).findHistory(eq(10L), eq(2L), isNull(), isNull(), isNull());
+        verify(redemptionHistoryRepository).findHistory(eq(10L), eq(2L), isNull(), isNull(), isNull());
     }
 
     @Test
@@ -122,7 +126,7 @@ class RedemptionServiceTest {
         when(familyGroupRepository.findById(10L)).thenReturn(Optional.of(family));
         when(familyMemberRepository.findByFamilyGroupIdAndUserId(10L, 1L))
                 .thenReturn(Optional.of(member));
-        when(redemptionRepository.findHistory(
+        when(redemptionHistoryRepository.findHistory(
                 eq(10L), isNull(), isNull(),
                 eq(dateFrom.atStartOfDay()),
                 eq(dateTo.atTime(23, 59, 59))))
@@ -132,7 +136,7 @@ class RedemptionServiceTest {
                 redemptionService.getHistory(10L, null, null, dateFrom, dateTo, user);
 
         assertThat(result).hasSize(1);
-        verify(redemptionRepository).findHistory(
+        verify(redemptionHistoryRepository).findHistory(
                 eq(10L), isNull(), isNull(),
                 eq(dateFrom.atStartOfDay()),
                 eq(dateTo.atTime(23, 59, 59)));

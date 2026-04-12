@@ -457,11 +457,10 @@ export class TasksListComponent {
         next: (result: CompleteTaskResponse) => {
           this.tasks.update(list => list.map(t => t.id === task.id ? { ...t, status: 'COMPLETED' } : t));
           this.isUpdatingStatus.set(null);
-          this.snackBar.open(
-            `Tarea completada. Se otorgarán +${result.xpReward} XP y ${result.coinsReward} monedas a ${result.assignedToName}.`,
-            'Cerrar',
-            { duration: 6000, panelClass: 'snack-success' },
-          );
+          const rewardMsg = result.leveledUp
+            ? `+${result.xpReward} XP · +${result.coinsReward} monedas → ¡${result.assignedToName} subió al nivel ${result.newLevel}!`
+            : `+${result.xpReward} XP · +${result.coinsReward} monedas otorgados a ${result.assignedToName}.`;
+          this.snackBar.open(rewardMsg, 'Cerrar', { duration: 6000, panelClass: 'snack-success' });
         },
         error: (err) => {
           this.isUpdatingStatus.set(null);
