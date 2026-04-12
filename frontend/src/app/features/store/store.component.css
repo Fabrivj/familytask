@@ -15,6 +15,62 @@
   margin-bottom: 0;
 }
 
+/* ── Child balance bar ───────────────────────────────────────────────── */
+.child-balance-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 8px 20px;
+  margin-bottom: 24px;
+  border-radius: 50px;
+  background: rgba(var(--border-rgb), 0.06);
+  border: 1.5px solid rgba(var(--border-rgb), 0.15);
+}
+
+.balance-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.balance-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  flex-shrink: 0;
+}
+
+.balance-icon.coins-icon { color: #FFC300; }
+.balance-icon.level-icon  { color: #00EFFF; }
+
+.balance-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.balance-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+}
+
+.balance-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(var(--border-rgb), 0.25);
+  margin: 0 16px;
+}
+
+@media (max-width: 767px) {
+  .child-balance-bar { padding: 8px 16px; }
+}
+
 .tabs-bar {
   display: flex;
   gap: 4px;
@@ -351,6 +407,88 @@
   65%       { transform: translateY(-3px) rotate(-8deg);  }
 }
 
+/* ── Claim wrapper (handles tooltip show/hide) ───────────────────────── */
+.claim-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-top: auto;
+}
+
+.claim-wrapper .btn-claim {
+  margin-top: 0;
+}
+
+/* ── Accessible tooltip ──────────────────────────────────────────────── */
+.claim-tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 240px;
+  padding: 10px 14px;
+  border-radius: 10px;
+
+  /* High-contrast surface — passes WCAG AA (7:1+ against white text) */
+  background: #0f0f1a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+
+  /* Hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: translateX(-50%) translateY(-4px);
+
+  z-index: 20;
+}
+
+/* Arrow pointing up toward the button */
+.claim-tooltip__arrow {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.claim-tooltip__arrow::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: #0f0f1a;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Show on hover OR keyboard focus — WCAG 2.1 SC 1.4.13 */
+.claim-wrapper--locked:hover .claim-tooltip,
+.claim-wrapper--locked:focus-within .claim-tooltip {
+  opacity: 1;
+  pointer-events: auto;       /* hoverable: user can move cursor onto tooltip */
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Keyboard-focused button highlight (replaces :focus-visible which disabled blocks) */
+.claim-wrapper--locked .btn-claim--locked:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* Generic disabled state (redeeming in progress) */
 .btn-claim:disabled {
   background: rgba(var(--border-rgb), 0.14);
   color: var(--text-sub);
@@ -361,6 +499,19 @@
 }
 
 .btn-claim:disabled::before { display: none; }
+
+/* Locked state (aria-disabled) — replaces gradient with muted grey */
+.btn-claim--locked {
+  background: rgba(var(--border-rgb), 0.10) !important;
+  color: var(--text-sub) !important;
+  border: 1.5px solid rgba(var(--border-rgb), 0.22) !important;
+  box-shadow: none !important;
+  animation: none !important;
+  cursor: not-allowed;
+}
+
+.btn-claim--locked::before { display: none !important; }
+.btn-claim--locked mat-icon { animation: none !important; }
 
 @keyframes claim-glow {
   0%, 100% { box-shadow: 0 4px 22px rgba(255, 46, 190, 0.45); }
