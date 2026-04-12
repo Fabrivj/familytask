@@ -5,7 +5,6 @@ import com.vertexdev.familytask.dto.redemption.RedemptionHistoryResponse;
 import com.vertexdev.familytask.dto.redemption.RedemptionResponse;
 import com.vertexdev.familytask.exception.RedemptionException;
 import com.vertexdev.familytask.model.FamilyMember;
-import com.vertexdev.familytask.model.Redemption;
 import com.vertexdev.familytask.model.RedemptionRequest;
 import com.vertexdev.familytask.model.Reward;
 import com.vertexdev.familytask.model.User;
@@ -13,7 +12,6 @@ import com.vertexdev.familytask.model.enums.RedemptionStatus;
 import com.vertexdev.familytask.model.enums.Role;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
-import com.vertexdev.familytask.repository.RedemptionHistoryRepository;
 import com.vertexdev.familytask.repository.RedemptionRepository;
 import com.vertexdev.familytask.repository.RewardRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +30,6 @@ public class RedemptionService {
 
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
-    private final RedemptionHistoryRepository redemptionHistoryRepository;
     private final RewardRepository rewardRepository;
     private final RedemptionRepository redemptionRepository;
 
@@ -55,12 +52,18 @@ public class RedemptionService {
                 .orElseThrow(() -> new RedemptionException(
                         "ACCESS_DENIED", "Acceso no autorizado.", 403));
 
-        LocalDateTime from = dateFrom != null ? dateFrom.atStartOfDay() : null;
-        LocalDateTime to = dateTo != null ? dateTo.atTime(23, 59, 59) : null;
+        LocalDateTime from = dateFrom != null ? dateFrom.atStartOfDay() : LocalDateTime.of(1900, 1, 1, 0, 0, 0);
+        LocalDateTime to = dateTo != null ? dateTo.atTime(23, 59, 59) : LocalDateTime.of(2099, 12, 31, 23, 59, 59);
 
         try {
-            return redemptionHistoryRepository
-                    .findHistory(familyId, memberId, status, from, to)
+            String statusStr = status != null ? status.toString() : null;
+            return redemptionRepository
+                    .findHistory(
+                            familyId,
+                            memberId,
+                            statusStr,
+                            from,
+                            to)
                     .stream()
                     .map(this::toHistoryResponse)
                     .toList();
@@ -113,6 +116,7 @@ public class RedemptionService {
                     .build();
 
             RedemptionRequest saved = redemptionRepository.save(redemption);
+
             log.info("Redemption requested by user {} for reward '{}' in family {}",
                     requester.getEmail(), reward.getName(), reward.getFamilyGroup().getName());
 
@@ -142,16 +146,16 @@ public class RedemptionService {
                 .toList();
     }
 
-    private RedemptionHistoryResponse toHistoryResponse(Redemption redemption) {
+    private RedemptionHistoryResponse toHistoryResponse(RedemptionRequest redemption) {
         return RedemptionHistoryResponse.builder()
                 .id(redemption.getId())
-                .rewardName(redemption.getRewardName())
-                .rewardIcon(redemption.getRewardIcon())
-                .rewardCost(redemption.getRewardCost())
-                .redeemedByUserId(redemption.getRedeemedBy().getId())
-                .redeemedByName(redemption.getRedeemedBy().getName())
+                .rewardName(redemption.getReward().getName())
+                .rewardIcon(redemption.getReward().getIcon())
+                .rewardCost(redemption.getCoinsSpent())
+                .redeemedByUserId(redemption.getRequestedBy().getUser().getId())
+                .redeemedByName(redemption.getRequestedBy().getUser().getName())
                 .status(redemption.getStatus())
-                .redeemedAt(redemption.getRedeemedAt())
+                .redeemedAt(redemption.getRequestedAt())
                 .build();
     }
 

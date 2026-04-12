@@ -88,14 +88,6 @@ export const routes: Routes = [
       import('./features/tasks/tasks-habits/tasks-habits.component').then(m => m.TasksHabitsComponent),
   },
   {
-    path: 'historial-canjes',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/redemption-history/redemption-history.component').then(
-        m => m.RedemptionHistoryComponent
-      ),
-  },
-  {
     path: '**',
     redirectTo: '',
   },
