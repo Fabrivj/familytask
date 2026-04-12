@@ -87,6 +87,15 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(BadgeException.class)
+    public ResponseEntity<ErrorResponse> handleBadgeException(BadgeException ex) {
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ErrorResponse> handleAuthException(AuthException ex) {
         HttpStatus status = switch (ex.getCode()) {

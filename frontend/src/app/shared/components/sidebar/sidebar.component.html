@@ -54,6 +54,16 @@
       </button>
     </li>
 
+    @if (!isParent()) {
+      <li>
+        <button class="nav-item" type="button" (click)="navigate('/badges')"
+          [class.active]="isActive('/badges')" aria-label="Logros">
+          <mat-icon aria-hidden="true">emoji_events</mat-icon>
+          <span class="label">LOGROS</span>
+        </button>
+      </li>
+    }
+
     @if (isParent()) {
       <li>
         <button class="nav-item" type="button" (click)="navigate('/family/members')"

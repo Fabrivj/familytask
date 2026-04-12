@@ -52,6 +52,7 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final FamilyPermissions familyPermissions;
     private final ExperienceService experienceService;
+    private final BadgeService badgeService;
 
     public TaskResponse createTask(CreateTaskRequest request, User creator) {
         FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
@@ -314,6 +315,9 @@ public class TaskService {
                     task.getXpReward(), task.getCoinsReward(), award.newLevel(),
                     award.leveledUp() ? " (LEVEL UP!)" : "");
 
+            var earnedBadges = badgeService.evaluateAndAwardBadges(
+                    assignment.getUser(), task.getFamilyGroup().getId());
+
             return CompleteTaskResponse.builder()
                     .taskId(task.getId())
                     .taskTitle(task.getTitle())
@@ -327,6 +331,7 @@ public class TaskService {
                     .previousLevel(award.previousLevel())
                     .leveledUp(award.leveledUp())
                     .xpToNextLevel(award.xpToNextLevel())
+                    .earnedBadges(earnedBadges)
                     .build();
         } catch (TaskException e) {
             throw e;

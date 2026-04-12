@@ -1,8 +1,10 @@
 package com.vertexdev.familytask.dto.habit;
 
+import com.vertexdev.familytask.dto.badge.BadgeResponse;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,5 +21,7 @@ public class CompleteHabitResponse {
     private Integer currentStreak;
     private Integer longestStreak;
     private LocalDate completionDate;
-    // TODO: confirm actual XP/coins grant once reward system is implemented
+
+    // Insignias ganadas al completar el hábito
+    private List<BadgeResponse> earnedBadges;
 }

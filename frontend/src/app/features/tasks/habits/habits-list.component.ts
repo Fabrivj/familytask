@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
+import { notifyEarnedBadges } from '../../../core/utils/badge-notify';
 import { PermissionsService } from '../../../core/services/permissions.service';
 import { HabitService } from '../../../core/services/habit.service';
 import { MembersService } from '../../../core/services/members.service';
@@ -64,6 +65,7 @@ export class HabitsListComponent {
           'Cerrar',
           { duration: 6000, panelClass: 'snack-success' },
         );
+        notifyEarnedBadges(this.snackBar, result.earnedBadges);
       },
       error: (err) => {
         this.isCompletingHabit.set(null);

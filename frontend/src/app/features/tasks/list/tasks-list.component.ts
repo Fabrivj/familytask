@@ -18,6 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { AuthService } from '../../../core/services/auth.service';
+import { notifyEarnedBadges } from '../../../core/utils/badge-notify';
 import { PermissionsService } from '../../../core/services/permissions.service';
 import { TaskService } from '../../../core/services/task.service';
 import { MembersService } from '../../../core/services/members.service';
@@ -461,6 +462,7 @@ export class TasksListComponent {
             ? `+${result.xpReward} XP · +${result.coinsReward} monedas → ¡${result.assignedToName} subió al nivel ${result.newLevel}!`
             : `+${result.xpReward} XP · +${result.coinsReward} monedas otorgados a ${result.assignedToName}.`;
           this.snackBar.open(rewardMsg, 'Cerrar', { duration: 6000, panelClass: 'snack-success' });
+          notifyEarnedBadges(this.snackBar, result.earnedBadges);
         },
         error: (err) => {
           this.isUpdatingStatus.set(null);

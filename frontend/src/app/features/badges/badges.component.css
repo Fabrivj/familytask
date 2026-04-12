@@ -1,0 +1,454 @@
+/* ── Main content wrapper (consistent with dashboard, family-members) ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 36px 40px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── States ────────────────────────────────────────���────── */
+.state-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 64px 0;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 2.5px solid rgba(var(--border-rgb), 0.15);
+  border-top-color: var(--border);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  color: var(--primary);
+}
+
+.error-text {
+  color: var(--primary);
+  text-align: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  margin: 0;
+}
+
+.btn-retry {
+  padding: 8px 22px;
+  background: transparent;
+  border: 1.5px solid var(--primary);
+  border-radius: 8px;
+  color: var(--primary);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-retry:hover {
+  background: rgba(var(--primary-rgb), 0.08);
+}
+
+.empty-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+  color: var(--text-sub);
+  opacity: 0.4;
+}
+
+.empty-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--text-sub);
+  margin: 0;
+}
+
+/* ── Proximo logro (hero card) ─────────────────────────── */
+.next-badge-section {
+  margin-bottom: 24px;
+}
+
+.next-badge-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08), rgba(var(--border-rgb), 0.06));
+  border: 1.5px solid rgba(var(--border-rgb), 0.3);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.next-badge-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.next-badge-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(var(--primary-rgb), 0.12);
+  border: 1px solid rgba(var(--primary-rgb), 0.25);
+  flex-shrink: 0;
+}
+
+.next-badge-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  color: var(--primary);
+}
+
+.next-badge-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.next-badge-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--primary);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.next-badge-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  display: block;
+  line-height: 1.2;
+}
+
+.next-badge-desc {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  color: var(--text-sub);
+  margin: 4px 0 10px;
+  line-height: 1.3;
+}
+
+.next-badge-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.next-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(var(--border-rgb), 0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.next-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--border), var(--primary));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.next-progress-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--border);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+/* ── Section headers ───────────────────────────────────── */
+.badges-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.section-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  color: var(--border);
+}
+
+/* ── Badge grid ────────────────────────────────────────── */
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 14px;
+}
+
+/* ── Badge card base ───────────────────────────────────── */
+.badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 22px 12px 16px;
+  background: var(--panel);
+  border: 1.5px solid rgba(var(--border-rgb), 0.18);
+  border-radius: 12px;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Earned card ───────────────────────────────────────── */
+.badge-card.earned {
+  border-color: var(--border);
+  box-shadow:
+    0 0 20px rgba(var(--border-rgb), 0.2),
+    0 0 40px rgba(var(--primary-rgb), 0.08),
+    inset 0 0 16px rgba(var(--border-rgb), 0.04);
+}
+
+.badge-card.earned:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 28px rgba(var(--border-rgb), 0.3),
+    0 0 48px rgba(var(--primary-rgb), 0.12),
+    inset 0 0 16px rgba(var(--border-rgb), 0.06);
+}
+
+.badge-glow {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.badge-card.earned .badge-icon {
+  color: var(--primary);
+  filter: drop-shadow(0 0 6px rgba(var(--primary-rgb), 0.4));
+}
+
+.badge-card.earned .badge-name {
+  color: var(--text);
+}
+
+.badge-card.earned .badge-date {
+  color: var(--border);
+}
+
+/* ── Locked card ───────────────────────────────────────── */
+.badge-card.locked {
+  opacity: 0.65;
+  border-color: rgba(var(--border-rgb), 0.1);
+}
+
+.badge-card.locked:hover {
+  opacity: 0.8;
+  border-color: rgba(var(--border-rgb), 0.2);
+}
+
+.badge-card.locked .badge-icon {
+  color: var(--text-sub);
+  opacity: 0.6;
+}
+
+.badge-card.locked .badge-name {
+  color: var(--text-sub);
+}
+
+/* ── Icon ─────────────────────────────────────────────── */
+.badge-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  margin-bottom: 8px;
+  transition: color 0.25s, filter 0.25s;
+}
+
+/* ── Text ─────────────────────────────────────────────── */
+.badge-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 3px;
+  letter-spacing: 0.02em;
+}
+
+.badge-desc {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  color: var(--text-sub);
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.badge-date {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--border);
+  letter-spacing: 0.05em;
+}
+
+/* ── Progress (locked badges) ──────────────────────────── */
+.badge-progress {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress-bar {
+  width: 80%;
+  height: 4px;
+  background: rgba(var(--border-rgb), 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--border);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-sub);
+  letter-spacing: 0.04em;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 767px) {
+  .content {
+    padding: 20px 16px 80px;
+  }
+
+  .next-badge-section {
+    margin-bottom: 20px;
+  }
+
+  .next-badge-card {
+    padding: 14px 16px;
+    gap: 14px;
+  }
+
+  .next-badge-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+
+  .next-badge-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+  }
+
+  .next-badge-name {
+    font-size: 15px;
+  }
+
+  .next-badge-desc {
+    font-size: 11px;
+    margin: 2px 0 8px;
+  }
+
+  .badges-section {
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .badge-card {
+    padding: 16px 10px 14px;
+  }
+
+  .badge-icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    margin-bottom: 6px;
+  }
+
+  .badge-name {
+    font-size: 12px;
+  }
+
+  .badge-desc {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+}
+
+@media (max-width: 380px) {
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .badge-card {
+    padding: 14px 8px 12px;
+  }
+
+  .badge-desc {
+    display: none;
+  }
+}
