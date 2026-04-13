@@ -34,7 +34,7 @@
     (click)="switchTab('history')"
   >
     <mat-icon aria-hidden="true">history</mat-icon>
-    HISTORIAL DE RECOMPENSAS
+    HISTORIAL DE CANJES
   </button>
 </div>
 
@@ -145,10 +145,10 @@
         }
 
         @if (isParent()) {
-          <div class="card-bottom" role="group" [attr.aria-label]="'Gestion de ' + reward.name">
+          <div class="card-bottom" role="group" [attr.aria-label]="'Gestion de ' + reward.name + ': ' + reward.pendingCount + (reward.pendingCount === 1 ? ' canje pendiente' : ' canjes pendientes')">
             <div class="card-meta-row" aria-hidden="true">
               <span class="card-active-badge"><span aria-hidden="true">•</span> ACTIVA</span>
-              <span class="card-claims"><span aria-hidden="true">📦</span> 0 canjes</span>
+              <span class="card-claims"><span aria-hidden="true">📦</span> {{ reward.pendingCount }} {{ reward.pendingCount === 1 ? 'canje' : 'canjes' }}</span>
             </div>
             <div class="card-actions">
               <button class="btn-action btn-edit" type="button"

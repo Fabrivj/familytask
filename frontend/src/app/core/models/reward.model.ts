@@ -10,6 +10,7 @@ export interface RewardResponse {
   approvalRule: ApprovalRule;
   familyId: number;
   createdAt: string;
+  pendingCount: number;
 }
 
 export interface CreateRewardRequest {
