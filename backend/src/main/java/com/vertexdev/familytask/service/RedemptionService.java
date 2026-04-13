@@ -3,6 +3,7 @@ package com.vertexdev.familytask.service;
 import com.vertexdev.familytask.dto.redemption.RedeemRewardRequest;
 import com.vertexdev.familytask.dto.redemption.RedemptionHistoryResponse;
 import com.vertexdev.familytask.dto.redemption.RedemptionResponse;
+import com.vertexdev.familytask.dto.redemption.UpdateRedemptionStatusRequest;
 import com.vertexdev.familytask.exception.RedemptionException;
 import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.RedemptionRequest;
@@ -14,6 +15,7 @@ import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.RedemptionRepository;
 import com.vertexdev.familytask.repository.RewardRepository;
+import com.vertexdev.familytask.util.FamilyPermissions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ public class RedemptionService {
     private final FamilyMemberRepository familyMemberRepository;
     private final RewardRepository rewardRepository;
     private final RedemptionRepository redemptionRepository;
+    private final FamilyPermissions familyPermissions;
 
     @Transactional(readOnly = true)
     public List<RedemptionHistoryResponse> getHistory(
@@ -126,6 +129,48 @@ public class RedemptionService {
         } catch (Exception e) {
             log.error("Error processing redemption for user {}: {}", requester.getEmail(), e.getMessage());
             throw new RedemptionException("REDEMPTION_FAILED", "No se pudo procesar el canje. Intenta de nuevo.", 500);
+        }
+    }
+
+    @Transactional
+    public RedemptionResponse updateRedemptionStatus(Long redemptionId, UpdateRedemptionStatusRequest request, User requester) {
+        familyGroupRepository.findById(request.getFamilyId())
+                .orElseThrow(() -> new RedemptionException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
+
+        FamilyMember member = familyMemberRepository
+                .findByFamilyGroupIdAndUserId(request.getFamilyId(), requester.getId())
+                .filter(FamilyMember::getIsActive)
+                .orElseThrow(() -> new RedemptionException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        if (!familyPermissions.isActiveParent(member)) {
+            throw new RedemptionException("ACCESS_DENIED", "Acceso no autorizado.", 403);
+        }
+
+        RedemptionRequest redemption = redemptionRepository.findById(redemptionId)
+                .filter(r -> r.getFamilyGroup().getId().equals(request.getFamilyId()))
+                .orElseThrow(() -> new RedemptionException("REDEMPTION_NOT_FOUND", "Canje no encontrado.", 404));
+
+        if (redemption.getStatus() == RedemptionStatus.DELIVERED && request.getStatus() == RedemptionStatus.PENDING) {
+            throw new RedemptionException(
+                    "INVALID_STATUS_TRANSITION",
+                    "No se puede revertir el estado de un canje ya entregado.",
+                    400);
+        }
+
+        try {
+            redemption.setStatus(request.getStatus());
+            if (request.getStatus() == RedemptionStatus.DELIVERED) {
+                redemption.setDeliveredAt(LocalDateTime.now());
+            }
+            RedemptionRequest saved = redemptionRepository.save(redemption);
+            log.info("Redemption {} status updated to {} by user {}",
+                    redemptionId, request.getStatus(), requester.getEmail());
+            return toRedemptionResponse(saved);
+        } catch (RedemptionException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error updating redemption {} status: {}", redemptionId, e.getMessage());
+            throw new RedemptionException("UPDATE_FAILED", "No se pudo actualizar el canje. Intenta de nuevo.", 500);
         }
     }
 

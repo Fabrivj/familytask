@@ -12,6 +12,7 @@ import com.vertexdev.familytask.model.Reward;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
+import com.vertexdev.familytask.repository.RedemptionRepository;
 import com.vertexdev.familytask.repository.RewardRepository;
 import com.vertexdev.familytask.util.FamilyPermissions;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class RewardService {
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final RewardRepository rewardRepository;
+    private final RedemptionRepository redemptionRepository;
     private final FamilyPermissions familyPermissions;
 
     @Transactional
@@ -76,9 +80,17 @@ public class RewardService {
                 .orElseThrow(() -> new RewardException("ACCESS_DENIED", "Acceso no autorizado.", 403));
 
         try {
+            Map<Long, Integer> pendingCounts = redemptionRepository
+                    .countPendingPerReward(familyGroup.getId())
+                    .stream()
+                    .collect(Collectors.toMap(
+                            row -> (Long) row[0],
+                            row -> ((Long) row[1]).intValue()
+                    ));
+
             return rewardRepository.findByFamilyGroupIdAndIsActiveTrueOrderByCreatedAtDesc(familyGroup.getId())
                     .stream()
-                    .map(this::toResponse)
+                    .map(r -> toResponse(r, pendingCounts.getOrDefault(r.getId(), 0)))
                     .toList();
         } catch (Exception e) {
             log.error("Failed to fetch rewards for family {}: {}", familyId, e.getMessage());
@@ -134,6 +146,10 @@ public class RewardService {
     }
 
     private RewardResponse toResponse(Reward reward) {
+        return toResponse(reward, 0);
+    }
+
+    private RewardResponse toResponse(Reward reward, int pendingCount) {
         return RewardResponse.builder()
                 .id(reward.getId())
                 .name(reward.getName())
@@ -146,6 +162,7 @@ public class RewardService {
                         : ApprovalRule.AUTOMATIC)
                 .familyId(reward.getFamilyGroup().getId())
                 .createdAt(reward.getCreatedAt())
+                .pendingCount(pendingCount)
                 .build();
     }
 }

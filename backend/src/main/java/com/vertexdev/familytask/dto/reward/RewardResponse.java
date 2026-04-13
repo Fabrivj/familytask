@@ -21,4 +21,5 @@ public class RewardResponse {
     private ApprovalRule approvalRule;
     private Long familyId;
     private LocalDateTime createdAt;
+    private int pendingCount;
 }

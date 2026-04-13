@@ -33,3 +33,8 @@ export interface RedeemRewardRequest {
   rewardId: number;
   familyId: number;
 }
+
+export interface UpdateRedemptionStatusRequest {
+  familyId: number;
+  status: RedemptionStatus;
+}
