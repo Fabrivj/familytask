@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { childGuard } from './core/guards/child.guard';
 import { parentGuard } from './core/guards/parent.guard';
 
 export const routes: Routes = [
@@ -92,6 +93,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/ranking/ranking.component').then(m => m.RankingComponent),
+  },
+  {
+    path: 'badges',
+    canActivate: [authGuard, childGuard],
+    loadComponent: () =>
+      import('./features/badges/badges.component').then(m => m.BadgesComponent),
   },
   {
     path: '**',

@@ -1,3 +1,5 @@
+import { EarnedBadge } from './badge.model';
+
 export type TaskPriority = 'HIGH' | 'MEDIUM' | 'LOW';
 export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'IN_REVIEW' | 'COMPLETED';
 
@@ -56,4 +58,5 @@ export interface CompleteTaskResponse {
   previousLevel: number;
   leveledUp: boolean;
   xpToNextLevel: number;
+  earnedBadges: EarnedBadge[];
 }

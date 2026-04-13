@@ -1,3 +1,5 @@
+import { EarnedBadge } from './badge.model';
+
 export type HabitFrequency = 'DAILY' | 'WEEKLY' | 'WEEKDAYS' | 'WEEKENDS' | 'MONTHLY';
 
 export interface HabitResponse {
@@ -25,6 +27,7 @@ export interface CompleteHabitResponse {
   currentStreak: number;
   longestStreak: number;
   completionDate: string;
+  earnedBadges: EarnedBadge[];
 }
 
 export interface CreateHabitRequest {

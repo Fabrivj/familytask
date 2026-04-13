@@ -45,6 +45,18 @@ public class FamilyPermissions {
      *   <li>The admin cannot remove themselves.</li>
      * </ul>
      */
+    /** Any active CHILD in the family. Used for child-only features like badges. */
+    public boolean isActiveChild(FamilyMember member) {
+        return member.getIsActive() && member.getRole() == Role.CHILD;
+    }
+
+    /** Any active member in the specified family, regardless of role. */
+    public boolean isActiveMember(FamilyMember member, Long familyId) {
+        return member != null
+                && member.getIsActive()
+                && member.getFamilyGroup().getId().equals(familyId);
+    }
+
     public boolean canRemoveMember(FamilyMember requester, FamilyMember target) {
         if (!Boolean.TRUE.equals(requester.getIsAdmin()) || !isActiveParent(requester)) return false;
         if (Boolean.TRUE.equals(target.getIsAdmin())) return false;

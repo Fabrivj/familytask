@@ -42,6 +42,7 @@ public class HabitService {
     private final HabitCompletionRepository habitCompletionRepository;
     private final UserRepository userRepository;
     private final FamilyPermissions familyPermissions;
+    private final BadgeService badgeService;
 
     @Transactional
     public HabitResponse createHabit(CreateHabitRequest request, User creator) {
@@ -212,6 +213,9 @@ public class HabitService {
 
             log.info("Habit '{}' completed by user {} on {}", habit.getTitle(), requester.getEmail(), today);
 
+            var earnedBadges = badgeService.evaluateAndAwardBadges(
+                    requester, habit.getFamilyGroup().getId());
+
             return CompleteHabitResponse.builder()
                     .habitId(habit.getId())
                     .habitTitle(habit.getTitle())
@@ -221,6 +225,7 @@ public class HabitService {
                     .currentStreak(assignment.getCurrentStreak())
                     .longestStreak(assignment.getLongestStreak())
                     .completionDate(today)
+                    .earnedBadges(earnedBadges)
                     .build();
         } catch (HabitException e) {
             throw e;
