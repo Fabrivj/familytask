@@ -13,26 +13,25 @@ public class ExperienceService {
 
     /**
      * XP acumulada necesaria para alcanzar el nivel N.
-     * Fórmula: 50 * N * (N - 1)
+     * Fórmula: 50 * N * (N + 1)
      *
-     * Nivel 1 →    0 XP
-     * Nivel 2 →  100 XP
-     * Nivel 3 →  300 XP
-     * Nivel 4 →  600 XP
-     * Nivel 5 → 1000 XP
+     * Nivel 0 →    0 XP
+     * Nivel 1 →  100 XP
+     * Nivel 2 →  300 XP
+     * Nivel 3 →  600 XP
+     * Nivel 4 → 1000 XP
      */
     public int xpForLevel(int level) {
-        return 50 * level * (level - 1);
+        return 50 * level * (level + 1);
     }
 
     /**
      * Calcula el nivel actual a partir del XP total acumulado.
-     * Inverso de xpForLevel: level = floor((1 + sqrt(1 + 8*totalXp/100)) / 2), mínimo 1.
+     * Inverso de xpForLevel: level = floor((-1 + sqrt(1 + 8*totalXp/100)) / 2), mínimo 0.
      */
     public int calculateLevel(int totalXp) {
-        if (totalXp <= 0) return 1;
-        int level = (int) Math.floor((1 + Math.sqrt(1 + 8.0 * totalXp / 100)) / 2);
-        return Math.max(1, level);
+        int level = (int) Math.floor((-1 + Math.sqrt(1 + 8.0 * totalXp / 100)) / 2);
+        return Math.max(0, level);
     }
 
     /**
