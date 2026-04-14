@@ -106,6 +106,9 @@
 
 .btn-copy {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 5px 14px;
   background: var(--secondary);
   border: none;
@@ -118,6 +121,13 @@
   color: #fff;
   cursor: pointer;
   transition: opacity 0.2s;
+}
+
+.btn-copy mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  line-height: 1;
 }
 
 .btn-copy:hover {
