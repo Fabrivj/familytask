@@ -43,6 +43,7 @@ public class HabitService {
     private final UserRepository userRepository;
     private final FamilyPermissions familyPermissions;
     private final BadgeService badgeService;
+    private final ExperienceService experienceService;
 
     @Transactional
     public HabitResponse createHabit(CreateHabitRequest request, User creator) {
@@ -211,7 +212,22 @@ public class HabitService {
             updateStreak(assignment, frequency, today);
             habitAssignmentRepository.save(assignment);
 
-            log.info("Habit '{}' completed by user {} on {}", habit.getTitle(), requester.getEmail(), today);
+            FamilyMember member = familyMemberRepository
+                    .findByFamilyGroupIdAndUserId(habit.getFamilyGroup().getId(), requester.getId())
+                    .orElseThrow(() -> new HabitException("MEMBER_NOT_FOUND",
+                            "No se encontró el perfil del miembro en esta familia.", 404));
+
+            double multiplier = calculateStreakMultiplier(assignment.getCurrentStreak());
+            int xpActual    = (int) Math.round((habit.getXpReward()    != null ? habit.getXpReward()    : 0) * multiplier);
+            int coinsActual = (int) Math.round((habit.getCoinsReward() != null ? habit.getCoinsReward() : 0) * multiplier);
+
+            ExperienceService.AwardResult award = experienceService.awardXpAndCoins(member, xpActual, coinsActual);
+
+            log.info("Habit '{}' completed by user {} on {} | streak={} multiplier={}x +{}XP +{}coins → level {}{}",
+                    habit.getTitle(), requester.getEmail(), today,
+                    assignment.getCurrentStreak(), String.format("%.2f", multiplier),
+                    xpActual, coinsActual, award.newLevel(),
+                    award.leveledUp() ? " (LEVEL UP!)" : "");
 
             var earnedBadges = badgeService.evaluateAndAwardBadges(
                     requester, habit.getFamilyGroup().getId());
@@ -225,6 +241,15 @@ public class HabitService {
                     .currentStreak(assignment.getCurrentStreak())
                     .longestStreak(assignment.getLongestStreak())
                     .completionDate(today)
+                    .streakMultiplier(multiplier)
+                    .xpActuallyAwarded(xpActual)
+                    .coinsActuallyAwarded(coinsActual)
+                    .newTotalXp(award.newTotalXp())
+                    .newTotalCoins(award.newTotalCoins())
+                    .newLevel(award.newLevel())
+                    .previousLevel(award.previousLevel())
+                    .leveledUp(award.leveledUp())
+                    .xpToNextLevel(award.xpToNextLevel())
                     .earnedBadges(earnedBadges)
                     .build();
         } catch (HabitException e) {
@@ -311,6 +336,14 @@ public class HabitService {
                 yield !last.isBefore(firstOfLastMonth) && !last.isAfter(lastOfLastMonth);
             }
         };
+    }
+
+    /**
+     * Multiplicador de racha: min(2.5, 1.0 + (streak - 1) × 0.05)
+     * Día 1 → 1.00x, Día 2 → 1.05x, Día 10 → 1.45x, Día 21+ → 2.50x (tope)
+     */
+    private double calculateStreakMultiplier(int streak) {
+        return Math.min(2.5, 1.0 + (streak - 1) * 0.05);
     }
 
     private HabitResponse toResponse(Habit habit) {

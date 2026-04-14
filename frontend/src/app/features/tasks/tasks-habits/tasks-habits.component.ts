@@ -14,7 +14,15 @@ import { PermissionsService } from '../../../core/services/permissions.service';
     <app-shell>
       <main class="content">
 
-        <app-page-header title="Tareas y Hábitos" [subtitle]="subtitle()" />
+        <div class="header-row">
+          <app-page-header title="Tareas y Hábitos" [subtitle]="subtitle()" />
+          @if (isParent()) {
+            <button class="btn-pill btn-add" type="button" (click)="openAddPanel()">
+              <mat-icon aria-hidden="true">add</mat-icon>
+              {{ activeTab() === 'tasks' ? 'NUEVA TAREA' : 'NUEVO HÁBITO' }}
+            </button>
+          }
+        </div>
 
         <div class="tabs-row">
           <div class="tabs" role="tablist">
@@ -31,13 +39,6 @@ import { PermissionsService } from '../../../core/services/permissions.service';
               HÁBITOS
             </button>
           </div>
-
-          @if (isParent()) {
-            <button class="btn-pill btn-add" type="button" (click)="openAddPanel()">
-              <mat-icon aria-hidden="true">add</mat-icon>
-              {{ activeTab() === 'tasks' ? 'NUEVA TAREA' : 'NUEVO HÁBITO' }}
-            </button>
-          }
         </div>
 
         @if (activeTab() === 'tasks') {
@@ -55,16 +56,21 @@ import { PermissionsService } from '../../../core/services/permissions.service';
     }
     @media (max-width: 767px) {
       .content { padding: 20px 16px 80px; }
-      .tabs-row { flex-direction: column; align-items: stretch; gap: 10px; }
+      .header-row { flex-direction: column; align-items: stretch; gap: 10px; }
       .tabs { width: 100%; }
       .tab { flex: 1; justify-content: center; padding: 10px 12px; }
       .btn-add { width: 100%; justify-content: center; }
     }
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
     .tabs-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
       margin-bottom: 20px;
     }
     .tabs {

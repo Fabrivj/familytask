@@ -37,12 +37,12 @@
 
             <div class="rank-info">
               <span class="rank-name">{{ member.name }}</span>
-              <span class="rank-meta">NIVEL {{ member.currentLevel ?? 1 }} · {{ member.totalXp ?? 0 }} XP</span>
+              <span class="rank-meta">{{ member.totalXp ?? 0 }} XP · {{ member.totalCoins ?? 0 }} monedas</span>
             </div>
 
-            <div class="rank-xp" [attr.aria-label]="(member.totalXp ?? 0) + ' puntos de experiencia'">
-              <mat-icon aria-hidden="true">bolt</mat-icon>
-              {{ member.totalXp ?? 0 }}
+            <div class="rank-xp" [attr.aria-label]="'Nivel ' + (member.currentLevel ?? 1)">
+              <span aria-hidden="true" class="rank-xp-label">NVL</span>
+              {{ member.currentLevel ?? 1 }}
             </div>
 
           </li>

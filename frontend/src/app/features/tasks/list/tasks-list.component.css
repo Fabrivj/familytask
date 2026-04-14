@@ -272,14 +272,14 @@
 }
 
 .task-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-sub);
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 .priority-text {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.06em;
 }
 
@@ -323,7 +323,7 @@
   border-radius: 4px;
   background: rgba(var(--border-rgb), 0.1);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--border);
 }
 
@@ -335,7 +335,7 @@
   border-radius: 4px;
   background: rgba(var(--success-rgb), 0.08);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--success);
 }
 
@@ -350,7 +350,7 @@
 
 .col-date {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-sub);
   white-space: nowrap;
 }
@@ -463,9 +463,9 @@
 .card-date {
   margin-left: auto;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-sub);
-  opacity: 0.45;
+  opacity: 0.7;
   flex-shrink: 0;
 }
 
@@ -474,7 +474,7 @@
   align-items: center;
   gap: 4px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-sub);
 }
 

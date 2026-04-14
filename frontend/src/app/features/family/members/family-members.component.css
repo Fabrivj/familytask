@@ -110,9 +110,9 @@
 }
 
 .card-email {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-sub);
-  opacity: 0.6;
+  opacity: 0.8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -150,10 +150,10 @@
 
 .stat-lbl {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 7.5px;
+  font-size: 10px;
   letter-spacing: 0.1em;
   color: var(--text-sub);
-  opacity: 0.5;
+  opacity: 0.75;
   text-align: center;
 }
 
@@ -183,7 +183,7 @@
 
 .xp-label {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 8.5px;
+  font-size: 11px;
   color: var(--border);
   letter-spacing: 0.06em;
   flex-shrink: 0;
@@ -206,9 +206,9 @@
 
 .xp-count {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 8px;
+  font-size: 10px;
   color: var(--text-sub);
-  opacity: 0.5;
+  opacity: 0.75;
   flex-shrink: 0;
 }
 
@@ -223,11 +223,11 @@
 
 .you-badge {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.15em;
-  color: var(--secondary);
-  border: 1px solid rgba(var(--secondary-rgb), 0.4);
-  background: rgba(var(--secondary-rgb), 0.08);
+  color: var(--border);
+  border: 1px solid rgba(var(--border-rgb), 0.7);
+  background: rgba(var(--border-rgb), 0.12);
   padding: 3px 10px;
   border-radius: 20px;
 }

@@ -24,4 +24,17 @@ public class CompleteHabitResponse {
 
     // Insignias ganadas al completar el hábito
     private List<BadgeResponse> earnedBadges;
+
+    // Resultado del sistema de XP (espejo de AwardResult)
+    private Integer newTotalXp;
+    private Integer newTotalCoins;
+    private Integer newLevel;
+    private Integer previousLevel;
+    private Boolean leveledUp;
+    private Integer xpToNextLevel;
+
+    // Recompensas reales (post-multiplicador de racha)
+    private Double streakMultiplier;
+    private Integer xpActuallyAwarded;
+    private Integer coinsActuallyAwarded;
 }

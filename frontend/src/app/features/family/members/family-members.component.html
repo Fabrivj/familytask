@@ -67,7 +67,7 @@
               @if (member.role === 'CHILD') {
                 <div class="xp-row" aria-label="Experiencia">
                   <mat-icon class="xp-bolt" aria-hidden="true">bolt</mat-icon>
-                  <span class="xp-label">XP — NIVEL {{ member.currentLevel ?? 1 }}</span>
+                  <span class="xp-label">XP</span>
                   <div class="xp-track">
                     <div class="xp-fill" [style.width.%]="xpPercent(member)"></div>
                   </div>

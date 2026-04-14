@@ -192,7 +192,7 @@
   padding: 2px 8px;
   border-radius: 20px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
   border: 1px solid rgba(var(--border-rgb), 0.15);
   color: var(--text-sub);
   white-space: nowrap;
@@ -266,9 +266,9 @@
 }
 
 .habit-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-sub);
-  opacity: 0.7;
+  opacity: 0.85;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -290,7 +290,7 @@
   padding: 4px 12px;
   border-radius: 20px;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
@@ -324,7 +324,7 @@
   border-radius: 4px;
   background: rgba(var(--border-rgb), 0.1);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--border);
 }
 
@@ -336,7 +336,7 @@
   border-radius: 4px;
   background: rgba(var(--success-rgb), 0.08);
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--success);
 }
 
@@ -428,9 +428,9 @@
 
 .card-desc {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-sub);
-  opacity: 0.65;
+  opacity: 0.85;
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;

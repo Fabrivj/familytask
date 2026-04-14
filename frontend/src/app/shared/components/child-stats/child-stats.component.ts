@@ -15,7 +15,7 @@ import { MemberItem } from '../../../core/models/member.model';
     <div class="stats-card">
       <div class="level-badge">
         <span class="level-label">NIVEL</span>
-        <span class="level-number">{{ member().currentLevel ?? 1 }}</span>
+        <span class="level-number">{{ member().currentLevel ?? 0 }}</span>
       </div>
 
       <div class="progress-section">
@@ -163,8 +163,8 @@ import { MemberItem } from '../../../core/models/member.model';
 export class ChildStatsComponent {
   readonly member = input.required<MemberItem>();
 
-  /** XP needed to go from current level start to next level (= 100 * currentLevel). */
-  readonly xpNeededInLevel = computed(() => 100 * (this.member().currentLevel ?? 1));
+  /** XP needed to go from current level start to next level (= 100 * (currentLevel + 1)). */
+  readonly xpNeededInLevel = computed(() => 100 * ((this.member().currentLevel ?? 0) + 1));
 
   /** XP earned within the current level. */
   readonly xpInLevel = computed(() =>

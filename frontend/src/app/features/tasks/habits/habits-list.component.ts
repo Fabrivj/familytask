@@ -60,8 +60,16 @@ export class HabitsListComponent {
             : h
         ));
         this.isCompletingHabit.set(null);
+
+        const multiplierLabel = result.streakMultiplier > 1
+          ? ` (×${result.streakMultiplier.toFixed(2)} racha)`
+          : '';
+        const rewardMsg = result.leveledUp
+          ? `+${result.xpActuallyAwarded} XP · +${result.coinsActuallyAwarded} monedas${multiplierLabel} → ¡${result.assignedToName} subió al nivel ${result.newLevel}!`
+          : `+${result.xpActuallyAwarded} XP · +${result.coinsActuallyAwarded} monedas${multiplierLabel}`;
+
         this.snackBar.open(
-          `¡Hábito completado! +${result.xpReward} XP y ${result.coinsReward} monedas. 🔥 Racha: ${result.currentStreak} día${result.currentStreak === 1 ? '' : 's'}`,
+          `¡Hábito completado! ${rewardMsg} 🔥 Racha: ${result.currentStreak} día${result.currentStreak === 1 ? '' : 's'}`,
           'Cerrar',
           { duration: 6000, panelClass: 'snack-success' },
         );

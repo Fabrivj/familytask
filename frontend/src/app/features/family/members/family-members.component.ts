@@ -200,7 +200,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   }
 
   xpNeededInLevel(member: MemberItem): number {
-    return 100 * (member.currentLevel ?? 1);
+    return 100 * ((member.currentLevel ?? 0) + 1);
   }
 
   xpInLevel(member: MemberItem): number {

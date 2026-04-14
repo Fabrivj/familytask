@@ -53,7 +53,7 @@ public class FamilyMember {
 
     @Column(name = "current_level", nullable = false)
     @Builder.Default
-    private Integer currentLevel = 1;
+    private Integer currentLevel = 0;
 
     @Column(name = "total_coins", nullable = false)
     @Builder.Default
