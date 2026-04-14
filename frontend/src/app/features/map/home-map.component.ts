@@ -31,6 +31,7 @@ import {
 } from '../../core/models/space.model';
 import { TaskResponse } from '../../core/models/task.model';
 import { priorityLabel } from '../../core/utils/task-labels';
+import { injectLoadingState } from '../../core/utils/loading-state';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -96,8 +97,9 @@ export class HomeMapComponent {
 
   /** Current user's name from session — used to highlight their assigned tasks. */
   readonly currentUserName = computed(() => this.authService.session()?.name ?? null);
-  readonly isLoading = signal(false);
-  readonly error = signal('');
+  private readonly ls = injectLoadingState();
+  readonly isLoading = this.ls.isLoading;
+  readonly error = this.ls.error;
 
   readonly spacesSubtitle = computed(() => {
     const n = this.spaces().length;
@@ -114,17 +116,22 @@ export class HomeMapComponent {
     return map;
   });
 
-  tasksForSpace(spaceId: number): TaskResponse[] {
-    return this.tasksBySpace().get(spaceId) ?? [];
-  }
-
   /** Tasks visible to the current child — assigned to them OR unassigned. */
-  myTasksForSpace(spaceId: number): TaskResponse[] {
+  readonly myTasksBySpace = computed(() => {
     const myName = this.currentUserName();
-    return this.tasksForSpace(spaceId).filter(
-      t => t.assignedToId === null || t.assignedToName === myName
-    );
-  }
+    const result = new Map<number, TaskResponse[]>();
+    for (const [spaceId, tasks] of this.tasksBySpace()) {
+      result.set(spaceId, tasks.filter(
+        t => t.assignedToId === null || t.assignedToName === myName
+      ));
+    }
+    return result;
+  });
+
+  /** Pre-resolved map used by the template — parent sees all, child sees theirs. */
+  readonly visibleTasksBySpace = computed(() =>
+    this.isParent() ? this.tasksBySpace() : this.myTasksBySpace()
+  );
 
   // ─── Delete space (two-modal flow) ──────────────────────────────────────
   readonly showDeleteConfirm = signal(false);
@@ -137,7 +144,7 @@ export class HomeMapComponent {
   readonly isMigrating = signal(false);
   readonly availableTargetSpaces = computed(() =>
     this.spaces().filter(s =>
-      s.id !== this.spaceToDelete()?.id && this.tasksForSpace(s.id).length === 0
+      s.id !== this.spaceToDelete()?.id && (this.tasksBySpace().get(s.id)?.length ?? 0) === 0
     )
   );
   readonly hasTargetSpaces = computed(() => this.availableTargetSpaces().length > 0);
@@ -172,27 +179,21 @@ export class HomeMapComponent {
   }
 
   private loadSpaces(familyId: number): void {
-    this.isLoading.set(true);
-    this.error.set('');
     this.spaces.set([]);
     this.tasks.set([]);
 
-    forkJoin({
-      spaces: this.spaceService.getSpaces(familyId),
-      tasks:  this.taskService.getTasks(familyId),
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
+    this.ls.run(
+      forkJoin({
+        spaces: this.spaceService.getSpaces(familyId),
+        tasks:  this.taskService.getTasks(familyId),
+      }).pipe(takeUntilDestroyed(this.destroyRef)),
+      {
         next: ({ spaces, tasks }) => {
           this.spaces.set(spaces);
           this.tasks.set(tasks);
-          this.isLoading.set(false);
         },
-        error: (err) => {
-          this.error.set(err.error?.message || 'No se pudo cargar los espacios. Intenta de nuevo.');
-          this.isLoading.set(false);
-        },
-      });
+      },
+    );
   }
 
   // ─── Panel ───────────────────────────────────────────────────────────────

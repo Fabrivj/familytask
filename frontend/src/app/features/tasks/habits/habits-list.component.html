@@ -1,7 +1,7 @@
 <!-- ── Filters ────────────────────────────────────────────────── -->
 <div class="filters-bar" role="group" aria-label="Filtros de hábitos">
   <span class="filter-label">FRECUENCIA</span>
-  @for (f of ['DAILY', 'WEEKDAYS', 'WEEKENDS', 'WEEKLY', 'MONTHLY']; track f) {
+  @for (f of frequencies; track f) {
     <button
       class="filter-chip"
       [class.filter-active]="filterFrequency() === f"

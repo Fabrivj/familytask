@@ -19,6 +19,8 @@ import { PermissionsService } from '../../../core/services/permissions.service';
 import { HabitService } from '../../../core/services/habit.service';
 import { MembersService } from '../../../core/services/members.service';
 import { CompleteHabitResponse, HabitFrequency, HabitResponse } from '../../../core/models/habit.model';
+import { HABIT_FREQUENCIES, frequencyIcon, frequencyLabel } from '../../../core/utils/habit-labels';
+import { injectLoadingState } from '../../../core/utils/loading-state';
 import { MemberItem } from '../../../core/models/member.model';
 import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -27,7 +29,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
   selector: 'app-habits-list',
   imports: [A11yModule, LowerCasePipe, ReactiveFormsModule, MatIconModule, MatProgressSpinnerModule, UserAvatarComponent, ConfirmDialogComponent],
   templateUrl: './habits-list.component.html',
-  styleUrl: './habits-list.component.css',
+  styleUrls: ['../shared/list-shared.css', './habits-list.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HabitsListComponent {
@@ -89,8 +91,9 @@ export class HabitsListComponent {
   // ─── Modal de borrado ─────────────────────────────────────────────────────
   readonly showDeleteModal = signal(false);
   readonly habitToDelete = signal<HabitResponse | null>(null);
-  readonly isLoading     = signal(false);
-  readonly error         = signal('');
+  private readonly ls    = injectLoadingState();
+  readonly isLoading     = this.ls.isLoading;
+  readonly error         = this.ls.error;
 
   // ─── Filtros ───────────────────────────────────────────────────────────────
   readonly filterFrequency = signal<string | null>(null);
@@ -115,18 +118,10 @@ export class HabitsListComponent {
   }
 
   private loadData(familyId: number): void {
-    this.isLoading.set(true);
-    this.error.set('');
-
-    this.habitService.getHabits(familyId).subscribe({
+    this.ls.run(this.habitService.getHabits(familyId), {
       next: (habits) => {
         this.habits.set(habits);
         this.countChange.emit(habits.length);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Error al cargar los hábitos. Por favor, intente nuevamente.');
-        this.isLoading.set(false);
       },
     });
 
@@ -158,31 +153,13 @@ export class HabitsListComponent {
     validators: [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)],
   });
   // ─── Helpers ──────────────────────────────────────────────────────────────
+  readonly frequencies = HABIT_FREQUENCIES;
+  readonly frequencyIcon = frequencyIcon;
+  readonly frequencyLabel = frequencyLabel;
+
   memberShortName(name: string): string {
     const parts = name.trim().split(' ');
     return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0];
-  }
-
-  frequencyIcon(f: string): string {
-    const icons: Record<string, string> = {
-      DAILY: 'wb_sunny',
-      WEEKDAYS: 'view_week',
-      WEEKENDS: 'weekend',
-      WEEKLY: 'date_range',
-      MONTHLY: 'calendar_month',
-    };
-    return icons[f] ?? 'repeat';
-  }
-
-  frequencyLabel(f: string): string {
-    const labels: Record<string, string> = {
-      DAILY: 'Diario',
-      WEEKLY: 'Semanal',
-      WEEKDAYS: 'Lunes a Viernes',
-      WEEKENDS: 'Fines de Semana',
-      MONTHLY: 'Mensual',
-    };
-    return labels[f] ?? f;
   }
 
   // ─── Validación del formulario ────────────────────────────────────────────

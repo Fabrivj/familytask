@@ -57,11 +57,7 @@
               </div>
               <div class="card-header-right">
                 <span class="task-count-badge">
-                  @if (isParent()) {
-                    {{ tasksForSpace(space.id).length }} tarea{{ tasksForSpace(space.id).length !== 1 ? 's' : '' }}
-                  } @else {
-                    {{ myTasksForSpace(space.id).length }} tarea{{ myTasksForSpace(space.id).length !== 1 ? 's' : '' }}
-                  }
+                  {{ (visibleTasksBySpace().get(space.id) ?? []).length }} tarea{{ (visibleTasksBySpace().get(space.id) ?? []).length !== 1 ? 's' : '' }}
                 </span>
                 @if (isParent()) {
                   <div class="card-header-actions">
@@ -83,15 +79,17 @@
             <!-- Task list -->
             <div class="card-tasks-outer">
               <div class="card-tasks">
-                @if (isParent() && tasksForSpace(space.id).length === 0) {
-                  <button class="empty-assign-cta" type="button" (click)="navigateToAssignTask(space)">
-                    <mat-icon aria-hidden="true">add</mat-icon>
-                    Asignar primera tarea
-                  </button>
-                } @else if (!isParent() && myTasksForSpace(space.id).length === 0) {
-                  <p class="placeholder-text">No tienes tareas aquí</p>
+                @if ((visibleTasksBySpace().get(space.id) ?? []).length === 0) {
+                  @if (isParent()) {
+                    <button class="empty-assign-cta" type="button" (click)="navigateToAssignTask(space)">
+                      <mat-icon aria-hidden="true">add</mat-icon>
+                      Asignar primera tarea
+                    </button>
+                  } @else {
+                    <p class="placeholder-text">No tienes tareas aquí</p>
+                  }
                 } @else {
-                  @for (task of (isParent() ? tasksForSpace(space.id) : myTasksForSpace(space.id)); track task.id) {
+                  @for (task of visibleTasksBySpace().get(space.id) ?? []; track task.id) {
                     <div [class]="'task-pill priority-' + task.priority.toLowerCase()"
                          [attr.aria-label]="task.title">
                       <span class="task-pill-dot" aria-hidden="true"></span>
@@ -120,7 +118,7 @@
             </div>
 
             <!-- Footer: parent → assign CTA | child → totals -->
-            @if (isParent() && tasksForSpace(space.id).length > 0) {
+            @if (isParent() && (visibleTasksBySpace().get(space.id) ?? []).length > 0) {
               <button class="btn-assign" type="button" (click)="navigateToAssignTask(space)">
                 <mat-icon aria-hidden="true">add</mat-icon>
                 ASIGNAR TAREA

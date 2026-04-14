@@ -23,7 +23,8 @@ import { PermissionsService } from '../../../core/services/permissions.service';
 import { TaskService } from '../../../core/services/task.service';
 import { MembersService } from '../../../core/services/members.service';
 import { SpaceService } from '../../../core/services/space.service';
-import { priorityLabel, statusLabel } from '../../../core/utils/task-labels';
+import { priorityLabel, statusLabel, statusIcon } from '../../../core/utils/task-labels';
+import { injectLoadingState } from '../../../core/utils/loading-state';
 import { CompleteTaskResponse, TaskPriority, TaskResponse, TaskStatus } from '../../../core/models/task.model';
 import { MemberItem } from '../../../core/models/member.model';
 import { SpaceResponse, spaceTypeIcon } from '../../../core/models/space.model';
@@ -43,7 +44,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     ConfirmDialogComponent,
   ],
   templateUrl: './tasks-list.component.html',
-  styleUrl: './tasks-list.component.css',
+  styleUrls: ['../shared/list-shared.css', './tasks-list.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TasksListComponent {
@@ -87,8 +88,9 @@ export class TasksListComponent {
   readonly countChange = output<number>();
   readonly members = signal<MemberItem[]>([]);
   readonly spaces = signal<SpaceResponse[]>([]);
-  readonly isLoading = signal(false);
-  readonly error = signal('');
+  private readonly ls = injectLoadingState();
+  readonly isLoading = this.ls.isLoading;
+  readonly error = this.ls.error;
 
   // ─── Filtros ──────────────────────────────────────────────────────────────
   readonly filterPriority = signal<string | null>(null);
@@ -148,12 +150,7 @@ export class TasksListComponent {
   readonly isUpdatingStatus = signal<number | null>(null);
   readonly statusLabel = statusLabel;
 
-  statusIcon(status: string): string {
-    if (status === 'PENDING') return 'schedule';
-    if (status === 'IN_PROGRESS') return 'play_arrow';
-    if (status === 'COMPLETED') return 'check_circle';
-    return 'help_outline';
-  }
+  readonly statusIcon = statusIcon;
   readonly statusDropdownPos = signal<{ top: number; left: number } | null>(null);
   readonly activeStatusTask = computed(() =>
     this.tasks().find(t => t.id === this.openStatusDropdownId()) ?? null
@@ -171,18 +168,10 @@ export class TasksListComponent {
   }
 
   private loadData(familyId: number): void {
-    this.isLoading.set(true);
-    this.error.set('');
-
-    this.taskService.getTasks(familyId).subscribe({
+    this.ls.run(this.taskService.getTasks(familyId), {
       next: (tasks) => {
         this.tasks.set(tasks);
         this.countChange.emit(tasks.length);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Error al cargar las tareas. Por favor, intente nuevamente.');
-        this.isLoading.set(false);
       },
     });
 

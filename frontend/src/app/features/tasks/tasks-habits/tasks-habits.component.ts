@@ -41,11 +41,12 @@ import { PermissionsService } from '../../../core/services/permissions.service';
           </div>
         </div>
 
-        @if (activeTab() === 'tasks') {
-          <app-tasks-list #tasksList (countChange)="taskCount.set($event)" />
-        } @else {
-          <app-habits-list #habitsList (countChange)="habitCount.set($event)" />
-        }
+        <app-tasks-list #tasksList
+          [style.display]="activeTab() === 'tasks' ? 'block' : 'none'"
+          (countChange)="taskCount.set($event)" />
+        <app-habits-list #habitsList
+          [style.display]="activeTab() === 'habits' ? 'block' : 'none'"
+          (countChange)="habitCount.set($event)" />
 
       </main>
     </app-shell>
@@ -111,8 +112,8 @@ import { PermissionsService } from '../../../core/services/permissions.service';
 export class TasksHabitsComponent {
   private readonly permissionsService = inject(PermissionsService);
 
-  @ViewChild('tasksList')  tasksList?: TasksListComponent;
-  @ViewChild('habitsList') habitsList?: HabitsListComponent;
+  @ViewChild('tasksList')  tasksList!: TasksListComponent;
+  @ViewChild('habitsList') habitsList!: HabitsListComponent;
 
   readonly activeTab   = signal<'tasks' | 'habits'>('tasks');
   readonly isParent    = this.permissionsService.isParent;
@@ -133,9 +134,9 @@ export class TasksHabitsComponent {
 
   openAddPanel(): void {
     if (this.activeTab() === 'tasks') {
-      this.tasksList?.openCreatePanel();
+      this.tasksList.openCreatePanel();
     } else {
-      this.habitsList?.openCreatePanel();
+      this.habitsList.openCreatePanel();
     }
   }
 }
