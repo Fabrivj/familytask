@@ -598,3 +598,23 @@
     padding: 13px 16px 13px 20px;
   }
 }
+
+/* ── Mat Datepicker input wrapper ── */
+.date-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-input {
+  flex: 1;
+  cursor: pointer;
+  padding-right: 40px;
+}
+
+.date-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}

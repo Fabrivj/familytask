@@ -8,7 +8,8 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -26,6 +27,8 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
   imports: [
     DatePipe,
     FormsModule,
+    ReactiveFormsModule,
+    MatDatepickerModule,
     MatIconModule,
     MatProgressSpinnerModule,
     UserChipComponent,
@@ -53,6 +56,8 @@ export class RedemptionHistoryPanelComponent {
   readonly selectedStatus = signal<RedemptionStatus | ''>('');
   readonly dateFrom = signal('');
   readonly dateTo = signal('');
+  readonly dateFromCtrl = new FormControl<Date | null>(null);
+  readonly dateToCtrl = new FormControl<Date | null>(null);
   readonly filtersExpanded = signal(true);
 
   readonly redemptions = signal<RedemptionHistoryResponse[]>([]);
@@ -133,6 +138,8 @@ export class RedemptionHistoryPanelComponent {
     this.selectedStatus.set('');
     this.dateFrom.set('');
     this.dateTo.set('');
+    this.dateFromCtrl.reset();
+    this.dateToCtrl.reset();
     this.closeFiltersIfNeeded();
     this.applyFilters();
   }
@@ -140,6 +147,18 @@ export class RedemptionHistoryPanelComponent {
   toggleFilters(): void {
     if (!this.collapsibleFilters()) return;
     this.filtersExpanded.update(value => !value);
+  }
+
+  onDateFromChange(event: MatDatepickerInputEvent<Date>): void {
+    this.dateFrom.set(event.value ? this.toISODate(event.value) : '');
+  }
+
+  onDateToChange(event: MatDatepickerInputEvent<Date>): void {
+    this.dateTo.set(event.value ? this.toISODate(event.value) : '');
+  }
+
+  private toISODate(date: Date): string {
+    return date.toISOString().split('T')[0];
   }
 
   statusLabel(status: RedemptionStatus): string {
