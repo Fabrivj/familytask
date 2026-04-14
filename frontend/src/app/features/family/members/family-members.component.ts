@@ -9,19 +9,19 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../../../core/services/auth.service';
-import { PermissionsService } from '../../../core/services/permissions.service';
-import { FamilyService } from '../../../core/services/family.service';
-import { MembersService } from '../../../core/services/members.service';
-import { InvitationService } from '../../../core/services/invitation.service';
-import { MemberItem, PendingInvitation } from '../../../core/models/member.model';
+import { AuthService } from '@core/services/auth.service';
+import { PermissionsService } from '@core/services/permissions.service';
+import { FamilyService } from '@core/services/family.service';
+import { MembersService } from '@core/services/members.service';
+import { InvitationService } from '@core/services/invitation.service';
+import { MemberItem, PendingInvitation } from '@core/models/member.model';
 import { MatIconModule } from '@angular/material/icon';
-import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
-import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { injectLoadingState } from '../../../core/utils/loading-state';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { RoleBadgeComponent } from '@shared/components/role-badge/role-badge.component';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { injectLoadingState } from '@core/utils/loading-state';
 
 const POLL_INTERVAL_MS = 15_000;
 
@@ -29,7 +29,11 @@ const POLL_INTERVAL_MS = 15_000;
   selector: 'app-family-members',
   imports: [MatIconModule, AppShellComponent, PageHeaderComponent, RoleBadgeComponent, UserAvatarComponent, ConfirmDialogComponent],
   templateUrl: './family-members.component.html',
-  styleUrl: './family-members.component.css',
+  styleUrls: [
+    './family-members.component.css',
+    './family-members-invitations.css',
+    './family-members-responsive.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FamilyMembersComponent implements OnInit, OnDestroy {

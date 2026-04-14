@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, NgZone, signal } from '@ang
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { fromEvent, throttleTime } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { LandingNavbarComponent } from './components/navbar/navbar.component';
 import { LandingHeroComponent } from './components/hero/hero.component';

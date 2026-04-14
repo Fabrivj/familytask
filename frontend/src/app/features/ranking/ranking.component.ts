@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService } from '../../core/services/auth.service';
-import { MembersService } from '../../core/services/members.service';
-import { MemberItem } from '../../core/models/member.model';
-import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { UserAvatarComponent } from '../../shared/components/user-avatar/user-avatar.component';
-import { injectLoadingState } from '../../core/utils/loading-state';
+import { AuthService } from '@core/services/auth.service';
+import { MembersService } from '@core/services/members.service';
+import { MemberItem } from '@core/models/member.model';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
+import { injectLoadingState } from '@core/utils/loading-state';
 
 @Component({
   selector: 'app-ranking',

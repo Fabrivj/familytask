@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '@env/environment';
 import { FamilyMembersResponse, MemberItem } from '../models/member.model';
 
 // Único punto de contacto con el endpoint de miembros de familia.

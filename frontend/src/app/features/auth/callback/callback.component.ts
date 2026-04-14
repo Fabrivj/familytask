@@ -9,10 +9,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { timeout, TimeoutError } from 'rxjs';
-import { AuthService } from '../../../core/services/auth.service';
-import { InvitationService } from '../../../core/services/invitation.service';
-import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
-import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
+import { AuthService } from '@core/services/auth.service';
+import { InvitationService } from '@core/services/invitation.service';
+import { PageLayoutComponent } from '@shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '@shared/components/neon-card/neon-card.component';
 
 type CallbackState = 'processing' | 'error';
 

@@ -15,10 +15,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
-import { PermissionsService } from '../../core/services/permissions.service';
-import { SpaceService } from '../../core/services/space.service';
-import { TaskService } from '../../core/services/task.service';
+import { AuthService } from '@core/services/auth.service';
+import { PermissionsService } from '@core/services/permissions.service';
+import { SpaceService } from '@core/services/space.service';
+import { TaskService } from '@core/services/task.service';
 import {
   CreateSpaceRequest,
   SPACE_TYPE_OPTIONS,
@@ -28,15 +28,17 @@ import {
   spaceTypeColor,
   spaceTypeIcon,
   spaceTypeLabel,
-} from '../../core/models/space.model';
-import { TaskResponse } from '../../core/models/task.model';
-import { priorityLabel } from '../../core/utils/task-labels';
-import { injectLoadingState } from '../../core/utils/loading-state';
+} from '@core/models/space.model';
+import { TaskResponse } from '@core/models/task.model';
+import { priorityLabel } from '@core/utils/task-labels';
+import { injectLoadingState } from '@core/utils/loading-state';
+import { createFocusRestore } from '@core/utils/focus-restore';
+import { fieldError } from '@core/utils/form-errors';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { UserAvatarComponent } from '../../shared/components/user-avatar/user-avatar.component';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-home-map',
@@ -51,7 +53,12 @@ import { UserAvatarComponent } from '../../shared/components/user-avatar/user-av
     UserAvatarComponent,
   ],
   templateUrl: './home-map.component.html',
-  styleUrls: ['../tasks/shared/list-shared.css', './home-map.component.css'],
+  styleUrls: [
+    '../tasks/shared/list-shared.css',
+    './home-map.component.css',
+    './home-map-cards.css',
+    './home-map-panel.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMapComponent {
@@ -194,10 +201,10 @@ export class HomeMapComponent {
   }
 
   // ─── Panel ───────────────────────────────────────────────────────────────
-  private _panelTrigger: HTMLElement | null = null;
+  private readonly _panelFocus = createFocusRestore();
 
   openCreatePanel(): void {
-    this._panelTrigger = document.activeElement as HTMLElement;
+    this._panelFocus.save();
     this.resetForm();
     this.showEditPanel.set(false);
     this.showCreatePanel.set(true);
@@ -206,12 +213,11 @@ export class HomeMapComponent {
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
-    this._panelTrigger?.focus();
-    this._panelTrigger = null;
+    this._panelFocus.restore();
   }
 
   openEditPanel(space: SpaceResponse): void {
-    this._panelTrigger = document.activeElement as HTMLElement;
+    this._panelFocus.save();
     this.showCreatePanel.set(false);
     this.spaceToEdit.set(space);
     this.nameCtrl.reset(space.name);
@@ -225,8 +231,7 @@ export class HomeMapComponent {
     this.showEditPanel.set(false);
     this.spaceToEdit.set(null);
     this.editError.set('');
-    this._panelTrigger?.focus();
-    this._panelTrigger = null;
+    this._panelFocus.restore();
   }
 
   submitEdit(): void {
@@ -273,13 +278,7 @@ export class HomeMapComponent {
     this.typeError.set(false);
   }
 
-  getNameError(): string {
-    const c = this.nameCtrl;
-    if (c.hasError('required') || c.hasError('minlength') || c.hasError('maxlength')) {
-      return 'El nombre debe tener entre 2 y 50 caracteres.';
-    }
-    return '';
-  }
+  getNameError = () => fieldError(this.nameCtrl, { required: 'El nombre debe tener entre 2 y 50 caracteres.', minlength: 'El nombre debe tener entre 2 y 50 caracteres.', maxlength: 'El nombre debe tener entre 2 y 50 caracteres.' });
 
   submitCreate(): void {
     this.nameCtrl.markAllAsTouched();

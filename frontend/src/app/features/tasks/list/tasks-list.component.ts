@@ -6,6 +6,7 @@ import {
   computed,
   effect,
   inject,
+  input,
   output,
   signal,
 } from '@angular/core';
@@ -17,19 +18,23 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { AuthService } from '../../../core/services/auth.service';
-import { notifyEarnedBadges } from '../../../core/utils/badge-notify';
-import { PermissionsService } from '../../../core/services/permissions.service';
-import { TaskService } from '../../../core/services/task.service';
-import { MembersService } from '../../../core/services/members.service';
-import { SpaceService } from '../../../core/services/space.service';
-import { priorityLabel, statusLabel, statusIcon } from '../../../core/utils/task-labels';
-import { injectLoadingState } from '../../../core/utils/loading-state';
-import { CompleteTaskResponse, TaskPriority, TaskResponse, TaskStatus } from '../../../core/models/task.model';
-import { MemberItem } from '../../../core/models/member.model';
-import { SpaceResponse, spaceTypeIcon } from '../../../core/models/space.model';
-import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { AuthService } from '@core/services/auth.service';
+import { notifyEarnedBadges } from '@core/utils/badge-notify';
+import { PermissionsService } from '@core/services/permissions.service';
+import { TaskService } from '@core/services/task.service';
+import { MembersService } from '@core/services/members.service';
+import { SpaceService } from '@core/services/space.service';
+import { priorityLabel, statusLabel, statusIcon } from '@core/utils/task-labels';
+import { injectLoadingState } from '@core/utils/loading-state';
+import { memberShortName } from '@core/utils/member-helpers';
+import { formatDate, toIsoDate } from '@core/utils/date-helpers';
+import { createFocusRestore } from '@core/utils/focus-restore';
+import { fieldError } from '@core/utils/form-errors';
+import { CompleteTaskResponse, TaskPriority, TaskResponse, TaskStatus } from '@core/models/task.model';
+import { MemberItem } from '@core/models/member.model';
+import { SpaceResponse, spaceTypeIcon } from '@core/models/space.model';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-tasks-list',
@@ -44,7 +49,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     ConfirmDialogComponent,
   ],
   templateUrl: './tasks-list.component.html',
-  styleUrls: ['../shared/list-shared.css', './tasks-list.component.css'],
+  styleUrls: ['../shared/list-shared.css', './tasks-list.component.css', './tasks-list-cards.css', './tasks-list-panel.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TasksListComponent {
@@ -86,6 +91,8 @@ export class TasksListComponent {
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly tasks = signal<TaskResponse[]>([]);
   readonly countChange = output<number>();
+  readonly openPanelTrigger = input(0);
+
   readonly members = signal<MemberItem[]>([]);
   readonly spaces = signal<SpaceResponse[]>([]);
   private readonly ls = injectLoadingState();
@@ -165,6 +172,10 @@ export class TasksListComponent {
       const id = this.familyId();
       if (id) this.loadData(id);
     });
+    effect(() => {
+      const v = this.openPanelTrigger();
+      if (v > 0) this.openCreatePanel();
+    });
   }
 
   private loadData(familyId: number): void {
@@ -211,60 +222,27 @@ export class TasksListComponent {
   // ─── Helpers ──────────────────────────────────────────────────────────────
   readonly priorityLabel = priorityLabel;
 
-  memberShortName(name: string): string {
-    const parts = name.split(' ');
-    if (parts.length > 1) return `${parts[0]} ${parts[parts.length - 1][0]}.`;
-    return parts[0];
-  }
+  readonly memberShortName = memberShortName;
 
-  formatDate(iso: string | null): string {
-    if (!iso) return '—';
-    const d = new Date(iso + 'T00:00:00');
-    const now = new Date();
-    if (d.toDateString() === now.toDateString()) return 'Hoy';
-    return d.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' });
-  }
+  readonly formatDate = formatDate;
 
   // ─── Validación del formulario ────────────────────────────────────────────
-  getTitleError(): string {
-    const c = this.titleCtrl;
-    if (c.hasError('required')) return 'El campo Título es obligatorio.';
-    if (c.hasError('maxlength')) return 'Máximo 100 caracteres.';
-    return '';
-  }
-
-  getDescriptionError(): string {
-    const c = this.descriptionCtrl;
-    if (c.hasError('required')) return 'El campo Descripción es obligatorio.';
-    if (c.hasError('maxlength')) return 'Máximo 500 caracteres.';
-    return '';
-  }
-
-  getXpError(): string {
-    if (this.xpRewardCtrl.hasError('required')) return 'Requerido.';
-    if (this.xpRewardCtrl.hasError('pattern')) return 'Debe ser un número entero.';
-    if (this.xpRewardCtrl.hasError('min')) return 'Mínimo 1.';
-    return '';
-  }
-
-  getCoinsError(): string {
-    if (this.coinsRewardCtrl.hasError('required')) return 'Requerido.';
-    if (this.coinsRewardCtrl.hasError('pattern')) return 'Debe ser un número entero.';
-    if (this.coinsRewardCtrl.hasError('min')) return 'Mínimo 1.';
-    return '';
-  }
+  getTitleError = () => fieldError(this.titleCtrl, { required: 'El campo Título es obligatorio.', maxlength: 'Máximo 100 caracteres.' });
+  getDescriptionError = () => fieldError(this.descriptionCtrl, { required: 'El campo Descripción es obligatorio.', maxlength: 'Máximo 500 caracteres.' });
+  getXpError = () => fieldError(this.xpRewardCtrl, { required: 'Requerido.', pattern: 'Debe ser un número entero.', min: 'Mínimo 1.' });
+  getCoinsError = () => fieldError(this.coinsRewardCtrl, { required: 'Requerido.', pattern: 'Debe ser un número entero.', min: 'Mínimo 1.' });
 
   // ─── Panel de creación / edición ─────────────────────────────────────────
-  private _panelTrigger: HTMLElement | null = null;
+  private readonly _panelFocus = createFocusRestore();
 
   openCreatePanel(): void {
-    this._panelTrigger = document.activeElement as HTMLElement;
+    this._panelFocus.save();
     this.resetForm();
     this.showCreatePanel.set(true);
   }
 
   openEditPanel(task: TaskResponse): void {
-    this._panelTrigger = document.activeElement as HTMLElement;
+    this._panelFocus.save();
     this.resetForm();
     this.editingTask.set(task);
     this.titleCtrl.setValue(task.title);
@@ -286,8 +264,7 @@ export class TasksListComponent {
     this.showCreatePanel.set(false);
     this.createError.set('');
     this.editingTask.set(null);
-    this._panelTrigger?.focus();
-    this._panelTrigger = null;
+    this._panelFocus.restore();
   }
 
   selectPriority(p: TaskPriority): void {
@@ -392,9 +369,7 @@ export class TasksListComponent {
     this.router.navigate([], { replaceUrl: true, queryParams: {} });
   }
 
-  private toIsoDate(d: Date): string {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
+  private readonly toIsoDate = toIsoDate;
 
   private resetForm(): void {
     this.editingTask.set(null);
@@ -483,10 +458,10 @@ export class TasksListComponent {
   }
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────
-  private _deleteTrigger: HTMLElement | null = null;
+  private readonly _deleteFocus = createFocusRestore();
 
   openDeleteModal(task: TaskResponse): void {
-    this._deleteTrigger = document.activeElement as HTMLElement;
+    this._deleteFocus.save();
     this.taskToDelete.set(task);
     this.showDeleteModal.set(true);
   }
@@ -494,8 +469,7 @@ export class TasksListComponent {
   closeDeleteModal(): void {
     this.showDeleteModal.set(false);
     this.taskToDelete.set(null);
-    this._deleteTrigger?.focus();
-    this._deleteTrigger = null;
+    this._deleteFocus.restore();
   }
 
   confirmDelete(): void {

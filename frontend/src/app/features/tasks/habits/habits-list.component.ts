@@ -4,6 +4,7 @@ import {
   computed,
   effect,
   inject,
+  input,
   output,
   signal,
 } from '@angular/core';
@@ -13,17 +14,20 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../../../core/services/auth.service';
-import { notifyEarnedBadges } from '../../../core/utils/badge-notify';
-import { PermissionsService } from '../../../core/services/permissions.service';
-import { HabitService } from '../../../core/services/habit.service';
-import { MembersService } from '../../../core/services/members.service';
-import { CompleteHabitResponse, HabitFrequency, HabitResponse } from '../../../core/models/habit.model';
-import { HABIT_FREQUENCIES, frequencyIcon, frequencyLabel } from '../../../core/utils/habit-labels';
-import { injectLoadingState } from '../../../core/utils/loading-state';
-import { MemberItem } from '../../../core/models/member.model';
-import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { AuthService } from '@core/services/auth.service';
+import { notifyEarnedBadges } from '@core/utils/badge-notify';
+import { PermissionsService } from '@core/services/permissions.service';
+import { HabitService } from '@core/services/habit.service';
+import { MembersService } from '@core/services/members.service';
+import { CompleteHabitResponse, HabitFrequency, HabitResponse } from '@core/models/habit.model';
+import { HABIT_FREQUENCIES, frequencyIcon, frequencyLabel } from '@core/utils/habit-labels';
+import { injectLoadingState } from '@core/utils/loading-state';
+import { memberShortName } from '@core/utils/member-helpers';
+import { createFocusRestore } from '@core/utils/focus-restore';
+import { fieldError } from '@core/utils/form-errors';
+import { MemberItem } from '@core/models/member.model';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-habits-list',
@@ -46,6 +50,8 @@ export class HabitsListComponent {
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly habits   = signal<HabitResponse[]>([]);
   readonly countChange = output<number>();
+  readonly openPanelTrigger = input(0);
+
   readonly members  = signal<MemberItem[]>([]);
   readonly childMembers = computed(() => this.members().filter(m => m.role === 'CHILD'));
 
@@ -115,6 +121,10 @@ export class HabitsListComponent {
       const id = this.familyId();
       if (id) this.loadData(id);
     });
+    effect(() => {
+      const v = this.openPanelTrigger();
+      if (v > 0) this.openCreatePanel();
+    });
   }
 
   private loadData(familyId: number): void {
@@ -157,43 +167,19 @@ export class HabitsListComponent {
   readonly frequencyIcon = frequencyIcon;
   readonly frequencyLabel = frequencyLabel;
 
-  memberShortName(name: string): string {
-    const parts = name.trim().split(' ');
-    return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0];
-  }
+  readonly memberShortName = memberShortName;
 
   // ─── Validación del formulario ────────────────────────────────────────────
-  getTitleError(): string {
-    const c = this.titleCtrl;
-    if (c.hasError('required')) return 'El campo Título es obligatorio.';
-    if (c.hasError('maxlength')) return 'Máximo 100 caracteres.';
-    return '';
-  }
-
-  getDescriptionError(): string {
-    if (this.descriptionCtrl.hasError('maxlength')) return 'Máximo 500 caracteres.';
-    return '';
-  }
-
-  getXpError(): string {
-    if (this.xpRewardCtrl.hasError('required')) return 'Requerido.';
-    if (this.xpRewardCtrl.hasError('pattern')) return 'Debe ser un número entero.';
-    if (this.xpRewardCtrl.hasError('min')) return 'Mínimo 1.';
-    return '';
-  }
-
-  getCoinsError(): string {
-    if (this.coinsRewardCtrl.hasError('required')) return 'Requerido.';
-    if (this.coinsRewardCtrl.hasError('pattern')) return 'Debe ser un número entero.';
-    if (this.coinsRewardCtrl.hasError('min')) return 'Mínimo 1.';
-    return '';
-  }
+  getTitleError = () => fieldError(this.titleCtrl, { required: 'El campo Título es obligatorio.', maxlength: 'Máximo 100 caracteres.' });
+  getDescriptionError = () => fieldError(this.descriptionCtrl, { maxlength: 'Máximo 500 caracteres.' });
+  getXpError = () => fieldError(this.xpRewardCtrl, { required: 'Requerido.', pattern: 'Debe ser un número entero.', min: 'Mínimo 1.' });
+  getCoinsError = () => fieldError(this.coinsRewardCtrl, { required: 'Requerido.', pattern: 'Debe ser un número entero.', min: 'Mínimo 1.' });
 
   // ─── Panel de creación ────────────────────────────────────────────────────
-  private _panelTrigger: HTMLElement | null = null;
+  private readonly _panelFocus = createFocusRestore();
 
   openCreatePanel(): void {
-    this._panelTrigger = document.activeElement as HTMLElement;
+    this._panelFocus.save();
     this.resetForm();
     this.showCreatePanel.set(true);
   }
@@ -201,8 +187,7 @@ export class HabitsListComponent {
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
-    this._panelTrigger?.focus();
-    this._panelTrigger = null;
+    this._panelFocus.restore();
   }
 
   selectFrequency(f: HabitFrequency): void {
@@ -272,10 +257,10 @@ export class HabitsListComponent {
   }
 
   // ─── Modal de borrado ─────────────────────────────────────────────────────
-  private _deleteTrigger: HTMLElement | null = null;
+  private readonly _deleteFocus = createFocusRestore();
 
   openDeleteModal(habit: HabitResponse): void {
-    this._deleteTrigger = document.activeElement as HTMLElement;
+    this._deleteFocus.save();
     this.habitToDelete.set(habit);
     this.showDeleteModal.set(true);
   }
@@ -283,8 +268,7 @@ export class HabitsListComponent {
   closeDeleteModal(): void {
     this.showDeleteModal.set(false);
     this.habitToDelete.set(null);
-    this._deleteTrigger?.focus();
-    this._deleteTrigger = null;
+    this._deleteFocus.restore();
   }
 
   confirmDelete(): void {

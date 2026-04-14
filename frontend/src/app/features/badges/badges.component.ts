@@ -7,13 +7,13 @@ import {
   signal,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService } from '../../core/services/auth.service';
-import { BadgeService } from '../../core/services/badge.service';
-import { BadgeResponse } from '../../core/models/badge.model';
-import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { AuthService } from '@core/services/auth.service';
+import { BadgeService } from '@core/services/badge.service';
+import { BadgeResponse } from '@core/models/badge.model';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { DatePipe } from '@angular/common';
-import { injectLoadingState } from '../../core/utils/loading-state';
+import { injectLoadingState } from '@core/utils/loading-state';
 
 @Component({
   selector: 'app-badges',
