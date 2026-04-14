@@ -105,10 +105,14 @@
     } @else {
       <ul class="redemption-list" aria-label="Historial de canjes">
         @for (item of redemptions(); track item.id) {
-          <li class="redemption-card" [class.redemption-card--delivered]="item.status === 'DELIVERED'">
-            <span class="redemption-icon" aria-hidden="true">
+          <li
+            class="redemption-card"
+            [class.redemption-card--pending]="item.status === 'PENDING'"
+            [class.redemption-card--delivered]="item.status === 'DELIVERED'"
+          >
+            <div class="redemption-icon-wrap" aria-hidden="true">
               {{ item.rewardIcon ?? '🎁' }}
-            </span>
+            </div>
             <div class="redemption-main">
               <div class="redemption-top">
                 <p class="redemption-name">{{ item.rewardName }}</p>
