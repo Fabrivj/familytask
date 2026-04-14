@@ -27,6 +27,15 @@ export interface CompleteHabitResponse {
   currentStreak: number;
   longestStreak: number;
   completionDate: string;
+  streakMultiplier: number;
+  xpActuallyAwarded: number;
+  coinsActuallyAwarded: number;
+  newTotalXp: number;
+  newTotalCoins: number;
+  newLevel: number;
+  previousLevel: number;
+  leveledUp: boolean;
+  xpToNextLevel: number;
   earnedBadges: EarnedBadge[];
 }
 
