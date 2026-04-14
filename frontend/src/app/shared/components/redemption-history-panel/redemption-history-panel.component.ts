@@ -143,7 +143,7 @@ export class RedemptionHistoryPanelComponent {
   }
 
   statusLabel(status: RedemptionStatus): string {
-    return status === 'PENDING' ? 'Pendiente' : 'Entregado';
+    return status === 'PENDING' ? 'Por entregar' : 'Entregado';
   }
 
   markAsDelivered(item: RedemptionHistoryResponse): void {
