@@ -51,7 +51,7 @@ import { UserAvatarComponent } from '../../shared/components/user-avatar/user-av
     UserAvatarComponent,
   ],
   templateUrl: './home-map.component.html',
-  styleUrl: './home-map.component.css',
+  styleUrls: ['../tasks/shared/list-shared.css', './home-map.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMapComponent {
@@ -71,23 +71,20 @@ export class HomeMapComponent {
   readonly spaceTypeIcon = spaceTypeIcon;
   readonly spaceTypeColor = spaceTypeColor;
 
-  spaceIconBg(type: string): string {
-    const hex = spaceTypeColor(type).replace('#', '');
-    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
-    return `rgba(${r},${g},${b},0.12)`;
-  }
-
-  spaceIconBorder(type: string): string {
-    const hex = spaceTypeColor(type).replace('#', '');
-    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
-    return `rgba(${r},${g},${b},0.35)`;
-  }
-
-  spaceIconBorderDim(type: string): string {
-    const hex = spaceTypeColor(type).replace('#', '');
-    const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
-    return `rgba(${r},${g},${b},0.18)`;
-  }
+  /** Pre-computed rgba styles per space type — avoids hex→rgba parsing on every CD tick. */
+  readonly spaceIconStyles = computed(() => {
+    const map = new Map<string, { bg: string; border: string; borderDim: string }>();
+    for (const opt of SPACE_TYPE_OPTIONS) {
+      const hex = spaceTypeColor(opt.value).replace('#', '');
+      const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+      map.set(opt.value, {
+        bg: `rgba(${r},${g},${b},0.12)`,
+        border: `rgba(${r},${g},${b},0.35)`,
+        borderDim: `rgba(${r},${g},${b},0.18)`,
+      });
+    }
+    return map;
+  });
   readonly spaceTypeOptions = SPACE_TYPE_OPTIONS;
   readonly priorityLabel = priorityLabel;
 

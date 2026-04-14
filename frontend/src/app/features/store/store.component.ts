@@ -24,6 +24,7 @@ import { AppShellComponent } from '../../shared/components/app-shell/app-shell.c
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { RedemptionHistoryPanelComponent } from '../../shared/components/redemption-history-panel/redemption-history-panel.component';
+import { injectLoadingState } from '../../core/utils/loading-state';
 
 const REWARD_ICONS = [
   '\u{1F381}', '\u{1F355}', '\u{1F3AE}', '\u{1F3AC}',
@@ -68,7 +69,7 @@ const ICON_LABELS: Record<string, string> = {
     RedemptionHistoryPanelComponent,
   ],
   templateUrl: './store.component.html',
-  styleUrl: './store.component.css',
+  styleUrls: ['../tasks/shared/list-shared.css', './store.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StoreComponent {
@@ -100,8 +101,9 @@ export class StoreComponent {
     return leveled.reduce((sum, r) => sum + r.minLevel!, 0) / leveled.length;
   });
 
-  readonly isLoading = signal(false);
-  readonly error = signal('');
+  private readonly ls = injectLoadingState();
+  readonly isLoading = this.ls.isLoading;
+  readonly error = this.ls.error;
 
   readonly showCreatePanel = signal(false);
   readonly isCreating = signal(false);
@@ -144,46 +146,31 @@ export class StoreComponent {
     });
   }
 
-  isPremium(reward: RewardResponse): boolean {
-    return !!reward.minLevel && reward.minLevel > this.avgLevel();
-  }
-
-  starsArray(minLevel: number): number[] {
-    return Array.from({ length: Math.min(minLevel, 10) });
-  }
-
-  canAfford(reward: RewardResponse): boolean {
+  /** Pre-computed per-reward derived values — evaluated once per data change, not per CD tick. */
+  readonly rewardMeta = computed(() => {
+    const avg = this.avgLevel();
     const coins = this.myStats()?.totalCoins ?? 0;
-    return coins >= reward.cost;
-  }
+    const level = this.myStats()?.currentLevel ?? 1;
+    const map = new Map<number, { premium: boolean; stars: number[]; gradient: string; blockReason: string | null }>();
 
-  meetsLevel(reward: RewardResponse): boolean {
-    if (!reward.minLevel) return true;
-    return (this.myStats()?.currentLevel ?? 1) >= reward.minLevel;
-  }
-
-  claimBlockReason(reward: RewardResponse): string | null {
-    const noCoins = !this.canAfford(reward);
-    const noLevel = !this.meetsLevel(reward);
-    if (noCoins && noLevel) return 'No tienes monedas suficientes y no alcanzas el nivel minimo requerido para esta recompensa.';
-    if (noCoins) return 'No tienes monedas suficientes para canjear esta recompensa.';
-    if (noLevel) return 'No alcanzas el nivel minimo requerido para esta recompensa.';
-    return null;
-  }
+    for (const r of this.rewards()) {
+      const premium = !!r.minLevel && r.minLevel > avg;
+      const stars: number[] = r.minLevel ? Array.from({ length: Math.min(r.minLevel, 10) }, (_, i) => i) : [];
+      const gradient = this.cardGradient(r.icon);
+      const noCoins = coins < r.cost;
+      const noLevel = !!r.minLevel && level < r.minLevel;
+      let blockReason: string | null = null;
+      if (noCoins && noLevel) blockReason = 'No tienes monedas suficientes y no alcanzas el nivel minimo requerido para esta recompensa.';
+      else if (noCoins) blockReason = 'No tienes monedas suficientes para canjear esta recompensa.';
+      else if (noLevel) blockReason = 'No alcanzas el nivel minimo requerido para esta recompensa.';
+      map.set(r.id, { premium, stars, gradient, blockReason });
+    }
+    return map;
+  });
 
   private loadData(familyId: number): void {
-    this.isLoading.set(true);
-    this.error.set('');
-
-    this.rewardService.getRewards(familyId).subscribe({
-      next: (rewards) => {
-        this.rewards.set(rewards);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Error al cargar las recompensas. Por favor, intente nuevamente.');
-        this.isLoading.set(false);
-      },
+    this.ls.run(this.rewardService.getRewards(familyId), {
+      next: (rewards) => this.rewards.set(rewards),
     });
 
     if (!this.isParent()) {

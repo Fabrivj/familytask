@@ -45,8 +45,8 @@
             <div class="card-header">
               <div class="card-meta">
                 <div class="space-icon-wrap"
-                  [style.background]="spaceIconBg(space.type)"
-                  [style.border-color]="spaceIconBorder(space.type)">
+                  [style.background]="spaceIconStyles().get(space.type)?.bg"
+                  [style.border-color]="spaceIconStyles().get(space.type)?.border">
                   <mat-icon class="space-icon" aria-hidden="true"
                     [style.color]="spaceTypeColor(space.type)">{{ spaceTypeIcon(space.type) }}</mat-icon>
                 </div>
@@ -179,8 +179,8 @@
               type="button"
               (click)="selectType(opt.value)"
               [attr.aria-pressed]="selectedType() === opt.value"
-              [style.border-color]="selectedType() === opt.value ? spaceTypeColor(opt.value) : spaceIconBorderDim(opt.value)"
-              [style.background]="selectedType() === opt.value ? spaceIconBg(opt.value) : null"
+              [style.border-color]="selectedType() === opt.value ? spaceTypeColor(opt.value) : spaceIconStyles().get(opt.value)?.borderDim"
+              [style.background]="selectedType() === opt.value ? spaceIconStyles().get(opt.value)?.bg : null"
             >
               <mat-icon class="type-icon" aria-hidden="true"
                 [style.color]="spaceTypeColor(opt.value)">{{ opt.icon }}</mat-icon>
@@ -262,8 +262,8 @@
               type="button"
               (click)="selectType(opt.value)"
               [attr.aria-pressed]="selectedType() === opt.value"
-              [style.border-color]="selectedType() === opt.value ? spaceTypeColor(opt.value) : spaceIconBorderDim(opt.value)"
-              [style.background]="selectedType() === opt.value ? spaceIconBg(opt.value) : null"
+              [style.border-color]="selectedType() === opt.value ? spaceTypeColor(opt.value) : spaceIconStyles().get(opt.value)?.borderDim"
+              [style.background]="selectedType() === opt.value ? spaceIconStyles().get(opt.value)?.bg : null"
             >
               <mat-icon class="type-icon" aria-hidden="true"
                 [style.color]="spaceTypeColor(opt.value)">{{ opt.icon }}</mat-icon>

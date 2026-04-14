@@ -7,6 +7,7 @@ import { MemberItem } from '../../core/models/member.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { UserAvatarComponent } from '../../shared/components/user-avatar/user-avatar.component';
+import { injectLoadingState } from '../../core/utils/loading-state';
 
 @Component({
   selector: 'app-ranking',
@@ -27,8 +28,9 @@ export class RankingComponent implements OnInit {
   private readonly membersService = inject(MembersService);
 
   readonly members = signal<MemberItem[]>([]);
-  readonly isLoading = signal(true);
-  readonly error = signal('');
+  private readonly ls = injectLoadingState();
+  readonly isLoading = this.ls.isLoading;
+  readonly error = this.ls.error;
   readonly isDisabled = signal(false);
 
   ngOnInit(): void {
@@ -41,22 +43,13 @@ export class RankingComponent implements OnInit {
   }
 
   private loadRanking(familyId: number): void {
-    this.isLoading.set(true);
-    this.error.set('');
     this.isDisabled.set(false);
 
-    this.membersService.getRanking(familyId).subscribe({
-      next: (data) => {
-        this.members.set(data);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
+    this.ls.run(this.membersService.getRanking(familyId), {
+      next: (data) => this.members.set(data),
+      error: (err: any) => {
         if (err?.error?.code === 'RANKING_DISABLED') {
           this.isDisabled.set(true);
-          this.error.set('El ranking no está habilitado para esta familia.');
-        } else {
-          this.error.set('No se pudo cargar el ranking. Intenta de nuevo.');
         }
       },
     });

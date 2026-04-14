@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, NgZone, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { fromEvent, throttleTime } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { LandingNavbarComponent } from './components/navbar/navbar.component';
@@ -33,9 +35,18 @@ export class LandingComponent {
 
   readonly showBackToTop = signal(false);
 
-  @HostListener('window:scroll')
-  onScroll(): void {
-    this.showBackToTop.set(window.scrollY > 400);
+  constructor() {
+    const ngZone = inject(NgZone);
+    ngZone.runOutsideAngular(() => {
+      fromEvent(window, 'scroll', { passive: true })
+        .pipe(
+          throttleTime(100, undefined, { leading: true, trailing: true }),
+          takeUntilDestroyed(),
+        )
+        .subscribe(() => {
+          this.showBackToTop.set(window.scrollY > 400);
+        });
+    });
   }
 
   scrollToTop(): void {

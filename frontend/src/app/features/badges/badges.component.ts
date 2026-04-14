@@ -13,6 +13,7 @@ import { BadgeResponse } from '../../core/models/badge.model';
 import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DatePipe } from '@angular/common';
+import { injectLoadingState } from '../../core/utils/loading-state';
 
 @Component({
   selector: 'app-badges',
@@ -26,8 +27,9 @@ export class BadgesComponent implements OnInit {
   private readonly badgeService = inject(BadgeService);
 
   readonly badges = signal<BadgeResponse[]>([]);
-  readonly isLoading = signal(true);
-  readonly error = signal('');
+  private readonly ls = injectLoadingState();
+  readonly isLoading = this.ls.isLoading;
+  readonly error = this.ls.error;
 
   readonly earnedBadges = computed(() =>
     this.badges()
@@ -58,18 +60,8 @@ export class BadgesComponent implements OnInit {
     const familyId = this.authService.getActiveFamilyId();
     if (!familyId) return;
 
-    this.isLoading.set(true);
-    this.error.set('');
-
-    this.badgeService.getBadges(familyId).subscribe({
-      next: (data) => {
-        this.badges.set(data);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message ?? 'Error al cargar las insignias.');
-        this.isLoading.set(false);
-      },
+    this.ls.run(this.badgeService.getBadges(familyId), {
+      next: (data) => this.badges.set(data),
     });
   }
 
