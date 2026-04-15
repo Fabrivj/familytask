@@ -5,6 +5,7 @@ import com.vertexdev.familytask.dto.habit.AssignHabitRequest;
 import com.vertexdev.familytask.dto.habit.CompleteHabitResponse;
 import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
+import com.vertexdev.familytask.dto.habit.UpdateHabitRequest;
 import com.vertexdev.familytask.model.User;
 import com.vertexdev.familytask.service.HabitService;
 import jakarta.validation.Valid;
@@ -68,6 +69,15 @@ public class HabitController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         return ResponseEntity.ok(habitService.completeHabit(id, authenticatedUser));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<HabitResponse> updateHabit(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateHabitRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        return ResponseEntity.ok(habitService.updateHabit(id, request, authenticatedUser));
     }
 
     @DeleteMapping("/{id}")

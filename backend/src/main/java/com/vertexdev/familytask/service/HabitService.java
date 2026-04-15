@@ -5,6 +5,7 @@ import com.vertexdev.familytask.dto.habit.AssignHabitRequest;
 import com.vertexdev.familytask.dto.habit.CompleteHabitResponse;
 import com.vertexdev.familytask.dto.habit.CreateHabitRequest;
 import com.vertexdev.familytask.dto.habit.HabitResponse;
+import com.vertexdev.familytask.dto.habit.UpdateHabitRequest;
 import com.vertexdev.familytask.exception.HabitException;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
@@ -82,6 +83,72 @@ public class HabitService {
         } catch (Exception e) {
             log.error("Error creating habit: {}", e.getMessage());
             throw new HabitException("HABIT_CREATION_FAILED", "Ocurrió un error al crear el hábito. Por favor, intente nuevamente.", 500);
+        }
+    }
+
+    @Transactional
+    public HabitResponse updateHabit(Long habitId, UpdateHabitRequest request, User requester) {
+        Habit habit = habitRepository.findById(habitId)
+                .filter(h -> Boolean.TRUE.equals(h.getIsActive()))
+                .orElseThrow(() -> new HabitException("HABIT_NOT_FOUND", "El hábito no fue encontrado.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(habit.getFamilyGroup().getId(), requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new HabitException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        HabitFrequency frequency;
+        try {
+            frequency = HabitFrequency.valueOf(request.getFrequency().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new HabitException("INVALID_FREQUENCY", "El campo Frecuencia es obligatorio.", 400);
+        }
+
+        try {
+            habit.setTitle(request.getTitle().trim());
+            habit.setDescription(request.getDescription() != null ? request.getDescription().trim() : null);
+            habit.setFrequency(frequency);
+            habit.setXpReward(request.getXpReward());
+            habit.setCoinsReward(request.getCoinsReward());
+            habitRepository.save(habit);
+
+            if (request.getAssignedToId() != null) {
+                FamilyGroup familyGroup = habit.getFamilyGroup();
+                User assignedTo = userRepository.findById(request.getAssignedToId())
+                        .orElseThrow(() -> new HabitException("USER_NOT_FOUND", "El usuario asignado no existe.", 404));
+
+                boolean isMember = familyMemberRepository
+                        .findByFamilyGroupIdAndIsActiveTrue(familyGroup.getId())
+                        .stream()
+                        .anyMatch(m -> m.getUser().getId().equals(assignedTo.getId()));
+                if (!isMember) {
+                    throw new HabitException("NOT_A_MEMBER", "El miembro seleccionado no pertenece al grupo familiar activo.", 400);
+                }
+
+                HabitAssignment existing = habitAssignmentRepository.findByHabitId(habitId).orElse(null);
+                if (existing != null) {
+                    existing.setUser(assignedTo);
+                    existing.setIsActive(true);
+                    habitAssignmentRepository.save(existing);
+                } else {
+                    HabitAssignment assignment = HabitAssignment.builder()
+                            .habit(habit)
+                            .user(assignedTo)
+                            .build();
+                    habitAssignmentRepository.save(assignment);
+                    habit.setAssignment(assignment);
+                }
+                log.info("Habit '{}' updated and assigned to {} by {}", habit.getTitle(), assignedTo.getEmail(), requester.getEmail());
+            } else {
+                log.info("Habit '{}' updated by {}", habit.getTitle(), requester.getEmail());
+            }
+
+            return toResponse(habit);
+        } catch (HabitException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error updating habit {}: {}", habitId, e.getMessage());
+            throw new HabitException("HABIT_UPDATE_FAILED", "Ocurrió un error al actualizar el hábito. Por favor, intente nuevamente.", 500);
         }
     }
 
