@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { StoreComponent } from './store.component';
-import { RewardService } from '../../core/services/reward.service';
-import { AuthService } from '../../core/services/auth.service';
-import { PermissionsService } from '../../core/services/permissions.service';
+import { RewardService } from '@core/services/reward.service';
+import { AuthService } from '@core/services/auth.service';
+import { PermissionsService } from '@core/services/permissions.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RedemptionService } from '../../core/services/redemption.service';
-import { RedemptionHistoryService } from '../../core/services/redemption-history.service';
-import { MembersService } from '../../core/services/members.service';
+import { RedemptionService } from '@core/services/redemption.service';
+import { RedemptionHistoryService } from '@core/services/redemption-history.service';
+import { MembersService } from '@core/services/members.service';
 import { of, throwError } from 'rxjs';
-import { RewardResponse } from '../../core/models/reward.model';
+import { RewardResponse } from '@core/models/reward.model';
 
 const mockReward: RewardResponse = {
   id: 1,

@@ -1,0 +1,191 @@
+/* ── Task pill ─────────────────────────────────────────────────────────── */
+.task-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  background: rgba(var(--border-rgb), 0.05);
+  cursor: default;
+  transition: background 0.15s;
+}
+
+.task-pill:hover { background: rgba(var(--border-rgb), 0.09); }
+
+.task-pill.priority-high   { border-left-color: var(--error); }
+.task-pill.priority-medium { border-left-color: var(--warning); }
+.task-pill.priority-low    { border-left-color: var(--success); }
+
+.task-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.task-pill.priority-high   .task-pill-dot { background: var(--error);   clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+.task-pill.priority-medium .task-pill-dot { background: var(--warning);  border-radius: 50%; }
+.task-pill.priority-low    .task-pill-dot { background: var(--success);  clip-path: polygon(0% 0%, 100% 0%, 50% 100%); }
+
+.task-pill-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Child view: rewards on task pills ────────────────────────────────── */
+.task-pill-rewards {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.pill-xp,
+.pill-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.pill-xp {
+  color: #00EFFF;
+  background: rgba(0, 239, 255, 0.10);
+  border: 1px solid rgba(0, 239, 255, 0.25);
+}
+
+.pill-xp mat-icon {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  line-height: 13px;
+}
+
+.pill-coins {
+  color: #FFC300;
+  background: rgba(255, 195, 0, 0.10);
+  border: 1px solid rgba(255, 195, 0, 0.25);
+}
+
+.pill-coins mat-icon {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  line-height: 13px;
+}
+
+
+.empty-assign-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed rgba(var(--primary-rgb), 0.4);
+  border-radius: 6px;
+  background: transparent;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  opacity: 0.7;
+  cursor: pointer;
+  margin: auto 0;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+
+.empty-assign-cta:hover { opacity: 1; border-color: var(--primary); }
+
+.empty-assign-cta mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+}
+
+.btn-assign {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 14px;
+  border: 1px solid rgba(var(--border-rgb), 0.18);
+  border-radius: 8px;
+  background: transparent;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-assign:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.3);
+  text-shadow: 0 0 8px rgba(var(--primary-rgb), 0.6);
+}
+
+.btn-assign:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-assign mat-icon {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  line-height: 13px;
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(var(--border-rgb), 0.15);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, box-shadow 0.2s, text-shadow 0.2s;
+}
+
+.btn-icon:hover:not(:disabled) {
+  border-color: var(--border);
+  color: var(--border);
+  box-shadow: 0 0 10px rgba(var(--border-rgb), 0.4);
+  filter: drop-shadow(0 0 4px rgba(var(--border-rgb), 0.6));
+}
+.btn-icon:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-icon-danger:hover:not(:disabled) {
+  border-color: var(--error);
+  color: var(--error);
+  box-shadow: 0 0 10px rgba(var(--error-rgb), 0.4);
+  filter: drop-shadow(0 0 4px rgba(var(--error-rgb), 0.6));
+}
+
+.btn-icon mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}

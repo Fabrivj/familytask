@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService } from '../../../core/services/auth.service';
-import { PermissionsService } from '../../../core/services/permissions.service';
+import { AuthService } from '@core/services/auth.service';
+import { PermissionsService } from '@core/services/permissions.service';
 
 /**
  * Bottom navigation bar shown only on mobile (≤767px).

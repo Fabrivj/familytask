@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { TasksListComponent } from '../list/tasks-list.component';
 import { HabitsListComponent } from '../habits/habits-list.component';
-import { PermissionsService } from '../../../core/services/permissions.service';
+import { PermissionsService } from '@core/services/permissions.service';
 
 @Component({
   selector: 'app-tasks-habits',
@@ -41,11 +41,14 @@ import { PermissionsService } from '../../../core/services/permissions.service';
           </div>
         </div>
 
-        @if (activeTab() === 'tasks') {
-          <app-tasks-list #tasksList (countChange)="taskCount.set($event)" />
-        } @else {
-          <app-habits-list #habitsList (countChange)="habitCount.set($event)" />
-        }
+        <app-tasks-list
+          [style.display]="activeTab() === 'tasks' ? 'block' : 'none'"
+          [openPanelTrigger]="openTaskPanel()"
+          (countChange)="taskCount.set($event)" />
+        <app-habits-list
+          [style.display]="activeTab() === 'habits' ? 'block' : 'none'"
+          [openPanelTrigger]="openHabitPanel()"
+          (countChange)="habitCount.set($event)" />
 
       </main>
     </app-shell>
@@ -111,13 +114,12 @@ import { PermissionsService } from '../../../core/services/permissions.service';
 export class TasksHabitsComponent {
   private readonly permissionsService = inject(PermissionsService);
 
-  @ViewChild('tasksList')  tasksList?: TasksListComponent;
-  @ViewChild('habitsList') habitsList?: HabitsListComponent;
-
-  readonly activeTab   = signal<'tasks' | 'habits'>('tasks');
-  readonly isParent    = this.permissionsService.isParent;
-  readonly taskCount   = signal(0);
-  readonly habitCount  = signal(0);
+  readonly activeTab        = signal<'tasks' | 'habits'>('tasks');
+  readonly isParent         = this.permissionsService.isParent;
+  readonly taskCount        = signal(0);
+  readonly habitCount       = signal(0);
+  readonly openTaskPanel  = signal(0);
+  readonly openHabitPanel = signal(0);
   readonly subtitle    = computed(() => {
     if (this.activeTab() === 'tasks') {
       const n = this.taskCount();
@@ -133,9 +135,9 @@ export class TasksHabitsComponent {
 
   openAddPanel(): void {
     if (this.activeTab() === 'tasks') {
-      this.tasksList?.openCreatePanel();
+      this.openTaskPanel.update(v => v + 1);
     } else {
-      this.habitsList?.openCreatePanel();
+      this.openHabitPanel.update(v => v + 1);
     }
   }
 }

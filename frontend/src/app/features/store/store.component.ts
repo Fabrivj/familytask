@@ -13,47 +13,20 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { A11yModule } from '@angular/cdk/a11y';
-import { AuthService } from '../../core/services/auth.service';
-import { PermissionsService } from '../../core/services/permissions.service';
-import { RewardService } from '../../core/services/reward.service';
-import { RedemptionService } from '../../core/services/redemption.service';
-import { MembersService } from '../../core/services/members.service';
-import { RewardResponse } from '../../core/models/reward.model';
-import { MemberItem } from '../../core/models/member.model';
-import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { RedemptionHistoryPanelComponent } from '../../shared/components/redemption-history-panel/redemption-history-panel.component';
-
-const REWARD_ICONS = [
-  '\u{1F381}', '\u{1F355}', '\u{1F3AE}', '\u{1F3AC}',
-  '\u{1F366}', '\u{2708}\u{FE0F}', '\u{1F457}', '\u{1F389}',
-  '\u{1F3A1}', '\u{1F382}', '\u{1F3C6}', '\u{1F3B5}',
-  '\u{1F354}', '\u{26BD}', '\u{1F4DA}', '\u{1F3A8}',
-  '\u{1F3D6}\u{FE0F}', '\u{1F3CA}', '\u{1F4B5}',
-];
-
-const ICON_LABELS: Record<string, string> = {
-  '\u{1F381}': 'Regalo',
-  '\u{1F355}': 'Pizza',
-  '\u{1F3AE}': 'Videojuegos',
-  '\u{1F3AC}': 'Pelicula',
-  '\u{1F366}': 'Helado',
-  '\u{2708}\u{FE0F}': 'Viaje',
-  '\u{1F457}': 'Ropa',
-  '\u{1F389}': 'Celebracion',
-  '\u{1F3A1}': 'Parque de atracciones',
-  '\u{1F382}': 'Pastel',
-  '\u{1F3C6}': 'Trofeo',
-  '\u{1F3B5}': 'Musica',
-  '\u{1F354}': 'Hamburguesa',
-  '\u{26BD}': 'Deporte',
-  '\u{1F4DA}': 'Libros',
-  '\u{1F3A8}': 'Arte',
-  '\u{1F3D6}\u{FE0F}': 'Playa',
-  '\u{1F3CA}': 'Piscina',
-  '\u{1F4B5}': 'Billetes',
-};
+import { AuthService } from '@core/services/auth.service';
+import { PermissionsService } from '@core/services/permissions.service';
+import { RewardService } from '@core/services/reward.service';
+import { RedemptionService } from '@core/services/redemption.service';
+import { MembersService } from '@core/services/members.service';
+import { RewardResponse } from '@core/models/reward.model';
+import { MemberItem } from '@core/models/member.model';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { RedemptionHistoryPanelComponent } from '@shared/components/redemption-history-panel/redemption-history-panel.component';
+import { injectLoadingState } from '@core/utils/loading-state';
+import { REWARD_ICONS, ICON_LABELS } from '@core/utils/constants';
+import { fieldError } from '@core/utils/form-errors';
 
 @Component({
   selector: 'app-store',
@@ -68,7 +41,7 @@ const ICON_LABELS: Record<string, string> = {
     RedemptionHistoryPanelComponent,
   ],
   templateUrl: './store.component.html',
-  styleUrl: './store.component.css',
+  styleUrls: ['../tasks/shared/list-shared.css', './store.component.css', './store-cards.css', './store-panel.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StoreComponent {
@@ -100,8 +73,9 @@ export class StoreComponent {
     return leveled.reduce((sum, r) => sum + r.minLevel!, 0) / leveled.length;
   });
 
-  readonly isLoading = signal(false);
-  readonly error = signal('');
+  private readonly ls = injectLoadingState();
+  readonly isLoading = this.ls.isLoading;
+  readonly error = this.ls.error;
 
   readonly showCreatePanel = signal(false);
   readonly isCreating = signal(false);
@@ -144,46 +118,31 @@ export class StoreComponent {
     });
   }
 
-  isPremium(reward: RewardResponse): boolean {
-    return !!reward.minLevel && reward.minLevel > this.avgLevel();
-  }
-
-  starsArray(minLevel: number): number[] {
-    return Array.from({ length: Math.min(minLevel, 10) });
-  }
-
-  canAfford(reward: RewardResponse): boolean {
+  /** Pre-computed per-reward derived values — evaluated once per data change, not per CD tick. */
+  readonly rewardMeta = computed(() => {
+    const avg = this.avgLevel();
     const coins = this.myStats()?.totalCoins ?? 0;
-    return coins >= reward.cost;
-  }
+    const level = this.myStats()?.currentLevel ?? 1;
+    const map = new Map<number, { premium: boolean; stars: number[]; gradient: string; blockReason: string | null }>();
 
-  meetsLevel(reward: RewardResponse): boolean {
-    if (!reward.minLevel) return true;
-    return (this.myStats()?.currentLevel ?? 1) >= reward.minLevel;
-  }
-
-  claimBlockReason(reward: RewardResponse): string | null {
-    const noCoins = !this.canAfford(reward);
-    const noLevel = !this.meetsLevel(reward);
-    if (noCoins && noLevel) return 'No tienes monedas suficientes y no alcanzas el nivel minimo requerido para esta recompensa.';
-    if (noCoins) return 'No tienes monedas suficientes para canjear esta recompensa.';
-    if (noLevel) return 'No alcanzas el nivel minimo requerido para esta recompensa.';
-    return null;
-  }
+    for (const r of this.rewards()) {
+      const premium = !!r.minLevel && r.minLevel > avg;
+      const stars: number[] = r.minLevel ? Array.from({ length: Math.min(r.minLevel, 10) }, (_, i) => i) : [];
+      const gradient = this.cardGradient(r.icon);
+      const noCoins = coins < r.cost;
+      const noLevel = !!r.minLevel && level < r.minLevel;
+      let blockReason: string | null = null;
+      if (noCoins && noLevel) blockReason = 'No tienes monedas suficientes y no alcanzas el nivel minimo requerido para esta recompensa.';
+      else if (noCoins) blockReason = 'No tienes monedas suficientes para canjear esta recompensa.';
+      else if (noLevel) blockReason = 'No alcanzas el nivel minimo requerido para esta recompensa.';
+      map.set(r.id, { premium, stars, gradient, blockReason });
+    }
+    return map;
+  });
 
   private loadData(familyId: number): void {
-    this.isLoading.set(true);
-    this.error.set('');
-
-    this.rewardService.getRewards(familyId).subscribe({
-      next: (rewards) => {
-        this.rewards.set(rewards);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Error al cargar las recompensas. Por favor, intente nuevamente.');
-        this.isLoading.set(false);
-      },
+    this.ls.run(this.rewardService.getRewards(familyId), {
+      next: (rewards) => this.rewards.set(rewards),
     });
 
     if (!this.isParent()) {
@@ -194,30 +153,10 @@ export class StoreComponent {
     }
   }
 
-  getNameError(): string {
-    const c = this.nameCtrl;
-    if (c.hasError('required')) return 'El nombre de la recompensa es obligatorio.';
-    if (c.hasError('minlength') || c.hasError('maxlength')) return 'El nombre debe tener entre 3 y 60 caracteres.';
-    return '';
-  }
-
-  getDescriptionError(): string {
-    if (this.descriptionCtrl.hasError('maxlength')) return 'Maximo 500 caracteres.';
-    return '';
-  }
-
-  getCostError(): string {
-    const c = this.costCtrl;
-    if (c.hasError('required')) return 'El costo debe ser mayor a 0.';
-    if (c.hasError('pattern') || c.hasError('min')) return 'El costo debe ser mayor a 0.';
-    return '';
-  }
-
-  getMinLevelError(): string {
-    const c = this.minLevelCtrl;
-    if (c.hasError('pattern') || c.hasError('min')) return 'El nivel debe ser un numero mayor a 0.';
-    return '';
-  }
+  getNameError = () => fieldError(this.nameCtrl, { required: 'El nombre de la recompensa es obligatorio.', minlength: 'El nombre debe tener entre 3 y 60 caracteres.', maxlength: 'El nombre debe tener entre 3 y 60 caracteres.' });
+  getDescriptionError = () => fieldError(this.descriptionCtrl, { maxlength: 'Maximo 500 caracteres.' });
+  getCostError = () => fieldError(this.costCtrl, { required: 'El costo debe ser mayor a 0.', pattern: 'El costo debe ser mayor a 0.', min: 'El costo debe ser mayor a 0.' });
+  getMinLevelError = () => fieldError(this.minLevelCtrl, { pattern: 'El nivel debe ser un numero mayor a 0.', min: 'El nivel debe ser un numero mayor a 0.' });
 
   openCreatePanel(): void {
     this.resetForm();

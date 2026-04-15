@@ -1,0 +1,176 @@
+/* ══════════════════════════════════════════════════════════
+   PENDING INVITATIONS
+═══════════════════════════════════════════════════════════ */
+.invite-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  background: var(--panel);
+  border: 1px solid rgba(var(--border-rgb), 0.12);
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+
+.invite-row:hover {
+  border-color: rgba(var(--border-rgb), 0.24);
+}
+
+.invite-icon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--secondary-rgb), 0.12);
+  border: 1px solid rgba(var(--secondary-rgb), 0.3);
+  border-radius: 8px;
+}
+
+.invite-icon mat-icon {
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+  line-height: 17px;
+  color: var(--secondary);
+}
+
+.invite-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.invite-email {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.invite-meta {
+  font-size: 11px;
+  color: var(--text-sub);
+  opacity: 0.65;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invite-meta strong {
+  color: var(--text-sub);
+  opacity: 1;
+  font-weight: 700;
+}
+
+.btn-copy {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  background: var(--secondary);
+  color: var(--text);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.btn-copy mat-icon {
+  font-size: 11px;
+  width: 11px;
+  height: 11px;
+  line-height: 11px;
+}
+
+.btn-copy:hover {
+  opacity: 0.85;
+}
+
+.btn-copy:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
+.pending-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 0 11px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: #FFD700;
+  background: rgba(255, 215, 0, 0.06);
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.btn-cancel-invite {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  border-radius: 6px;
+  color: rgba(var(--primary-rgb), 0.5);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-cancel-invite:hover {
+  border-color: rgba(var(--primary-rgb), 0.5);
+  color: var(--primary);
+}
+
+.btn-cancel-invite:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.btn-cancel-invite mat-icon {
+  font-size: 11px;
+  width: 11px;
+  height: 11px;
+  line-height: 11px;
+}
+
+.cancel-spinner {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid rgba(var(--primary-rgb), 0.3);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

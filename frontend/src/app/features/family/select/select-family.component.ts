@@ -8,11 +8,11 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthService } from '../../../core/services/auth.service';
-import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
-import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
+import { AuthService } from '@core/services/auth.service';
+import { PageLayoutComponent } from '@shared/components/page-layout/page-layout.component';
+import { TopBarComponent } from '@shared/components/top-bar/top-bar.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { RoleBadgeComponent } from '@shared/components/role-badge/role-badge.component';
 
 @Component({
   selector: 'app-select-family',

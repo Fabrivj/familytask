@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '@core/services/auth.service';
 import { BottomNavComponent } from '../bottom-nav/bottom-nav.component';
 import { PageLayoutComponent } from '../page-layout/page-layout.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
