@@ -140,7 +140,11 @@ public class HabitService {
                 }
                 log.info("Habit '{}' updated and assigned to {} by {}", habit.getTitle(), assignedTo.getEmail(), requester.getEmail());
             } else {
-                log.info("Habit '{}' updated by {}", habit.getTitle(), requester.getEmail());
+                habitAssignmentRepository.findByHabitId(habitId).ifPresent(a -> {
+                    a.setIsActive(false);
+                    habitAssignmentRepository.save(a);
+                });
+                log.info("Habit '{}' updated (unassigned) by {}", habit.getTitle(), requester.getEmail());
             }
 
             return toResponse(habit);
@@ -415,8 +419,9 @@ public class HabitService {
 
     private HabitResponse toResponse(Habit habit) {
         HabitAssignment assignment = habit.getAssignment();
+        boolean active = assignment != null && Boolean.TRUE.equals(assignment.getIsActive());
         Boolean completedInCurrentPeriod = null;
-        if (assignment != null && Boolean.TRUE.equals(assignment.getIsActive())) {
+        if (active) {
             LocalDate today = LocalDate.now();
             completedInCurrentPeriod = alreadyCompletedInPeriod(
                 assignment.getId(), habit.getFrequency(), today
@@ -430,11 +435,11 @@ public class HabitService {
                 .xpReward(habit.getXpReward())
                 .coinsReward(habit.getCoinsReward())
                 .createdAt(habit.getCreatedAt())
-                .assignedToId(assignment != null ? assignment.getUser().getId() : null)
-                .assignedToName(assignment != null ? assignment.getUser().getName() : null)
-                .assignedToPictureUrl(assignment != null ? assignment.getUser().getPictureUrl() : null)
-                .currentStreak(assignment != null ? assignment.getCurrentStreak() : null)
-                .longestStreak(assignment != null ? assignment.getLongestStreak() : null)
+                .assignedToId(active ? assignment.getUser().getId() : null)
+                .assignedToName(active ? assignment.getUser().getName() : null)
+                .assignedToPictureUrl(active ? assignment.getUser().getPictureUrl() : null)
+                .currentStreak(active ? assignment.getCurrentStreak() : null)
+                .longestStreak(active ? assignment.getLongestStreak() : null)
                 .completedInCurrentPeriod(completedInCurrentPeriod)
                 .build();
     }
