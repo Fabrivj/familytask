@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { MemberItem } from '../../../core/models/member.model';
+import { MemberItem } from '@core/models/member.model';
 
 /**
  * Displays a child member's gamification stats:

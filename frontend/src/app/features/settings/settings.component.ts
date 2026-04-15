@@ -5,12 +5,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { AuthService } from '../../core/services/auth.service';
-import { FamilyService } from '../../core/services/family.service';
-import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-
-const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
+import { AuthService } from '@core/services/auth.service';
+import { FamilyService } from '@core/services/family.service';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { VALID_NAME } from '@core/utils/constants';
 
 @Component({
   selector: 'app-settings',

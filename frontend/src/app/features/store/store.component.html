@@ -76,9 +76,9 @@
   <div class="rewards-grid">
     @for (reward of rewards(); track reward.id) {
       <article class="reward-card"
-        [class.reward-card--premium]="isPremium(reward)"
+        [class.reward-card--premium]="rewardMeta().get(reward.id)?.premium"
         [attr.aria-labelledby]="'reward-name-' + reward.id"
-        [style.background]="cardGradient(reward.icon)">
+        [style.background]="rewardMeta().get(reward.id)?.gradient">
 
         <div class="card-hero" aria-hidden="true">{{ reward.icon || '🎁' }}</div>
 
@@ -99,7 +99,7 @@
             <div class="card-level" [attr.aria-label]="'Nivel minimo ' + reward.minLevel">
               <span class="sr-only">Nivel minimo requerido: {{ reward.minLevel }}</span>
               <span class="level-stars" aria-hidden="true">
-                @for (s of starsArray(reward.minLevel); track s) {
+                @for (s of rewardMeta().get(reward.id)?.stars ?? []; track s) {
                   <mat-icon class="star-icon">star</mat-icon>
                 }
               </span>
@@ -112,33 +112,33 @@
         </div>
 
         @if (!isParent()) {
-          <span class="claim-wrapper" [class.claim-wrapper--locked]="!!claimBlockReason(reward)">
+          <span class="claim-wrapper" [class.claim-wrapper--locked]="!!rewardMeta().get(reward.id)?.blockReason">
             <button
               class="btn-claim"
-              [class.btn-claim--locked]="!!claimBlockReason(reward)"
+              [class.btn-claim--locked]="!!rewardMeta().get(reward.id)?.blockReason"
               type="button"
-              [attr.aria-disabled]="!!claimBlockReason(reward) || isRedeeming()"
+              [attr.aria-disabled]="!!rewardMeta().get(reward.id)?.blockReason || isRedeeming()"
               [attr.aria-busy]="isRedeeming()"
-              [attr.aria-describedby]="claimBlockReason(reward) ? 'tip-' + reward.id : null"
-              [attr.aria-label]="claimBlockReason(reward) ? (reward.name + ': bloqueado') : ('Reclamar ' + reward.name + ' - ' + reward.cost + ' monedas')"
-              (click)="!!claimBlockReason(reward) || isRedeeming() ? null : openClaimDialog(reward)"
-              (keydown.enter)="!!claimBlockReason(reward) || isRedeeming() ? null : openClaimDialog(reward)"
-              (keydown.space)="!!claimBlockReason(reward) || isRedeeming() ? $event.preventDefault() : openClaimDialog(reward)"
+              [attr.aria-describedby]="rewardMeta().get(reward.id)?.blockReason ? 'tip-' + reward.id : null"
+              [attr.aria-label]="rewardMeta().get(reward.id)?.blockReason ? (reward.name + ': bloqueado') : ('Reclamar ' + reward.name + ' - ' + reward.cost + ' monedas')"
+              (click)="!!rewardMeta().get(reward.id)?.blockReason || isRedeeming() ? null : openClaimDialog(reward)"
+              (keydown.enter)="!!rewardMeta().get(reward.id)?.blockReason || isRedeeming() ? null : openClaimDialog(reward)"
+              (keydown.space)="!!rewardMeta().get(reward.id)?.blockReason || isRedeeming() ? $event.preventDefault() : openClaimDialog(reward)"
             >
-              <mat-icon aria-hidden="true">{{ claimBlockReason(reward) ? 'lock' : 'rocket_launch' }}</mat-icon>
+              <mat-icon aria-hidden="true">{{ rewardMeta().get(reward.id)?.blockReason ? 'lock' : 'rocket_launch' }}</mat-icon>
               <span aria-live="polite">
-                {{ isRedeeming() ? 'Procesando...' : (claimBlockReason(reward) ? 'BLOQUEADO' : 'RECLAMAR') }}
+                {{ isRedeeming() ? 'Procesando...' : (rewardMeta().get(reward.id)?.blockReason ? 'BLOQUEADO' : 'RECLAMAR') }}
               </span>
             </button>
 
-            @if (claimBlockReason(reward)) {
+            @if (rewardMeta().get(reward.id)?.blockReason) {
               <span
                 [id]="'tip-' + reward.id"
                 class="claim-tooltip"
                 role="tooltip"
               >
                 <span class="claim-tooltip__arrow" aria-hidden="true"></span>
-                {{ claimBlockReason(reward) }}
+                {{ rewardMeta().get(reward.id)?.blockReason }}
               </span>
             }
           </span>

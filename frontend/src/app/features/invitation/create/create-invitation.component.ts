@@ -12,13 +12,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService } from '../../../core/services/auth.service';
-import { InvitationService } from '../../../core/services/invitation.service';
-import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
-import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
-import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
-import { HelpChipComponent } from '../../../shared/components/help-chip/help-chip.component';
-import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
+import { AuthService } from '@core/services/auth.service';
+import { InvitationService } from '@core/services/invitation.service';
+import { PageLayoutComponent } from '@shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '@shared/components/neon-card/neon-card.component';
+import { TopBarComponent } from '@shared/components/top-bar/top-bar.component';
+import { HelpChipComponent } from '@shared/components/help-chip/help-chip.component';
+import { RoleBadgeComponent } from '@shared/components/role-badge/role-badge.component';
+import { fieldError } from '@core/utils/form-errors';
 
 @Component({
   selector: 'app-create-invitation',
@@ -71,12 +72,7 @@ export class CreateInvitationComponent {
   readonly linkCopied = signal(false);
   readonly inviteCount = signal(0);
 
-  getEmailError(): string {
-    const c = this.emailCtrl;
-    if (c.hasError('required')) return 'El correo es obligatorio.';
-    if (c.hasError('email')) return 'El correo ingresado no es válido.';
-    return '';
-  }
+  getEmailError = () => fieldError(this.emailCtrl, { required: 'El correo es obligatorio.', email: 'El correo ingresado no es válido.' });
 
   generateLink(): void {
     this.emailCtrl.markAllAsTouched();
