@@ -13,13 +13,13 @@ import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../../../core/services/auth.service';
-import { MembersService } from '../../../core/services/members.service';
-import { PermissionsService } from '../../../core/services/permissions.service';
-import { RedemptionHistoryService } from '../../../core/services/redemption-history.service';
-import { RedemptionService } from '../../../core/services/redemption.service';
-import { MemberItem } from '../../../core/models/member.model';
-import { RedemptionHistoryResponse, RedemptionStatus } from '../../../core/models/redemption.model';
+import { AuthService } from '@core/services/auth.service';
+import { MembersService } from '@core/services/members.service';
+import { PermissionsService } from '@core/services/permissions.service';
+import { RedemptionHistoryService } from '@core/services/redemption-history.service';
+import { RedemptionService } from '@core/services/redemption.service';
+import { MemberItem } from '@core/models/member.model';
+import { RedemptionHistoryResponse, RedemptionStatus } from '@core/models/redemption.model';
 import { UserChipComponent } from '../user-chip/user-chip.component';
 
 @Component({
@@ -34,7 +34,10 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
     UserChipComponent,
   ],
   templateUrl: './redemption-history-panel.component.html',
-  styleUrl: './redemption-history-panel.component.css',
+  styleUrls: [
+    './redemption-history-panel.component.css',
+    './redemption-history-panel-responsive.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RedemptionHistoryPanelComponent {

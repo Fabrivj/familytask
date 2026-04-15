@@ -9,13 +9,13 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService } from '../../../core/services/auth.service';
-import { InvitationService } from '../../../core/services/invitation.service';
-import { InviteDetailsResponse } from '../../../core/models/invitation.model';
-import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
-import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
-import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
-import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
+import { AuthService } from '@core/services/auth.service';
+import { InvitationService } from '@core/services/invitation.service';
+import { InviteDetailsResponse } from '@core/models/invitation.model';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
+import { PageLayoutComponent } from '@shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '@shared/components/neon-card/neon-card.component';
+import { RoleBadgeComponent } from '@shared/components/role-badge/role-badge.component';
 
 type PageState = 'loading' | 'ready' | 'processing' | 'success' | 'error';
 

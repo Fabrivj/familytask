@@ -1,16 +1,65 @@
-:host {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+/* ── Panel overrides (base in list-shared.css) ─────────────────────────── */
+
+.field-hint {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-sub);
+  opacity: 0.5;
+  margin-top: 4px;
+  display: block;
 }
 
-.history-panel {
+.icon-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.icon-fieldset legend {
+  padding: 0;
+  float: left;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.icon-grid {
   display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid rgba(var(--border-rgb), 0.18);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sub);
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.icon-btn span {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.icon-btn:hover {
+  border-color: rgba(var(--border-rgb), 0.35);
+  color: var(--text);
+}
+
+.icon-btn-active {
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
+  color: var(--primary);
+}
+
+@media (max-width: 767px) {
+  .field-row { grid-template-columns: 1fr; }
 }
 
 .history-filters-toggle {
@@ -70,6 +119,7 @@
 .history-filters-shell {
   display: grid;
   grid-template-rows: 1fr;
+  transition: grid-template-rows 0.24s ease, opacity 0.2s ease;
 }
 
 .history-filters-shell__inner {
@@ -98,6 +148,7 @@
   flex: 1;
 }
 
+/* Matches global .field-label */
 .filter-label {
   font-family: 'Share Tech Mono', monospace;
   font-size: var(--text-micro);
@@ -106,6 +157,7 @@
   text-transform: uppercase;
 }
 
+/* Matches global .field-input */
 .filter-select,
 .filter-input {
   background: rgba(var(--border-rgb), 0.03);
@@ -126,6 +178,7 @@
   box-shadow: 0 0 0 2px rgba(var(--border-rgb), 0.12);
 }
 
+/* Dark option styling */
 .filter-select option {
   background: var(--panel);
   color: var(--text);
@@ -138,6 +191,7 @@
   flex-shrink: 0;
 }
 
+/* Matches .btn-cta style */
 .btn-apply {
   display: flex;
   align-items: center;
@@ -171,6 +225,7 @@
   text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
 }
 
+/* Matches .btn-cta.btn-outline */
 .btn-clear {
   padding: 10px 16px;
   background: transparent;
@@ -194,29 +249,28 @@
   box-shadow: 0 0 10px rgba(var(--border-rgb), 0.25);
 }
 
-.state-center,
-.state-error,
+.state-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 16px;
+  color: var(--error);
+  text-align: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+}
+
 .state-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
   padding: 56px 16px;
+  color: var(--text-sub);
   text-align: center;
   font-family: 'Rajdhani', sans-serif;
   font-size: 15px;
-}
-
-.state-center {
-  color: var(--text-sub);
-}
-
-.state-error {
-  color: var(--error);
-}
-
-.state-empty {
-  color: var(--text-sub);
 }
 
 .state-empty mat-icon,
@@ -266,93 +320,42 @@
   gap: 10px;
 }
 
-/* ── Tarjeta de canje ──────────────────────────────────── */
-
+/* Neon gradient border — same technique as .reward-card */
 .redemption-card {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px 14px 22px;
+  padding: 14px 18px;
   border: 1.5px solid transparent;
   border-radius: var(--radius-lg);
-  overflow: hidden;
   background:
-    linear-gradient(var(--panel), var(--panel)) padding-box,
-    linear-gradient(120deg, rgba(255,46,190,0.35) 0%, rgba(155,64,255,0.28) 50%, rgba(0,239,255,0.35) 100%) border-box;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  transition: background 0.2s, box-shadow 0.2s, opacity 0.4s ease;
-}
-
-/* stripe de estado a la izquierda */
-.redemption-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-}
-
-.redemption-card--pending::before {
-  background: var(--warning);
-  box-shadow: 0 0 10px rgba(var(--warning-rgb), 0.7);
-}
-
-.redemption-card--delivered::before {
-  background: var(--success);
-  box-shadow: 0 0 8px rgba(var(--success-rgb), 0.5);
+    linear-gradient(var(--bg), var(--bg)) padding-box,
+    linear-gradient(120deg, rgba(255,46,190,0.25) 0%, rgba(155,64,255,0.2) 50%, rgba(0,239,255,0.25) 100%) border-box;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 
 .redemption-card:hover {
   background:
-    linear-gradient(var(--panel), var(--panel)) padding-box,
-    linear-gradient(120deg, rgba(255,46,190,0.65) 0%, rgba(155,64,255,0.5) 50%, rgba(0,239,255,0.65) 100%) border-box;
-  box-shadow: 0 4px 22px rgba(0,0,0,0.38), 0 0 14px rgba(var(--primary-rgb), 0.08);
+    linear-gradient(var(--bg), var(--bg)) padding-box,
+    linear-gradient(120deg, rgba(255,46,190,0.55) 0%, rgba(155,64,255,0.45) 50%, rgba(0,239,255,0.55) 100%) border-box;
+  box-shadow: 0 4px 24px rgba(var(--primary-rgb), 0.1), 0 0 12px rgba(var(--border-rgb), 0.06);
 }
 
-.redemption-card--delivered {
-  opacity: 0.55;
-}
-
-.redemption-card--delivered:hover {
-  opacity: 0.75;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-}
-
-/* ── Icono ─────────────────────────────────────────────── */
-
-.redemption-icon-wrap {
+.redemption-icon {
+  font-size: 28px;
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.07);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
   line-height: 1;
+  width: 40px;
+  text-align: center;
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
 }
 
-/* ── Contenido principal (3 filas) ─────────────────────── */
-
-.redemption-main {
+.redemption-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
   min-width: 0;
-}
-
-.redemption-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
 }
 
 .redemption-name {
@@ -366,53 +369,37 @@
   text-overflow: ellipsis;
 }
 
-.redemption-cost {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: 'Share Tech Mono', monospace;
-  font-weight: 700;
-  color: #FFC300;
-  font-size: 15px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  text-shadow: 0 0 6px rgba(255, 195, 0, 0.4);
-}
-
-.redemption-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .redemption-date {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 12px;
+  font-size: var(--text-micro);
   color: var(--text-sub);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  display: block;
 }
 
-.redemption-footer {
+.redemption-right {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-.coin-icon {
-  font-size: 15px;
-  width: 15px;
-  height: 15px;
-  color: #FFC300;
+.redemption-cost {
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  color: var(--warning);
+  font-size: 13px;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgba(var(--warning-rgb), 0.5);
 }
 
-/* ── Badge ─────────────────────────────────────────────── */
-
+/* Matches neon badge style used throughout the app */
 .redemption-badge {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
+  font-size: var(--text-micro);
   font-weight: 700;
-  padding: 4px 11px;
+  padding: 3px 10px;
   border-radius: 999px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -420,11 +407,10 @@
 }
 
 .badge-pending {
-  background: rgba(var(--warning-rgb), 0.14);
+  background: rgba(var(--warning-rgb), 0.12);
   color: var(--warning);
-  border: 1px solid rgba(var(--warning-rgb), 0.55);
-  box-shadow: 0 0 8px rgba(var(--warning-rgb), 0.35);
-  animation: badge-pulse 2.4s ease-in-out infinite;
+  border: 1px solid rgba(var(--warning-rgb), 0.3);
+  box-shadow: 0 0 6px rgba(var(--warning-rgb), 0.2);
 }
 
 .badge-delivered {
@@ -434,59 +420,83 @@
   box-shadow: 0 0 6px rgba(var(--success-rgb), 0.2);
 }
 
-@keyframes badge-pulse {
-  0%, 100% { box-shadow: 0 0 6px rgba(var(--warning-rgb), 0.3); }
-  50%       { box-shadow: 0 0 16px rgba(var(--warning-rgb), 0.8), 0 0 32px rgba(var(--warning-rgb), 0.25); }
+/* Muy pequeño: columna única */
+@media (max-width: 449px) {
+  .history-panel {
+    min-height: clamp(24rem, calc(100vh - 18rem), 34rem);
+  }
+
+  .filters-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    padding: 16px 16px;
+  }
+
+  .filter-group {
+    min-width: unset;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .filter-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .btn-apply,
+  .btn-clear {
+    width: 100%;
+    height: 40px;
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .history-scroll {
+    padding-right: 2px;
+  }
 }
 
-/* ── Botón entregar ────────────────────────────────────── */
+/* Tablet: grid 2x2 */
+@media (min-width: 450px) and (max-width: 600px) {
+  .filters-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+    padding: 16px 20px;
+  }
 
-.btn-deliver {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: rgba(var(--primary-rgb), 0.12);
-  border: 1.5px solid var(--primary);
-  border-radius: var(--radius);
-  color: var(--primary);
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  white-space: nowrap;
-  min-height: 32px;
-  box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.35);
-  text-shadow: 0 0 8px rgba(var(--primary-rgb), 0.5);
-  transition: box-shadow 0.2s, text-shadow 0.2s, transform 0.12s;
-}
+  .filter-group { min-width: unset; }
 
-.btn-deliver mat-icon {
-  font-size: 15px;
-  width: 15px;
-  height: 15px;
-}
+  .filter-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 8px;
+  }
 
-.btn-deliver:hover:not(:disabled) {
-  box-shadow: 0 0 18px rgba(var(--primary-rgb), 0.75), 0 0 36px rgba(var(--primary-rgb), 0.25);
-  text-shadow: 0 0 12px rgba(var(--primary-rgb), 0.85);
-  transform: translateY(-1px);
-}
+  .btn-apply {
+    flex: 1;
+    height: 40px;
+    font-size: 13px;
+    padding: 10px 16px;
+  }
 
-.btn-deliver:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.4);
-}
+  .btn-clear {
+    flex: 1;
+    height: 40px;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
 
-.btn-deliver:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+  .redemption-card { gap: 10px; padding: 12px 14px; }
 
-@media (prefers-reduced-motion: reduce) {
-  .badge-pending { animation: none; }
-  .btn-deliver   { transition: none; transform: none !important; }
+  .redemption-right {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
 }

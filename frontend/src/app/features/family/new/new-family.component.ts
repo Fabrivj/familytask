@@ -5,14 +5,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService } from '../../../core/services/auth.service';
-import { FamilyService } from '../../../core/services/family.service';
-import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
-import { NeonCardComponent } from '../../../shared/components/neon-card/neon-card.component';
-import { TopBarComponent } from '../../../shared/components/top-bar/top-bar.component';
-import { HelpChipComponent } from '../../../shared/components/help-chip/help-chip.component';
-
-const VALID_NAME = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-'.]+$/;
+import { AuthService } from '@core/services/auth.service';
+import { FamilyService } from '@core/services/family.service';
+import { PageLayoutComponent } from '@shared/components/page-layout/page-layout.component';
+import { NeonCardComponent } from '@shared/components/neon-card/neon-card.component';
+import { TopBarComponent } from '@shared/components/top-bar/top-bar.component';
+import { HelpChipComponent } from '@shared/components/help-chip/help-chip.component';
+import { VALID_NAME } from '@core/utils/constants';
+import { fieldError } from '@core/utils/form-errors';
 
 @Component({
   selector: 'app-new-family',
@@ -53,14 +53,7 @@ export class NewFamilyComponent {
   readonly shortName = this.authService.shortName;
   readonly nameInitial = this.authService.nameInitial;
 
-  getNameError(): string {
-    const c = this.nameCtrl;
-    if (c.hasError('required')) return 'El nombre es obligatorio.';
-    if (c.hasError('minlength')) return 'Mínimo 3 caracteres.';
-    if (c.hasError('maxlength')) return 'Máximo 50 caracteres.';
-    if (c.hasError('pattern')) return 'El nombre contiene caracteres inválidos.';
-    return '';
-  }
+  getNameError = () => fieldError(this.nameCtrl, { required: 'El nombre es obligatorio.', minlength: 'Mínimo 3 caracteres.', maxlength: 'Máximo 50 caracteres.', pattern: 'El nombre contiene caracteres inválidos.' });
 
   create(): void {
     this.nameCtrl.markAllAsTouched();
