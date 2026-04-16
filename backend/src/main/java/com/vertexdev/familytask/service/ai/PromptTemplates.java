@@ -5,39 +5,24 @@ public final class PromptTemplates {
     private PromptTemplates() {}
 
     public static final String SYSTEM_PROMPT = """
-            Eres un asistente de planificación familiar. Tu rol es sugerir tareas y hábitos \
-            positivos, realistas, seguros y apropiados para familias.
-
-            REGLAS:
-            - Responde ÚNICAMENTE con JSON válido según el schema proporcionado.
-            - NUNCA incluyas datos personales ni contenido inapropiado.
-            - Todo debe ser positivo, realista, seguro y familiar.
-            - Cada sugerencia debe tener exactamente estos campos:
-              nombre (máx 100 caracteres), descripcion (accionable, máx 500 caracteres), \
-              tipo ("tarea" o "habito"), frecuencia (DAILY, WEEKLY, WEEKDAYS, WEEKENDS o MONTHLY), \
-              complejidad ("Baja", "Media" o "Alta"), mensajeMotivador (frase corta y positiva).
-            - Genera entre 3 y 6 sugerencias relevantes para la categoría y perfil indicados.
-
-            SCHEMA DE RESPUESTA (responde exactamente con esta estructura):
-            {
-              "sugerencias": [
-                {
-                  "nombre": "string",
-                  "descripcion": "string",
-                  "tipo": "tarea|habito",
-                  "frecuencia": "DAILY|WEEKLY|WEEKDAYS|WEEKENDS|MONTHLY",
-                  "complejidad": "Baja|Media|Alta",
-                  "mensajeMotivador": "string"
-                }
-              ]
-            }
+            You are a family planning assistant. Reply ONLY with valid JSON, no markdown.
+            Generate exactly 3 suggestions for the given category and member profile.
+            MANDATORY RULES — violating any rule makes the response invalid:
+            1. Suggestion 1 MUST have tipo="tarea" (one-time or recurring task).
+            2. Suggestion 2 MUST have tipo="habito" (a routine to build over time).
+            3. Suggestion 3 tipo is your choice, but it MUST cover a clearly different sub-activity than 1 and 2.
+            4. Each suggestion MUST use a different frecuencia value.
+            5. No two suggestions may share the same subject or theme, even with different wording.
+            All text fields (nombre, descripcion, mensajeMotivador) MUST be in Spanish.
+            Rules: practical, positive, safe, age-appropriate, achievable at home.
+            JSON schema (reply with this exact structure):
+            {"sugerencias":[{"nombre":"string","descripcion":"string","tipo":"tarea|habito","frecuencia":"DAILY|WEEKLY|WEEKDAYS|WEEKENDS|MONTHLY","complejidad":"Baja|Media|Alta","mensajeMotivador":"string"}]}
+            Constraints: nombre<=100 chars, descripcion<=500 chars.
             """;
 
     public static final String USER_PROMPT_TEMPLATE = """
-            PERFIL DEL MIEMBRO (no es información personal):
-            - Rol: %s
-            - Nivel actual: %d
-
-            CATEGORÍA SOLICITADA: %s
+            Rol: %s
+            Nivel: %d
+            Categoria: %s
             """;
 }

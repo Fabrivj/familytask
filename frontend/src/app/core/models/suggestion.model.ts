@@ -16,6 +16,7 @@ export interface SuggestionRequest {
   familyId: number;
   category: SuggestionCategory | string;
   memberUserId: number;
+  excludedSuggestionNames?: string[];
 }
 
 export interface SuggestionItem {
@@ -25,7 +26,7 @@ export interface SuggestionItem {
   tipo: 'tarea' | 'habito' | string;
   frecuencia: 'DAILY' | 'WEEKLY' | 'WEEKDAYS' | 'WEEKENDS' | 'MONTHLY' | string;
   complejidad: 'Baja' | 'Media' | 'Alta' | string;
-  puntos: number;
+  monedas: number;
   exp: number;
   mensajeMotivador: string;
 }

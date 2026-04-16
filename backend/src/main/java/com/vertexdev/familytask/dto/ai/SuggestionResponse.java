@@ -12,7 +12,7 @@ public class SuggestionResponse {
     private String tipo;
     private String frecuencia;
     private String complejidad;
-    private int puntos;
+    private int monedas;
     private int exp;
     private String mensajeMotivador;
 }

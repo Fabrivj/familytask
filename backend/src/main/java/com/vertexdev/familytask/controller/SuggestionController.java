@@ -40,7 +40,8 @@ public class SuggestionController {
             SuggestionListResponse response = suggestionService.generate(
                     request.getFamilyId(),
                     request.getCategory(),
-                    request.getMemberUserId()
+                    request.getMemberUserId(),
+                    request.getExcludedSuggestionNames()
             );
             return ResponseEntity.ok(response);
         } catch (AiServiceUnavailableException | AiSuggestionException e) {

@@ -18,4 +18,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     boolean existsByHomeSpaceIdAndDeletedAtIsNull(Long homeSpaceId);
 
     List<Task> findByHomeSpaceIdAndDeletedAtIsNull(Long homeSpaceId);
+
+    List<Task> findByHomeSpaceId(Long homeSpaceId);
 }
