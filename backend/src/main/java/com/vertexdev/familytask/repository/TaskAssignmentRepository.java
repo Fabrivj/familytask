@@ -18,6 +18,19 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
     @Query("SELECT COUNT(a) FROM TaskAssignment a WHERE a.user.id = :userId AND a.task.familyGroup.id = :familyGroupId AND a.status = :status")
     long countByUserIdAndFamilyGroupIdAndStatus(@Param("userId") Long userId, @Param("familyGroupId") Long familyGroupId, @Param("status") TaskStatus status);
 
+    @Query("""
+        SELECT COUNT(a) FROM TaskAssignment a
+        WHERE a.task.familyGroup.id = :familyId
+          AND a.status IN :statuses
+          AND (:memberId IS NULL OR a.user.id = :memberId)
+          AND (:spaceId  IS NULL OR a.task.homeSpace.id = :spaceId)
+        """)
+    long countByFamilyAndStatuses(
+            @Param("familyId")  Long familyId,
+            @Param("statuses")  java.util.List<TaskStatus> statuses,
+            @Param("memberId")  Long memberId,
+            @Param("spaceId")   Long spaceId);
+
     @Modifying
     @Query("DELETE FROM TaskAssignment a WHERE a.user.id = :userId AND a.task.familyGroup.id = :familyGroupId")
     void deleteByUserIdAndFamilyGroupId(@Param("userId") Long userId, @Param("familyGroupId") Long familyGroupId);

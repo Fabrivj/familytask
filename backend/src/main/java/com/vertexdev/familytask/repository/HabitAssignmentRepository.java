@@ -20,4 +20,12 @@ public interface HabitAssignmentRepository extends JpaRepository<HabitAssignment
     @Modifying
     @Query("DELETE FROM HabitAssignment a WHERE a.user.id = :userId AND a.habit.familyGroup.id = :familyGroupId")
     void deleteByUserIdAndFamilyGroupId(@Param("userId") Long userId, @Param("familyGroupId") Long familyGroupId);
+
+    @Query("""
+        SELECT COUNT(ha) FROM HabitAssignment ha
+        WHERE ha.habit.familyGroup.id = :familyId
+          AND ha.isActive = true
+          AND (:memberId IS NULL OR ha.user.id = :memberId)
+        """)
+    long countActiveByFamily(@Param("familyId") Long familyId, @Param("memberId") Long memberId);
 }
