@@ -1,0 +1,376 @@
+.content {
+  padding: 24px 28px;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Filtros ─────────────────────────────────────────────────────────────── */
+.filters-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.week-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(var(--border-rgb), 0.2);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.week-btn:hover { background: rgba(var(--border-rgb), 0.1); }
+
+.week-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  min-width: 140px;
+  text-align: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(var(--border-rgb), 0.2);
+  background: transparent;
+  color: var(--text-sub);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+.filter-chip.filter-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* ── Estado ──────────────────────────────────────────────────────────────── */
+.state-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 0;
+  color: var(--text-sub);
+}
+
+.state-icon { font-size: 40px; opacity: 0.4; }
+.error-icon { color: var(--danger, #e53935); opacity: 0.8; }
+.state-text { font-size: 14px; text-align: center; }
+
+.btn-retry {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1.5px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  font-size: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  cursor: pointer;
+}
+.btn-retry:hover { background: var(--primary); color: #fff; }
+
+/* ── KPIs ────────────────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.kpi-card {
+  background: var(--panel);
+  border: 1.5px solid rgba(var(--border-rgb), 0.18);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpi-value {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.kpi-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--text-sub);
+  text-transform: uppercase;
+}
+
+.kpi-primary .kpi-value { color: var(--primary); font-size: 34px; }
+
+.kpi-bar-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--border-rgb), 0.15);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.kpi-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--primary);
+  transition: width 0.4s ease;
+}
+
+/* ── Secciones ───────────────────────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--text-sub);
+  margin: 0;
+}
+
+/* ── Tendencia diaria ────────────────────────────────────────────────────── */
+.trend-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 120px;
+  background: var(--panel);
+  border: 1.5px solid rgba(var(--border-rgb), 0.18);
+  border-radius: 14px;
+  padding: 16px 20px 0;
+}
+
+.trend-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.trend-bars {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.trend-bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  min-height: 2px;
+  transition: height 0.4s ease;
+}
+.trend-bar-tasks  { background: var(--primary); }
+.trend-bar-habits { background: var(--accent, #ff9800); opacity: 0.8; }
+
+.trend-day {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-sub);
+  padding: 4px 0 2px;
+}
+
+.trend-total {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-sub);
+  padding-bottom: 6px;
+}
+
+.trend-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.legend-tasks  { background: var(--primary); }
+.legend-habits { background: var(--accent, #ff9800); opacity: 0.8; }
+
+.legend-label {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+/* ── Estado de tareas ────────────────────────────────────────────────────── */
+.status-list {
+  background: var(--panel);
+  border: 1.5px solid rgba(var(--border-rgb), 0.18);
+  border-radius: 14px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-completed  { background: #4caf50; }
+.status-in-review  { background: #2196f3; }
+.status-in-progress { background: #ff9800; }
+.status-pending    { background: rgba(var(--border-rgb), 0.5); }
+
+.status-name {
+  font-size: 12px;
+  color: var(--text-sub);
+  min-width: 90px;
+}
+
+.status-bar-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(var(--border-rgb), 0.12);
+  overflow: hidden;
+}
+.status-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.status-fill-completed { background: #4caf50; }
+.status-fill-review    { background: #2196f3; }
+.status-fill-progress  { background: #ff9800; }
+.status-fill-pending   { background: rgba(var(--border-rgb), 0.4); }
+
+.status-count {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ── Por miembro ─────────────────────────────────────────────────────────── */
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.member-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1.5px solid rgba(var(--border-rgb), 0.18);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.member-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.member-stat-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-stat-counts {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+.stat-chip-tasks  { background: rgba(var(--primary-rgb, 99,102,241), 0.12); color: var(--primary); }
+.stat-chip-habits { background: rgba(255, 152, 0, 0.12); color: #ff9800; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .content { padding: 16px; gap: 20px; }
+
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .kpi-card:first-child {
+    grid-column: 1 / -1;
+  }
+  .kpi-value { font-size: 22px; }
+  .kpi-primary .kpi-value { font-size: 28px; }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .trend-chart { height: 90px; padding: 12px 12px 0; gap: 4px; }
+}

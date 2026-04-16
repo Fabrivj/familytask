@@ -71,6 +71,12 @@ export const routes: Routes = [
       import('./features/settings/settings.component').then(m => m.SettingsComponent),
   },
   {
+    path: 'reports',
+    canActivate: [authGuard, parentGuard],
+    loadComponent: () =>
+      import('./features/reports/reports.component').then(m => m.ReportsComponent),
+  },
+  {
     path: 'map',
     canActivate: [authGuard],
     loadComponent: () =>
