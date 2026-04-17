@@ -52,3 +52,13 @@ export interface AssignHabitRequest {
   familyId: number;
   assignedToId: number;
 }
+
+export interface UpdateHabitRequest {
+  familyId: number;
+  title: string;
+  description?: string | null;
+  frequency: HabitFrequency;
+  xpReward: number;
+  coinsReward: number;
+  assignedToId?: number | null;
+}

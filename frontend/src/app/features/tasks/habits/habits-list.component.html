@@ -99,7 +99,7 @@
             <td>
               <div class="col-actions">
                 @if (isParent()) {
-                  <button class="btn-icon" type="button" aria-label="Editar hábito" disabled>
+                  <button class="btn-icon" type="button" aria-label="Editar hábito" (click)="openEditPanel(habit)">
                     <mat-icon aria-hidden="true">edit</mat-icon>
                   </button>
                   <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" (click)="openDeleteModal(habit)">
@@ -215,10 +215,10 @@
 @if (showCreatePanel()) {
   <div class="overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Crear nuevo hábito" cdkTrapFocus cdkTrapFocusAutoCapture>
+  <aside class="create-panel" role="dialog" [attr.aria-label]="isEditMode() ? 'Editar hábito' : 'Crear nuevo hábito'" cdkTrapFocus cdkTrapFocusAutoCapture>
     <div class="panel-header">
       <div class="panel-header-left">
-        <h2 class="panel-title">Nuevo hábito</h2>
+        <h2 class="panel-title">{{ isEditMode() ? 'Editar hábito' : 'Nuevo hábito' }}</h2>
         <span class="panel-badge">HÁBITO</span>
       </div>
       <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
@@ -324,32 +324,30 @@
       </div>
 
       <!-- Asignar a -->
-      @if (childMembers().length > 0) {
-        <div class="field">
-          <label class="field-label">ASIGNAR A <span class="optional">(OPCIONAL)</span></label>
-          <div class="assignee-chips">
+      <div class="field">
+        <label class="field-label">ASIGNAR A</label>
+        <div class="assignee-chips">
+          <button
+            class="assignee-chip"
+            [class.assignee-active]="selectedAssignee() === null"
+            type="button"
+            [attr.aria-pressed]="selectedAssignee() === null"
+            (click)="selectedAssignee.set(null)"
+          >Sin asignar</button>
+          @for (m of childMembers(); track m.id) {
             <button
               class="assignee-chip"
-              [class.assignee-active]="selectedAssignee() === null"
+              [class.assignee-active]="selectedAssignee() === m.id"
               type="button"
-              [attr.aria-pressed]="selectedAssignee() === null"
-              (click)="selectedAssignee.set(null)"
-            >Sin asignar</button>
-            @for (m of childMembers(); track m.id) {
-              <button
-                class="assignee-chip"
-                [class.assignee-active]="selectedAssignee() === m.id"
-                type="button"
-                [attr.aria-pressed]="selectedAssignee() === m.id"
-                (click)="selectedAssignee.set(m.id)"
-              >
-                <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="22" />
-                {{ memberShortName(m.name) }}
-              </button>
-            }
-          </div>
+              [attr.aria-pressed]="selectedAssignee() === m.id"
+              (click)="selectedAssignee.set(m.id)"
+            >
+              <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="22" />
+              {{ memberShortName(m.name) }}
+            </button>
+          }
         </div>
-      }
+      </div>
 
       <!-- Error -->
       @if (createError()) {
@@ -361,10 +359,10 @@
         <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
         <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
           @if (isCreating()) {
-            Creando...
+            {{ isEditMode() ? 'Guardando...' : 'Creando...' }}
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
-            CREAR HÁBITO
+            {{ isEditMode() ? 'GUARDAR CAMBIOS' : 'CREAR HÁBITO' }}
           }
         </button>
       </div>
