@@ -21,12 +21,13 @@
       </div>
 
       <!-- Miembro -->
-      <div class="filter-group">
-        <span class="filter-label">MIEMBRO</span>
+      <div class="filter-group" role="group" aria-label="Filtrar por miembro">
+        <span class="filter-label" aria-hidden="true">MIEMBRO</span>
         <div class="filter-chips">
           <button
             class="filter-chip"
             [class.filter-active]="selectedMemberId() === null"
+            [attr.aria-pressed]="selectedMemberId() === null"
             type="button"
             (click)="selectMember(null)"
           >Todos</button>
@@ -34,6 +35,7 @@
             <button
               class="filter-chip"
               [class.filter-active]="selectedMemberId() === m.id"
+              [attr.aria-pressed]="selectedMemberId() === m.id"
               type="button"
               (click)="selectMember(m.id)"
             >
@@ -46,12 +48,13 @@
 
       <!-- Categoría (espacio) -->
       @if (spaces().length > 0) {
-        <div class="filter-group">
-          <span class="filter-label">CATEGORÍA</span>
+        <div class="filter-group" role="group" aria-label="Filtrar por categoría">
+          <span class="filter-label" aria-hidden="true">CATEGORÍA</span>
           <div class="filter-chips">
             <button
               class="filter-chip"
               [class.filter-active]="selectedSpaceId() === null"
+              [attr.aria-pressed]="selectedSpaceId() === null"
               type="button"
               (click)="selectSpace(null)"
             >Todas</button>
@@ -59,6 +62,7 @@
               <button
                 class="filter-chip"
                 [class.filter-active]="selectedSpaceId() === s.id"
+                [attr.aria-pressed]="selectedSpaceId() === s.id"
                 type="button"
                 (click)="selectSpace(s.id)"
               >{{ s.name }}</button>
@@ -71,7 +75,7 @@
 
     <!-- ── Estados ─────────────────────────────────────────────────────── -->
     @if (isLoading()) {
-      <div class="state-center" role="status" aria-label="Cargando reporte">
+      <div class="state-center" role="status" aria-live="polite" aria-label="Cargando reporte">
         <mat-spinner diameter="36" />
       </div>
     } @else if (error()) {
@@ -90,11 +94,18 @@
       <!-- ── KPIs ──────────────────────────────────────────────────────── -->
       <section class="kpi-grid" aria-label="Resumen de la semana">
 
-        <div class="kpi-card kpi-primary">
-          <span class="kpi-value">{{ r.taskCompletionRate }}%</span>
-          <span class="kpi-label">CUMPLIMIENTO TAREAS</span>
-          <div class="kpi-bar-track">
-            <div class="kpi-bar-fill" [style.width.%]="r.taskCompletionRate"></div>
+        <div class="kpi-card kpi-primary" aria-label="Cumplimiento de tareas: {{ r.taskCompletionRate }}%">
+          <span class="kpi-value" aria-hidden="true">{{ r.taskCompletionRate }}%</span>
+          <span class="kpi-label" aria-hidden="true">CUMPLIMIENTO TAREAS</span>
+          <div
+            class="kpi-bar-track"
+            role="progressbar"
+            [attr.aria-valuenow]="r.taskCompletionRate"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-label]="r.taskCompletionRate + '% cumplimiento de tareas'"
+          >
+            <div class="kpi-bar-fill" [style.width.%]="r.taskCompletionRate" aria-hidden="true"></div>
           </div>
         </div>
 
@@ -156,44 +167,76 @@
         <h2 class="section-title">ESTADO DE TAREAS</h2>
         <div class="status-list">
           <div class="status-row">
-            <span class="status-dot status-completed"></span>
+            <span class="status-dot status-completed" aria-hidden="true"></span>
             <span class="status-name">Completadas</span>
-            <div class="status-bar-track">
+            <div
+              class="status-bar-track"
+              role="progressbar"
+              [attr.aria-valuenow]="barWidth(r.tasksCompleted, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="r.tasksCompleted + ' tareas completadas'"
+            >
               <div class="status-bar-fill status-fill-completed"
-                   [style.width.%]="barWidth(r.tasksCompleted, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)">
+                   [style.width.%]="barWidth(r.tasksCompleted, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+                   aria-hidden="true">
               </div>
             </div>
-            <span class="status-count">{{ r.tasksCompleted }}</span>
+            <span class="status-count" aria-hidden="true">{{ r.tasksCompleted }}</span>
           </div>
           <div class="status-row">
-            <span class="status-dot status-in-review"></span>
+            <span class="status-dot status-in-review" aria-hidden="true"></span>
             <span class="status-name">En revisión</span>
-            <div class="status-bar-track">
+            <div
+              class="status-bar-track"
+              role="progressbar"
+              [attr.aria-valuenow]="barWidth(r.tasksInReview, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="r.tasksInReview + ' tareas en revisión'"
+            >
               <div class="status-bar-fill status-fill-review"
-                   [style.width.%]="barWidth(r.tasksInReview, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)">
+                   [style.width.%]="barWidth(r.tasksInReview, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+                   aria-hidden="true">
               </div>
             </div>
-            <span class="status-count">{{ r.tasksInReview }}</span>
+            <span class="status-count" aria-hidden="true">{{ r.tasksInReview }}</span>
           </div>
           <div class="status-row">
-            <span class="status-dot status-in-progress"></span>
+            <span class="status-dot status-in-progress" aria-hidden="true"></span>
             <span class="status-name">En progreso</span>
-            <div class="status-bar-track">
+            <div
+              class="status-bar-track"
+              role="progressbar"
+              [attr.aria-valuenow]="barWidth(r.tasksInProgress, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="r.tasksInProgress + ' tareas en progreso'"
+            >
               <div class="status-bar-fill status-fill-progress"
-                   [style.width.%]="barWidth(r.tasksInProgress, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)">
+                   [style.width.%]="barWidth(r.tasksInProgress, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+                   aria-hidden="true">
               </div>
             </div>
-            <span class="status-count">{{ r.tasksInProgress }}</span>
+            <span class="status-count" aria-hidden="true">{{ r.tasksInProgress }}</span>
           </div>
           <div class="status-row">
-            <span class="status-dot status-pending"></span>
+            <span class="status-dot status-pending" aria-hidden="true"></span>
             <span class="status-name">Pendientes</span>
-            <div class="status-bar-track">
+            <div
+              class="status-bar-track"
+              role="progressbar"
+              [attr.aria-valuenow]="barWidth(r.tasksPending, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="r.tasksPending + ' tareas pendientes'"
+            >
               <div class="status-bar-fill status-fill-pending"
-                   [style.width.%]="barWidth(r.tasksPending, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)">
+                   [style.width.%]="barWidth(r.tasksPending, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+                   aria-hidden="true">
               </div>
             </div>
-            <span class="status-count">{{ r.tasksPending }}</span>
+            <span class="status-count" aria-hidden="true">{{ r.tasksPending }}</span>
           </div>
         </div>
       </section>
