@@ -19,7 +19,7 @@ import { notifyEarnedBadges } from '@core/utils/badge-notify';
 import { PermissionsService } from '@core/services/permissions.service';
 import { HabitService } from '@core/services/habit.service';
 import { MembersService } from '@core/services/members.service';
-import { CompleteHabitResponse, HabitFrequency, HabitResponse } from '@core/models/habit.model';
+import { CompleteHabitResponse, HabitFrequency, HabitResponse, UpdateHabitRequest } from '@core/models/habit.model';
 import { HABIT_FREQUENCIES, frequencyIcon, frequencyLabel } from '@core/utils/habit-labels';
 import { injectLoadingState } from '@core/utils/loading-state';
 import { memberShortName } from '@core/utils/member-helpers';
@@ -141,10 +141,12 @@ export class HabitsListComponent {
     });
   }
 
-  // ─── Panel de creación ────────────────────────────────────────────────────
+  // ─── Panel de creación / edición ─────────────────────────────────────────
   readonly showCreatePanel = signal(false);
   readonly isCreating = signal(false);
   readonly createError = signal('');
+  readonly editingHabit = signal<HabitResponse | null>(null);
+  readonly isEditMode = computed(() => this.editingHabit() !== null);
 
   readonly titleCtrl = new FormControl('', {
     nonNullable: true,
@@ -184,9 +186,23 @@ export class HabitsListComponent {
     this.showCreatePanel.set(true);
   }
 
+  openEditPanel(habit: HabitResponse): void {
+    this._panelFocus.save();
+    this.resetForm();
+    this.editingHabit.set(habit);
+    this.titleCtrl.setValue(habit.title);
+    this.descriptionCtrl.setValue(habit.description ?? '');
+    this.selectedFrequency.set(habit.frequency);
+    this.xpRewardCtrl.setValue(habit.xpReward);
+    this.coinsRewardCtrl.setValue(habit.coinsReward);
+    this.selectedAssignee.set(habit.assignedToId);
+    this.showCreatePanel.set(true);
+  }
+
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+    this.editingHabit.set(null);
     this._panelFocus.restore();
   }
 
@@ -216,7 +232,33 @@ export class HabitsListComponent {
     this.isCreating.set(true);
     this.createError.set('');
 
+    const editing = this.editingHabit();
     const assignedToId = this.selectedAssignee();
+
+    if (editing) {
+      const request: UpdateHabitRequest = {
+        familyId,
+        title: this.titleCtrl.value.trim(),
+        description: this.descriptionCtrl.value.trim() || null,
+        frequency: this.selectedFrequency(),
+        xpReward: this.xpRewardCtrl.value!,
+        coinsReward: this.coinsRewardCtrl.value!,
+        assignedToId,
+      };
+      this.habitService.update(editing.id, request).subscribe({
+        next: (updated) => {
+          this.habits.update(list => list.map(h => h.id === updated.id ? updated : h));
+          this.isCreating.set(false);
+          this.closeCreatePanel();
+          this.snackBar.open('Hábito actualizado exitosamente', 'Cerrar', { duration: 4000, panelClass: 'snack-success' });
+        },
+        error: (err) => {
+          this.createError.set(err.error?.message || 'Ocurrió un error al actualizar el hábito. Por favor, intente nuevamente.');
+          this.isCreating.set(false);
+        },
+      });
+      return;
+    }
 
     this.habitService.create({
       familyId,
@@ -295,6 +337,7 @@ export class HabitsListComponent {
   }
 
   private resetForm(): void {
+    this.editingHabit.set(null);
     this.titleCtrl.reset('');
     this.descriptionCtrl.reset('');
     this.selectedFrequency.set('DAILY');
