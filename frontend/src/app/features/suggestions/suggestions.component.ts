@@ -114,9 +114,6 @@ interface CardState {
                 class="btn-refresh"
                 type="button"
                 (click)="loadPrefetched()"
-                (mouseenter)="onRefreshHoverEnter()"
-                (mouseleave)="onRefreshHoverLeave()"
-                (touchstart)="onRefreshTouchStart()"
               >
                 <mat-icon aria-hidden="true">refresh</mat-icon>
                 Cargar más sugerencias

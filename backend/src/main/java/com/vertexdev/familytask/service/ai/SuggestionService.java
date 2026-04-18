@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SuggestionService {
 
-    private final OllamaChatModel defaultChatModel;
     private final OllamaApi ollamaApi;
     private final GamificationRules gamificationRules;
     private final MemberProfileResolver memberProfileResolver;
@@ -207,11 +206,23 @@ public class SuggestionService {
         long startedAt = System.nanoTime();
         try {
             log.info("Suggestion request model={} promptLength={}", model, userPrompt.length());
+
+            // Explicit JSON format — not relying on injected bean defaults
+            OllamaChatModel chatModel = OllamaChatModel.builder()
+                    .ollamaApi(ollamaApi)
+                    .defaultOptions(OllamaChatOptions.builder()
+                            .model(model)
+                            .temperature(temperature)
+                            .numPredict(numPredict)
+                            .format("json")
+                            .build())
+                    .build();
+
             var prompt = new Prompt(List.of(
-                    new SystemMessage(PromptTemplates.SYSTEM_PROMPT),
+                    new SystemMessage(PromptTemplates.SYSTEM_PROMPT_THREE),
                     new UserMessage(userPrompt)
             ));
-            String rawJson = defaultChatModel.call(prompt).getResult().getOutput().getText();
+            String rawJson = chatModel.call(prompt).getResult().getOutput().getText();
             if (rawJson == null || rawJson.isBlank()) {
                 log.warn("Model {} returned an empty response after {} ms.", model, durationMs(startedAt));
                 throw new AiServiceUnavailableException("El proveedor de sugerencias devolvió una respuesta vacía.",
@@ -253,7 +264,7 @@ public class SuggestionService {
                     .build();
 
             var prompt = new Prompt(List.of(
-                    new SystemMessage(PromptTemplates.SYSTEM_PROMPT),
+                    new SystemMessage(PromptTemplates.SYSTEM_PROMPT_SINGLE),
                     new UserMessage(userPrompt)
             ));
             String rawJson = chatModel.call(prompt).getResult().getOutput().getText();
