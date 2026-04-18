@@ -1,0 +1,13 @@
+package com.vertexdev.familytask.model.enums;
+
+public enum SuggestionCategory {
+    HIGIENE_PERSONAL,
+    ORDEN_Y_LIMPIEZA,
+    ALIMENTACION,
+    ESTUDIO_Y_LECTURA,
+    ACTIVIDAD_FISICA,
+    RESPONSABILIDAD_FAMILIAR,
+    AUTOCUIDADO_EMOCIONAL,
+    CREATIVIDAD,
+    TECNOLOGIA_RESPONSABLE
+}

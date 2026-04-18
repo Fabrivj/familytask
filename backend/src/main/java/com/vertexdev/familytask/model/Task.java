@@ -30,7 +30,7 @@ public class Task {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
-    @OneToOne(mappedBy = "task", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "task", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private TaskAssignment assignment;
 
     @ManyToOne(fetch = FetchType.LAZY)

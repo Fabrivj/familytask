@@ -105,6 +105,24 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(AiServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleAiServiceUnavailable(AiServiceUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(AiSuggestionException.class)
+    public ResponseEntity<ErrorResponse> handleAiSuggestionException(AiSuggestionException ex) {
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ErrorResponse> handleAuthException(AuthException ex) {
         HttpStatus status = switch (ex.getCode()) {

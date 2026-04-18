@@ -110,10 +110,19 @@ public class SpaceService {
                         "No es posible eliminar este espacio porque tiene tareas asignadas.", 409);
             }
             Space targetSpace = resolveOwnedSpace(targetSpaceId, familyGroup.getId());
-            List<Task> tasks = taskRepository.findByHomeSpaceIdAndDeletedAtIsNull(spaceId);
-            tasks.forEach(t -> t.setHomeSpace(targetSpace));
-            taskRepository.saveAll(tasks);
-            log.info("Migrated {} tasks from space {} to space {}", tasks.size(), spaceId, targetSpaceId);
+            List<Task> activeTasks = taskRepository.findByHomeSpaceIdAndDeletedAtIsNull(spaceId);
+            activeTasks.forEach(t -> t.setHomeSpace(targetSpace));
+            taskRepository.saveAll(activeTasks);
+            log.info("Migrated {} tasks from space {} to space {}", activeTasks.size(), spaceId, targetSpaceId);
+        }
+
+        // Soft-deleted tasks still hold a non-nullable FK to this space — hard-delete them
+        List<Task> softDeletedTasks = taskRepository.findByHomeSpaceId(spaceId).stream()
+                .filter(t -> t.getDeletedAt() != null)
+                .toList();
+        if (!softDeletedTasks.isEmpty()) {
+            taskRepository.deleteAll(softDeletedTasks);
+            log.info("Purged {} soft-deleted tasks from space {}", softDeletedTasks.size(), spaceId);
         }
 
         spaceRepository.delete(space);

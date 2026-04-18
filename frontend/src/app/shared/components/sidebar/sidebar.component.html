@@ -20,8 +20,8 @@
 
     @if (isParent()) {
       <li>
-        <button class="nav-item" type="button" (click)="navigate(null)"
-          [class.active]="isActive('/ai')" aria-label="IA (próximamente)" aria-disabled="true" tabindex="-1">
+        <button class="nav-item" type="button" (click)="navigate('/ai/suggestions')"
+          [class.active]="isActive('/ai')" aria-label="Sugerencias IA">
           <mat-icon aria-hidden="true">auto_awesome</mat-icon>
           <span class="label">IA</span>
         </button>

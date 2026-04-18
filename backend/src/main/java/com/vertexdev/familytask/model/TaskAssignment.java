@@ -31,6 +31,9 @@ public class TaskAssignment {
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
+    @OneToOne(mappedBy = "taskAssignment", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private TaskCompletion completion;
+
     // TODO: lógica de status pendiente de implementación
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
