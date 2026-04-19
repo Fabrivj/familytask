@@ -11,6 +11,7 @@ export function statusLabel(s: string | null): string {
 export function statusIcon(status: string): string {
   if (status === 'PENDING') return 'schedule';
   if (status === 'IN_PROGRESS') return 'play_arrow';
+  if (status === 'IN_REVIEW') return 'rate_review';
   if (status === 'COMPLETED') return 'check_circle';
-  return 'help_outline';
+  return 'schedule';
 }

@@ -54,15 +54,21 @@ import { PermissionsService } from '@core/services/permissions.service';
     </app-shell>
   `,
   styles: [`
+    :host {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+    }
     .content {
       padding: 24px;
-    }
-    @media (max-width: 767px) {
-      .content { padding: 20px 16px 80px; }
-      .header-row { flex-direction: column; align-items: stretch; gap: 10px; }
-      .tabs { width: 100%; }
-      .tab { flex: 1; justify-content: center; padding: 10px 12px; }
-      .btn-add { width: 100%; justify-content: center; }
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      box-sizing: border-box;
+      max-width: 100%;
     }
     .header-row {
       display: flex;
@@ -70,15 +76,18 @@ import { PermissionsService } from '@core/services/permissions.service';
       justify-content: space-between;
       gap: 20px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
     .tabs-row {
       display: flex;
       align-items: center;
       margin-bottom: 20px;
+      min-width: 0;
     }
     .tabs {
       display: flex;
       gap: 4px;
+      min-width: 0;
     }
     .tab {
       display: flex;
@@ -96,6 +105,7 @@ import { PermissionsService } from '@core/services/permissions.service';
       border-radius: var(--radius);
       cursor: pointer;
       transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
     }
     .tab-active {
       color: var(--primary);
@@ -108,6 +118,22 @@ import { PermissionsService } from '@core/services/permissions.service';
     }
     .btn-add {
       flex-shrink: 0;
+    }
+    @media (max-width: 767px) {
+      .content { padding: 16px 14px 80px; }
+      .header-row { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
+      .tabs-row { margin-bottom: 14px; }
+      .tabs { width: 100%; }
+      .tab { flex: 1; justify-content: center; padding: 9px 10px; font-size: 12px; gap: 4px; }
+      .btn-add { width: 100%; justify-content: center; }
+    }
+    @media (max-width: 480px) {
+      .content { padding: 12px 10px 80px; }
+      .tab-icon { display: none; }
+      .tab { font-size: 11px; padding: 9px 6px; }
+    }
+    @media (max-width: 360px) {
+      .content { padding: 10px 8px 80px; }
     }
   `],
 })
