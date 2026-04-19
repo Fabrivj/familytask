@@ -1,0 +1,344 @@
+<main class="parent-content" aria-label="Panel de padre / tutor">
+
+  @if (successMessage()) {
+    <p class="msg-success" role="status">
+      <mat-icon aria-hidden="true">check_circle</mat-icon>
+      {{ successMessage() }}
+    </p>
+  }
+
+  <!-- ══════════════════════ LOADING ══════════════════════ -->
+  @if (isLoading()) {
+    <div class="state-center" role="status" aria-live="polite" aria-label="Cargando dashboard familiar">
+      <mat-spinner diameter="44" />
+      <span class="state-text">Cargando dashboard...</span>
+    </div>
+  }
+
+  <!-- ══════════════════════ ERROR ══════════════════════ -->
+  @if (error()) {
+    <div class="error-state" role="alert">
+      <mat-icon aria-hidden="true" class="error-icon">error_outline</mat-icon>
+      <p class="error-msg">{{ error() }}</p>
+      <button class="btn-retry" type="button" (click)="loadData()"
+              aria-label="Reintentar cargar el dashboard">
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+        REINTENTAR
+      </button>
+    </div>
+  }
+
+  <!-- ══════════════════════ CONTENT ══════════════════════ -->
+  @if (!isLoading() && !error()) {
+
+    <!-- ── HEADER ── -->
+    <header class="parent-header" aria-labelledby="parent-banner-title">
+      <p class="banner-tag" aria-hidden="true">// PANEL DE PADRE</p>
+      <h1 class="banner-title" id="parent-banner-title">
+        Hola, {{ userName() }} <span class="wave" aria-hidden="true">👋</span>
+      </h1>
+      <p class="banner-sub">
+        Tienes
+        <strong class="hl-primary">{{ pendingVerificationTasks().length }}
+          {{ pendingVerificationTasks().length === 1 ? 'tarea por aprobar' : 'tareas por aprobar' }}</strong>
+        y
+        <strong class="hl-warning">{{ pendingRedemptionsCount() }}
+          {{ pendingRedemptionsCount() === 1 ? 'recompensa pendiente' : 'recompensas pendientes' }}</strong>
+        de entrega.
+      </p>
+    </header>
+
+    <!-- ── STATS ROW (5 cards) ── -->
+    <section class="stats-row" aria-label="Resumen del grupo">
+      <div class="stat-card">
+        <div class="stat-head">
+          <span class="stat-label">TAREAS ACTIVAS</span>
+          <span class="stat-icon-box stat-icon-tasks" aria-hidden="true">
+            <mat-icon>assignment</mat-icon>
+          </span>
+        </div>
+        <span class="stat-value">{{ activeTasksCount() }}</span>
+        <span class="stat-sub">En la familia</span>
+      </div>
+
+      <div class="stat-card stat-card-coins">
+        <div class="stat-head">
+          <span class="stat-label">MONEDAS EN CIRCULACIÓN</span>
+          <span class="stat-icon-box stat-icon-coins" aria-hidden="true">◈</span>
+        </div>
+        <span class="stat-value">{{ coinsInCirculation() }}</span>
+        <span class="stat-sub">Entre todos los hijos</span>
+      </div>
+
+      <div class="stat-card stat-card-done">
+        <div class="stat-head">
+          <span class="stat-label">TAREAS COMPLETADAS</span>
+          <span class="stat-icon-box stat-icon-done" aria-hidden="true">
+            <mat-icon>verified</mat-icon>
+          </span>
+        </div>
+        <span class="stat-value">{{ completedTasksTotal() }}</span>
+        <span class="stat-sub">Por toda la familia</span>
+      </div>
+
+      <div class="stat-card stat-card-redeem">
+        <div class="stat-head">
+          <span class="stat-label">CANJES PENDIENTES</span>
+          <span class="stat-icon-box stat-icon-redeem" aria-hidden="true">
+            <mat-icon>redeem</mat-icon>
+          </span>
+        </div>
+        <span class="stat-value">{{ pendingRedemptionsCount() }}</span>
+        <span class="stat-sub">Por entregar</span>
+      </div>
+
+      <div class="stat-card stat-card-habits">
+        <div class="stat-head">
+          <span class="stat-label">HÁBITOS ACTIVOS</span>
+          <span class="stat-icon-box stat-icon-habits" aria-hidden="true">
+            <mat-icon>bolt</mat-icon>
+          </span>
+        </div>
+        <span class="stat-value">{{ activeHabitsCount() }}</span>
+        <span class="stat-sub">Recurrentes</span>
+      </div>
+    </section>
+
+    <!-- ── MAIN LAYOUT ── -->
+    <div class="main-layout">
+
+      <!-- ════════════ COLUMNA PRINCIPAL ════════════ -->
+      <div class="col-main">
+
+        <!-- ── TAREAS POR VERIFICAR ── -->
+        <section class="panel-section" aria-labelledby="verify-heading">
+          <div class="section-header">
+            <h2 class="section-title" id="verify-heading">
+              <mat-icon aria-hidden="true" class="section-icon section-icon-primary">check</mat-icon>
+              TAREAS COMPLETADAS POR VERIFICAR
+              @if (pendingVerificationTasks().length > 0) {
+                <span class="section-badge"
+                      aria-label="{{ pendingVerificationTasks().length }} tareas esperando revisión">
+                  {{ pendingVerificationTasks().length }}
+                </span>
+              }
+            </h2>
+            <a routerLink="/tasks" class="section-link" aria-label="Ir a la lista completa de tareas">
+              VER TODAS
+              <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+            </a>
+          </div>
+
+          @if (pendingVerificationTasks().length === 0) {
+            <div class="empty-state" role="status">
+              <mat-icon aria-hidden="true" class="empty-icon">task_alt</mat-icon>
+              <p class="empty-msg">Ninguna tarea está en revisión ahora mismo.</p>
+            </div>
+          } @else {
+            <ul class="verify-list" role="list" aria-label="Tareas enviadas a revisión">
+              @for (task of pendingVerificationTasks(); track task.id) {
+                <li class="verify-item">
+                  <div class="verify-thumb" aria-hidden="true">
+                    <mat-icon>assignment_turned_in</mat-icon>
+                  </div>
+                  <div class="verify-info">
+                    <span class="verify-title">{{ task.title }}</span>
+                    <span class="verify-meta">
+                      @if (task.assignedToName) {
+                        Completada por <strong>{{ task.assignedToName }}</strong>
+                      } @else {
+                        Sin asignar
+                      }
+                      @if (task.homeSpaceName) {
+                        · Zona: {{ task.homeSpaceName }}
+                      }
+                    </span>
+                  </div>
+                  <div class="verify-rewards" aria-hidden="true">
+                    <span class="reward-pill reward-xp">+{{ task.xpReward }} XP</span>
+                    <span class="reward-pill reward-coins">◈ {{ task.coinsReward }}</span>
+                  </div>
+                  <div class="verify-actions">
+                    <button type="button"
+                            class="btn-action btn-approve"
+                            (click)="approveTask(task.id)"
+                            aria-label="Aprobar tarea {{ task.title }}">
+                      <mat-icon aria-hidden="true">check</mat-icon>
+                    </button>
+                    <button type="button"
+                            class="btn-action btn-reject"
+                            (click)="rejectTask(task.id)"
+                            aria-label="Rechazar tarea {{ task.title }}">
+                      <mat-icon aria-hidden="true">close</mat-icon>
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <!-- ── PROGRESO DE MIEMBROS ── -->
+        <section class="panel-section" aria-labelledby="members-heading">
+          <div class="section-header">
+            <h2 class="section-title" id="members-heading">
+              <mat-icon aria-hidden="true" class="section-icon">groups</mat-icon>
+              PROGRESO DE MIEMBROS
+              @if (children().length > 0) {
+                <span class="section-badge" aria-label="{{ children().length }} hijos en la familia">
+                  {{ children().length }}
+                </span>
+              }
+            </h2>
+            <a routerLink="/family/members" class="section-link" aria-label="Ir a la gestión de miembros">
+              VER PERFIL
+              <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+            </a>
+          </div>
+
+          @if (children().length === 0) {
+            <div class="empty-state" role="status">
+              <mat-icon aria-hidden="true" class="empty-icon">groups</mat-icon>
+              <p class="empty-msg">Aún no hay hijos en la familia.</p>
+            </div>
+          } @else {
+            <div class="members-table" role="table" aria-label="Progreso de cada hijo">
+              <div class="members-head" role="row">
+                <span role="columnheader">MIEMBRO</span>
+                <span role="columnheader">NIVEL</span>
+                <span role="columnheader">XP</span>
+                <span class="col-right" role="columnheader">MONEDAS</span>
+                <span class="col-right" role="columnheader">TAREAS</span>
+              </div>
+
+              @for (m of children(); track m.id) {
+                <div class="member-row" role="row">
+                  <div class="member-cell-user" role="cell">
+                    <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="40" />
+                    <div class="member-ident">
+                      <strong class="member-name">{{ m.name }}</strong>
+                      <span class="member-role">Hijo</span>
+                    </div>
+                  </div>
+
+                  <div role="cell">
+                    <span class="level-badge" aria-label="Nivel {{ m.currentLevel ?? 0 }}">
+                      Nivel {{ m.currentLevel ?? 0 }} <span aria-hidden="true">★</span>
+                    </span>
+                  </div>
+
+                  <div class="member-cell-xp" role="cell"
+                       [attr.aria-valuenow]="xpInLevel(m)"
+                       [attr.aria-valuemin]="0"
+                       [attr.aria-valuemax]="xpNeededInLevel(m)"
+                       [attr.aria-label]="'Progreso de XP de ' + m.name">
+                    <div class="xp-bar-track">
+                      <div class="xp-bar-fill" [style.width.%]="xpPercent(m)"></div>
+                    </div>
+                    <span class="xp-bar-label" aria-hidden="true">
+                      {{ xpInLevel(m) }}/{{ xpNeededInLevel(m) }}
+                    </span>
+                  </div>
+
+                  <div class="col-right" role="cell">
+                    <span class="metric-value metric-coins">{{ m.totalCoins ?? 0 }}</span>
+                  </div>
+
+                  <div class="col-right member-cell-tasks" role="cell">
+                    <mat-icon aria-hidden="true" class="tasks-icon">check</mat-icon>
+                    <span class="metric-value metric-done">{{ m.completedTaskCount ?? 0 }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+      </div><!-- /col-main -->
+
+      <!-- ════════════ SIDEBAR ════════════ -->
+      <aside class="col-sidebar" aria-label="Accesos rápidos y canjes">
+
+        <!-- ── ACCIONES RÁPIDAS ── -->
+        <section class="panel-section sidebar-panel" aria-labelledby="quick-heading">
+          <div class="section-header">
+            <h2 class="section-title" id="quick-heading">
+              ACCIONES RÁPIDAS
+            </h2>
+          </div>
+          <nav class="quick-grid" aria-label="Atajos a gestión familiar">
+            <a class="quick-btn" routerLink="/tasks">
+              <mat-icon aria-hidden="true" class="quick-icon quick-icon-task">assignment</mat-icon>
+              <span>CREAR TAREA</span>
+            </a>
+            <a class="quick-btn" routerLink="/tasks">
+              <mat-icon aria-hidden="true" class="quick-icon quick-icon-habit">loop</mat-icon>
+              <span>NUEVO HÁBITO</span>
+            </a>
+            <a class="quick-btn" routerLink="/store">
+              <mat-icon aria-hidden="true" class="quick-icon quick-icon-reward">card_giftcard</mat-icon>
+              <span>AGREGAR RECOMPENSA</span>
+            </a>
+            <a class="quick-btn" routerLink="/invitation/create">
+              <mat-icon aria-hidden="true" class="quick-icon quick-icon-member">person_add</mat-icon>
+              <span>INVITAR MIEMBRO</span>
+            </a>
+          </nav>
+        </section>
+
+        <!-- ── ESTADO DE CANJES ── -->
+        <section class="panel-section sidebar-panel" aria-labelledby="redemptions-heading">
+          <div class="section-header">
+            <h2 class="section-title" id="redemptions-heading">
+              <span class="section-icon-star" aria-hidden="true">★</span>
+              ESTADO DE CANJES
+              @if (pendingRedemptionsCount() > 0) {
+                <span class="section-badge"
+                      aria-label="{{ pendingRedemptionsCount() }} canjes pendientes de entrega">
+                  {{ pendingRedemptionsCount() }}
+                </span>
+              }
+            </h2>
+            <a routerLink="/store" class="section-link" aria-label="Ir a la tienda y gestionar canjes">
+              VER TODOS
+              <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+            </a>
+          </div>
+
+          @if (recentRedemptions().length === 0) {
+            <div class="empty-state empty-state-compact" role="status">
+              <p class="empty-msg">Aún no hay canjes.</p>
+            </div>
+          } @else {
+            <ul class="redeem-list" role="list" aria-label="Canjes recientes">
+              @for (r of recentRedemptions(); track r.id) {
+                <li class="redeem-item">
+                  <div class="redeem-icon" aria-hidden="true">
+                    {{ r.rewardIcon ?? '🎁' }}
+                  </div>
+                  <div class="redeem-info">
+                    <span class="redeem-title">{{ r.rewardName }}</span>
+                    <span class="redeem-meta">
+                      Canjeado por <strong>{{ r.redeemedByName }}</strong>
+                      <span class="redeem-cost" aria-hidden="true"> · ◈ {{ r.rewardCost }}</span>
+                    </span>
+                  </div>
+                  <span class="status-pill"
+                        [class.status-pending]="r.status === 'PENDING'"
+                        [class.status-delivered]="r.status === 'DELIVERED'"
+                        aria-label="Estado: {{ r.status === 'PENDING' ? 'Pendiente' : 'Entregado' }}">
+                    {{ r.status === 'PENDING' ? 'Pendiente' : 'Entregado' }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+      </aside>
+
+    </div><!-- /main-layout -->
+
+  }
+
+</main>
