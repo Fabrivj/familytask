@@ -155,11 +155,18 @@ export class ParentDashboardComponent implements OnInit {
   }
 
   // ─── Acciones inline de verificación ─────────────────────────────────────
-  /** Aprueba una tarea en revisión: la marca como completada. */
+  /**
+   * Aprueba una tarea en revisión: usa el endpoint /complete que aplica XP,
+   * monedas, nivel y badges al hijo. `updateStatus` no admite
+   * IN_REVIEW → COMPLETED (ver state-machine en TaskService.validateTransition).
+   */
   approveTask(taskId: number): void {
-    this.taskService.updateStatus(taskId, 'COMPLETED').subscribe({
-      next: () => {
-        this.snackBar.open('Tarea aprobada.', 'Cerrar', { duration: 4000 });
+    this.taskService.complete(taskId).subscribe({
+      next: (res) => {
+        const msg = res.leveledUp
+          ? `Tarea aprobada. ${res.assignedToName} subió al nivel ${res.newLevel}.`
+          : 'Tarea aprobada.';
+        this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
         this.loadData();
       },
       error: (err) => {
