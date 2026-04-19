@@ -1,6 +1,6 @@
-# Code Integration — Pull dev & merge into current feature branch
+# Code Integration — Pull dev & rebase current feature branch
 
-You are a **Senior Software Architect** performing a branch integration from `dev` into the current local feature branch, preserving local work and resolving any conflicts with full architectural awareness.
+You are a **Senior Software Architect** performing a branch integration by rebasing the current local feature branch on top of `origin/dev`, preserving local work and resolving any conflicts with full architectural awareness.
 
 ## Context
 
@@ -47,17 +47,19 @@ Review the diff summary. Pay attention to:
 
 **Report the list of incoming commits to the user before proceeding.**
 
-### Step 3. Merge dev into current branch
+### Step 3. Rebase feature branch onto dev
 
 ```bash
-git merge origin/dev --no-ff -m "chore: integrate dev into $(git branch --show-current)"
+git rebase origin/dev
 ```
 
-Prefer merge over rebase to preserve branch history. Use `--no-ff` to keep a clear integration commit.
+This replays the feature branch commits on top of the latest `dev`, producing a linear history.
+
+> If the feature branch is more than 15 commits behind `dev`, flag this to the user before starting the rebase — a long rebase with many conflicts can be risky.
 
 ### Step 4. Resolve conflicts (if any)
 
-If `git merge` reports conflicts:
+If `git rebase` pauses on a conflict:
 
 1. List all conflicted files:
 
@@ -76,13 +78,19 @@ If `git merge` reports conflicts:
    git add <file>
    ```
 
-4. Complete the merge:
+4. Continue the rebase to the next commit:
 
    ```bash
-   git merge --continue
+   git rebase --continue
    ```
 
-   You may also use `git mergetool` for complex three-way conflicts.
+   Repeat steps 1–4 for each commit that has conflicts.
+
+   If a conflict is unresolvable, abort and report:
+
+   ```bash
+   git rebase --abort
+   ```
 
 ### Step 5. Restore stash (if stashed in Step 1)
 
@@ -146,8 +154,8 @@ git diff origin/$(git branch --show-current) --stat 2>/dev/null || echo "Branch 
 ```
 
 Confirm:
-- All local commits are intact
-- No untracked conflict artifacts (`*.orig` files, merge markers)
+- All local commits are intact and replayed cleanly
+- No untracked conflict artifacts (`*.orig` files, rebase markers)
 - Build passes
 
 ---
@@ -172,7 +180,7 @@ For each conflict resolved:
 
 ### Blockers
 
-List anything that prevents a clean integration with recommended next steps.
+List anything that prevents a clean rebase with recommended next steps.
 
 ### Status
 
@@ -182,12 +190,13 @@ List anything that prevents a clean integration with recommended next steps.
 
 ## Constraints
 
-- Never force-push after integration.
+- Never force-push to `main` or `dev` after rebase.
+- Force-pushing the **feature branch** to origin after a rebase is expected and required — confirm with the user before running `git push --force-with-lease`.
 - Never use `git reset --hard` to resolve conflicts — always resolve file by file.
 - Never commit `.env` files even if they appear in the conflict list.
 - Do not skip the build steps — they are the integration gate.
 - If CI on `dev` is currently failing, do not integrate — flag it to the user first.
-- If the feature branch is more than 15 commits behind `dev`, flag this to the user before merging.
+- If the feature branch is more than 15 commits behind `dev`, flag this to the user before rebasing.
 
 ## Checklist before closing
 
@@ -196,5 +205,5 @@ List anything that prevents a clean integration with recommended next steps.
 - [ ] Backend compiles without errors
 - [ ] No `<<<<<<`, `======`, `>>>>>>` markers left in any file
 - [ ] No stash entries left dangling (`git stash list`)
-- [ ] No TODO/FIXME markers introduced by the merge
-- [ ] Integration commit message is descriptive
+- [ ] No TODO/FIXME markers introduced by the rebase
+- [ ] User has been informed that a force-push will be needed to update the remote feature branch

@@ -452,16 +452,74 @@
 .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
 
 @media (max-width: 767px) {
-  .content { padding: 20px 16px 80px; }
+  .content { padding: 16px 14px 80px; }
   .header-row { flex-direction: column; gap: 12px; margin-bottom: 20px; }
   .btn-new-reward { width: 100%; justify-content: center; }
-  .rewards-grid { grid-template-columns: 1fr; }
-  .tabs-bar { flex-wrap: wrap; }
-  .tab-btn { flex: 1; justify-content: center; }
+  .rewards-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tabs-bar { gap: 4px; }
+  .tab-btn { flex: 1; justify-content: center; font-size: 12px; padding: 7px 10px; gap: 4px; }
   .history-panel { min-height: clamp(26rem, calc(100vh - 20rem), 38rem); }
   .history-filters-toggle { display: flex; }
   .history-filters-shell--collapsed {
     grid-template-rows: 0fr;
     opacity: 0;
   }
+
+  /* ── Tooltip: inline on mobile so it never overlaps adjacent cards ── */
+  .claim-tooltip {
+    position: static;
+    transform: none !important;
+    width: 100%;
+    max-width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 12px;
+    margin-top: 0;
+    opacity: 0;
+    transition: max-height 0.2s ease, padding 0.2s ease, opacity 0.15s ease, margin-top 0.2s ease;
+    border-radius: 8px;
+    font-size: 11px;
+    box-shadow: none;
+    pointer-events: none;
+    z-index: auto;
+  }
+
+  .claim-tooltip__arrow { display: none; }
+
+  .claim-wrapper--locked:focus-within .claim-tooltip {
+    max-height: 80px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none !important;
+  }
+
+  /* Remove hover trigger on touch — only focus-within matters */
+  .claim-wrapper--locked:hover .claim-tooltip {
+    max-height: 0;
+    padding: 0 12px;
+    margin-top: 0;
+    opacity: 0;
+  }
+  .claim-wrapper--locked:focus-within:hover .claim-tooltip {
+    max-height: 80px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .content { padding: 12px 10px 80px; }
+  .rewards-grid { grid-template-columns: 1fr; }
+  .tab-btn mat-icon { display: none; }
+  .tab-btn { font-size: 11px; padding: 7px 8px; }
+  .card-hero { font-size: 40px; }
+  .reward-card { padding: 18px 14px 14px; }
+}
+
+@media (max-width: 360px) {
+  .content { padding: 10px 8px 80px; }
+  .tab-btn { font-size: 10px; letter-spacing: 0; }
 }

@@ -4,6 +4,9 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .header-row {
@@ -21,7 +24,7 @@
 
 /* ── Child balance bar ───────────────────────────────────────────────── */
 .child-balance-bar {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0;
   padding: 8px 20px;
@@ -29,6 +32,9 @@
   border-radius: 50px;
   background: rgba(var(--border-rgb), 0.06);
   border: 1.5px solid rgba(var(--border-rgb), 0.15);
+  align-self: flex-start;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .balance-item {
@@ -150,4 +156,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
+  min-width: 0;
 }
+

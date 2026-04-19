@@ -457,4 +457,11 @@
     border-left: none;
   }
   .panel-body { padding: 20px 16px; }
+  .field-row { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .panel-body { padding: 16px 12px; gap: 16px; }
+  .field-row { grid-template-columns: 1fr; }
+  .filter-chip { padding: 5px 9px; font-size: 10px; }
 }

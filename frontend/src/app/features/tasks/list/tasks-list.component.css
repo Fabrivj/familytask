@@ -2,6 +2,12 @@
    TASKS LIST — Task-specific styles (shared rules in ../shared/list-shared.css)
    ═══════════════════════════════════════════════════════════════════════════ */
 
+:host {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
 .filter-chip-member { gap: 5px; }
 
 /* ── Space dropdown ───────────────────────────────────────────────────── */
