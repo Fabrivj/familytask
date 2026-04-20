@@ -63,7 +63,7 @@
                   }
                 </div>
                 @if (habit.description) {
-                  <span class="habit-desc">{{ habit.description }}</span>
+                  <span class="habit-desc" [title]="habit.description">{{ habit.description }}</span>
                 }
               </div>
             </td>

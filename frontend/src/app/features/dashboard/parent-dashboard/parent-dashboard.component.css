@@ -386,6 +386,7 @@
 ══════════════════════════════════════ */
 .members-table {
   display: flex; flex-direction: column;
+  overflow-x: auto;
 }
 .members-head,
 .member-row {
