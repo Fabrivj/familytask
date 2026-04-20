@@ -267,19 +267,30 @@
             </h2>
           </div>
           <nav class="quick-grid" aria-label="Atajos a gestión familiar">
-            <a class="quick-btn" routerLink="/tasks">
+            <a class="quick-btn"
+               routerLink="/tasks"
+               [queryParams]="{ tab: 'tasks', create: 1 }"
+               aria-label="Crear una nueva tarea">
               <mat-icon aria-hidden="true" class="quick-icon quick-icon-task">assignment</mat-icon>
               <span>CREAR TAREA</span>
             </a>
-            <a class="quick-btn" routerLink="/tasks">
+            <a class="quick-btn"
+               routerLink="/tasks"
+               [queryParams]="{ tab: 'habits', create: 1 }"
+               aria-label="Crear un nuevo hábito">
               <mat-icon aria-hidden="true" class="quick-icon quick-icon-habit">loop</mat-icon>
               <span>NUEVO HÁBITO</span>
             </a>
-            <a class="quick-btn" routerLink="/store">
+            <a class="quick-btn"
+               routerLink="/store"
+               [queryParams]="{ create: 1 }"
+               aria-label="Agregar una nueva recompensa a la tienda">
               <mat-icon aria-hidden="true" class="quick-icon quick-icon-reward">card_giftcard</mat-icon>
               <span>AGREGAR RECOMPENSA</span>
             </a>
-            <a class="quick-btn" routerLink="/invitation/create">
+            <a class="quick-btn"
+               routerLink="/invitation/create"
+               aria-label="Invitar a un nuevo miembro a la familia">
               <mat-icon aria-hidden="true" class="quick-icon quick-icon-member">person_add</mat-icon>
               <span>INVITAR MIEMBRO</span>
             </a>
