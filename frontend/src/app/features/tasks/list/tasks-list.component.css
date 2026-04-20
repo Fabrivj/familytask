@@ -149,6 +149,10 @@
   font-size: 13px;
   color: var(--text-sub);
   opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
 }
 
 .priority-text {

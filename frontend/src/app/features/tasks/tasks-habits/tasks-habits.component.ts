@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
 import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
@@ -139,6 +141,7 @@ import { PermissionsService } from '@core/services/permissions.service';
 })
 export class TasksHabitsComponent {
   private readonly permissionsService = inject(PermissionsService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly activeTab        = signal<'tasks' | 'habits'>('tasks');
   readonly isParent         = this.permissionsService.isParent;
@@ -154,6 +157,25 @@ export class TasksHabitsComponent {
     const n = this.habitCount();
     return `${n} hábito${n !== 1 ? 's' : ''} activo${n !== 1 ? 's' : ''}`;
   });
+
+  constructor() {
+    // Soporte para deep-links desde el dashboard:
+    //   /tasks?tab=habits       → preselecciona la pestaña de hábitos
+    //   /tasks?tab=tasks&create=1 → abre directamente el panel "Nueva tarea"
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed())
+      .subscribe(params => {
+        const tab = params.get('tab');
+        if (tab === 'habits' || tab === 'tasks') {
+          this.activeTab.set(tab);
+        }
+        if (params.get('create') === '1' && this.isParent()) {
+          // Espera al próximo tick para que `activeTab` ya haya propagado
+          // y el panel correcto reaccione al trigger.
+          queueMicrotask(() => this.openAddPanel());
+        }
+      });
+  }
 
   switchTab(tab: 'tasks' | 'habits'): void {
     this.activeTab.set(tab);

@@ -9,6 +9,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -51,6 +53,7 @@ export class StoreComponent {
   private readonly membersService = inject(MembersService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly permissionsService = inject(PermissionsService);
+  private readonly route = inject(ActivatedRoute);
 
   @ViewChild('newRewardBtn') newRewardBtn!: ElementRef<HTMLButtonElement>;
 
@@ -116,6 +119,15 @@ export class StoreComponent {
       const id = this.familyId();
       if (id) this.loadData(id);
     });
+
+    // Deep-link desde el dashboard: /store?create=1 abre el panel de nueva recompensa.
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed())
+      .subscribe(params => {
+        if (params.get('create') === '1' && this.isParent()) {
+          queueMicrotask(() => this.openCreatePanel());
+        }
+      });
   }
 
   /** Pre-computed per-reward derived values — evaluated once per data change, not per CD tick. */
