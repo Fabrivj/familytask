@@ -125,7 +125,7 @@
                   <div class="task-info">
                     <span class="task-name">{{ task.title }}</span>
                     @if (task.description) {
-                      <span class="task-desc">{{ task.description }}</span>
+                      <span class="task-desc" [title]="task.description">{{ task.description }}</span>
                     }
                   </div>
                 </td>

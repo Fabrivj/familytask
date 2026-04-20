@@ -108,8 +108,7 @@ export class CallbackComponent implements OnInit {
     const newFamily = families.find(f => !oldFamilyIds.has(f.familyId)) ?? families[0];
     if (newFamily) {
       this.authService.setActiveFamily(newFamily.familyId);
-      const dest = newFamily.role === 'PARENT' ? '/family/members' : '/dashboard';
-      this.router.navigate([dest]);
+      this.router.navigate(['/dashboard']);
     } else {
       this.router.navigate(['/family/select']);
     }
