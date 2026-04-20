@@ -40,23 +40,6 @@
 
 @if (activeTab() === 'rewards') {
 
-@if (!isParent() && myStats()) {
-  <div class="child-balance-bar" role="status" aria-live="polite" aria-label="Tu saldo actual">
-    <div class="balance-item">
-      <mat-icon class="balance-icon coins-icon" aria-hidden="true">monetization_on</mat-icon>
-      <span class="sr-only">Monedas disponibles:</span>
-      <span class="balance-value">{{ myStats()!.totalCoins ?? 0 }}</span>
-      <span class="balance-label">monedas</span>
-    </div>
-    <div class="balance-divider" aria-hidden="true"></div>
-    <div class="balance-item">
-      <mat-icon class="balance-icon level-icon" aria-hidden="true">military_tech</mat-icon>
-      <span class="sr-only">Nivel actual:</span>
-      <span class="balance-value">{{ myStats()!.currentLevel ?? 1 }}</span>
-      <span class="balance-label">nivel</span>
-    </div>
-  </div>
-}
 
 @if (isLoading()) {
   <div class="state-center" role="status" aria-label="Cargando recompensas">
