@@ -107,6 +107,12 @@ export const routes: Routes = [
       import('./features/badges/badges.component').then(m => m.BadgesComponent),
   },
   {
+    path: 'ai/suggestions',
+    canActivate: [authGuard, parentGuard],
+    loadComponent: () =>
+      import('./features/suggestions/suggestions.component').then(m => m.SuggestionsComponent),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

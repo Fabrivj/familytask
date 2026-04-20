@@ -41,6 +41,15 @@ import { PermissionsService } from '@core/services/permissions.service';
             Miembros
           </button>
         }
+        @if (isParent()) {
+          <button class="sheet-item" type="button"
+            [class.active]="isActive('/ai')"
+            (click)="navigateFrom('/ai/suggestions')"
+            aria-label="Sugerencias IA">
+            <mat-icon aria-hidden="true">auto_awesome</mat-icon>
+            Sugerencias IA
+          </button>
+        }
         @if (hasMultipleFamilies()) {
           <button class="sheet-item" type="button"
             [class.active]="isActive('/family/select')"

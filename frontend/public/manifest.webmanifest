@@ -5,8 +5,10 @@
   "theme_color": "#6c63ff",
   "background_color": "#0d0d1a",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "scope": "/",
   "start_url": "/dashboard",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icons/icon-72x72.png",
