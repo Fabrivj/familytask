@@ -30,8 +30,8 @@
 
     @if (isParent()) {
       <li>
-        <button class="nav-item" type="button" (click)="navigate(null)"
-          [class.active]="isActive('/reports')" aria-label="Reportes (próximamente)" aria-disabled="true" tabindex="-1">
+        <button class="nav-item" type="button" (click)="navigate('/reports')"
+          [class.active]="isActive('/reports')" aria-label="Reportes">
           <mat-icon aria-hidden="true">bar_chart</mat-icon>
           <span class="label">REPORTES</span>
         </button>

@@ -1,0 +1,268 @@
+<app-shell>
+  <main class="content">
+
+    <app-page-header
+      title="Reporte Semanal"
+      subtitle="Avances y cumplimiento de tareas y hábitos de la familia."
+    />
+
+    <!-- ── Filtros ──────────────────────────────────────────────────────── -->
+    <section class="filters-bar" aria-label="Filtros del reporte">
+
+      <!-- Navegación semana -->
+      <div class="week-nav">
+        <button class="week-btn" type="button" aria-label="Semana anterior" (click)="prevWeek()">
+          <mat-icon aria-hidden="true">chevron_left</mat-icon>
+        </button>
+        <span class="week-label">{{ weekLabel() }}</span>
+        <button class="week-btn" type="button" aria-label="Semana siguiente" (click)="nextWeek()">
+          <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <!-- Miembro -->
+      <div class="filter-group" role="group" aria-label="Filtrar por miembro">
+        <span class="filter-label" aria-hidden="true">MIEMBRO</span>
+        <div class="filter-chips">
+          <button
+            class="filter-chip"
+            [class.filter-active]="selectedMemberId() === null"
+            [attr.aria-pressed]="selectedMemberId() === null"
+            type="button"
+            (click)="selectMember(null)"
+          >Todos</button>
+          @for (m of members(); track m.id) {
+            <button
+              class="filter-chip"
+              [class.filter-active]="selectedMemberId() === m.id"
+              [attr.aria-pressed]="selectedMemberId() === m.id"
+              type="button"
+              (click)="selectMember(m.id)"
+            >
+              <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="18" />
+              {{ memberShortName(m.name) }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Categoría (espacio) -->
+      @if (spaces().length > 0) {
+        <div class="filter-group" role="group" aria-label="Filtrar por categoría">
+          <span class="filter-label" aria-hidden="true">CATEGORÍA</span>
+          <div class="filter-chips">
+            <button
+              class="filter-chip"
+              [class.filter-active]="selectedSpaceId() === null"
+              [attr.aria-pressed]="selectedSpaceId() === null"
+              type="button"
+              (click)="selectSpace(null)"
+            >Todas</button>
+            @for (s of spaces(); track s.id) {
+              <button
+                class="filter-chip"
+                [class.filter-active]="selectedSpaceId() === s.id"
+                [attr.aria-pressed]="selectedSpaceId() === s.id"
+                type="button"
+                (click)="selectSpace(s.id)"
+              >{{ s.name }}</button>
+            }
+          </div>
+        </div>
+      }
+
+    </section>
+
+    <!-- ── Estados ─────────────────────────────────────────────────────── -->
+    @if (isLoading()) {
+      <div class="state-center" role="status" aria-live="polite" aria-label="Cargando reporte">
+        <mat-spinner diameter="36" />
+      </div>
+    } @else if (error()) {
+      <div class="state-center" role="alert">
+        <mat-icon class="state-icon error-icon" aria-hidden="true">error_outline</mat-icon>
+        <p class="state-text">{{ error() }}</p>
+        <button class="btn-retry" type="button" (click)="loadReport()">Reintentar</button>
+      </div>
+    } @else if (isEmpty()) {
+      <div class="state-center" role="status">
+        <mat-icon class="state-icon" aria-hidden="true">bar_chart</mat-icon>
+        <p class="state-text">No hay datos para la semana seleccionada.</p>
+      </div>
+    } @else if (report(); as r) {
+
+      <!-- ── KPIs ──────────────────────────────────────────────────────── -->
+      <section class="kpi-grid" aria-label="Resumen de la semana">
+
+        <div class="kpi-card kpi-primary" aria-label="Cumplimiento de tareas: {{ r.taskCompletionRate }}%">
+          <span class="kpi-value" aria-hidden="true">{{ r.taskCompletionRate }}%</span>
+          <span class="kpi-label" aria-hidden="true">CUMPLIMIENTO TAREAS</span>
+          <div
+            class="kpi-bar-track"
+            role="progressbar"
+            [attr.aria-valuenow]="r.taskCompletionRate"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-label]="r.taskCompletionRate + '% cumplimiento de tareas'"
+          >
+            <div class="kpi-bar-fill" [style.width.%]="r.taskCompletionRate" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-value">{{ r.tasksCompleted }}</span>
+          <span class="kpi-label">TAREAS COMPLETADAS</span>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-value">{{ r.tasksPending + r.tasksInProgress + r.tasksInReview }}</span>
+          <span class="kpi-label">TAREAS PENDIENTES</span>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-value">{{ r.habitsCompleted }}</span>
+          <span class="kpi-label">HÁBITOS COMPLETADOS</span>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-value">{{ r.habitsActive }}</span>
+          <span class="kpi-label">HÁBITOS ACTIVOS</span>
+        </div>
+
+      </section>
+
+      <!-- ── Tendencia diaria ──────────────────────────────────────────── -->
+      <section class="section" aria-label="Actividad diaria">
+        <h2 class="section-title">ACTIVIDAD DIARIA</h2>
+        <div class="trend-chart" role="img" aria-label="Gráfica de actividad por día">
+          @for (day of r.dailyTrend; track day.date) {
+            <div class="trend-col">
+              <div class="trend-bars">
+                <div
+                  class="trend-bar trend-bar-tasks"
+                  [style.height.%]="barWidth(day.tasksCompleted, maxDailyValue())"
+                  [attr.aria-label]="day.tasksCompleted + ' tareas'"
+                  role="presentation"
+                ></div>
+                <div
+                  class="trend-bar trend-bar-habits"
+                  [style.height.%]="barWidth(day.habitsCompleted, maxDailyValue())"
+                  [attr.aria-label]="day.habitsCompleted + ' hábitos'"
+                  role="presentation"
+                ></div>
+              </div>
+              <span class="trend-day">{{ dayLabel(day.date) }}</span>
+              <span class="trend-total">{{ day.tasksCompleted + day.habitsCompleted }}</span>
+            </div>
+          }
+        </div>
+        <div class="trend-legend">
+          <span class="legend-dot legend-tasks"></span><span class="legend-label">Tareas</span>
+          <span class="legend-dot legend-habits"></span><span class="legend-label">Hábitos</span>
+        </div>
+      </section>
+
+      <!-- ── Estado de tareas ──────────────────────────────────────────── -->
+      <section class="section" aria-label="Estado de tareas">
+        <h2 class="section-title">ESTADO DE TAREAS</h2>
+        <div class="status-list">
+          <div class="status-row">
+            <span class="status-dot status-completed" aria-hidden="true"></span>
+            <span class="status-name">Completadas</span>
+            <div
+              class="status-bar-track"
+              role="progressbar"
+              [attr.aria-valuenow]="barWidth(r.tasksCompleted, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="r.tasksCompleted + ' tareas completadas'"
+            >
+              <div class="status-bar-fill status-fill-completed"
+                   [style.width.%]="barWidth(r.tasksCompleted, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+                   aria-hidden="true">
+              </div>
+            </div>
+            <span class="status-count" aria-hidden="true">{{ r.tasksCompleted }}</span>
+          </div>
+          <div class="status-row">
+            <span class="status-dot status-in-review" aria-hidden="true"></span>
+            <span class="status-name">En revisión</span>
+            <div
+              class="status-bar-track"
+              role="progressbar"
+              [attr.aria-valuenow]="barWidth(r.tasksInReview, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="r.tasksInReview + ' tareas en revisión'"
+            >
+              <div class="status-bar-fill status-fill-review"
+                   [style.width.%]="barWidth(r.tasksInReview, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+                   aria-hidden="true">
+              </div>
+            </div>
+            <span class="status-count" aria-hidden="true">{{ r.tasksInReview }}</span>
+          </div>
+          <div class="status-row">
+            <span class="status-dot status-in-progress" aria-hidden="true"></span>
+            <span class="status-name">En progreso</span>
+            <div
+              class="status-bar-track"
+              role="progressbar"
+              [attr.aria-valuenow]="barWidth(r.tasksInProgress, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="r.tasksInProgress + ' tareas en progreso'"
+            >
+              <div class="status-bar-fill status-fill-progress"
+                   [style.width.%]="barWidth(r.tasksInProgress, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+                   aria-hidden="true">
+              </div>
+            </div>
+            <span class="status-count" aria-hidden="true">{{ r.tasksInProgress }}</span>
+          </div>
+          <div class="status-row">
+            <span class="status-dot status-pending" aria-hidden="true"></span>
+            <span class="status-name">Pendientes</span>
+            <div
+              class="status-bar-track"
+              role="progressbar"
+              [attr.aria-valuenow]="barWidth(r.tasksPending, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="r.tasksPending + ' tareas pendientes'"
+            >
+              <div class="status-bar-fill status-fill-pending"
+                   [style.width.%]="barWidth(r.tasksPending, r.tasksCompleted + r.tasksPending + r.tasksInProgress + r.tasksInReview)"
+                   aria-hidden="true">
+              </div>
+            </div>
+            <span class="status-count" aria-hidden="true">{{ r.tasksPending }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Por miembro ───────────────────────────────────────────────── -->
+      @if (r.members.length > 0) {
+        <section class="section" aria-label="Resumen por miembro">
+          <h2 class="section-title">POR MIEMBRO</h2>
+          <div class="member-grid">
+            @for (m of r.members; track m.memberId; let i = $index) {
+              <div class="member-stat-card">
+                <app-user-avatar [name]="m.memberName" [pictureUrl]="m.pictureUrl ?? ''" [size]="36" />
+                <div class="member-stat-info">
+                  <span class="member-stat-name">{{ memberShortName(m.memberName) }}</span>
+                  <div class="member-stat-counts">
+                    <span class="stat-chip stat-chip-tasks">{{ m.tasksCompleted }} tareas</span>
+                    <span class="stat-chip stat-chip-habits">{{ m.habitsCompleted }} hábitos</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+    }
+
+  </main>
+</app-shell>
