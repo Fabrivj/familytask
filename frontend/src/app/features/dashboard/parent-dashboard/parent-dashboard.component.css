@@ -344,6 +344,16 @@
 .reward-coins {
   background: rgba(var(--warning-rgb), 0.08); color: var(--warning);
   border: 1px solid rgba(var(--warning-rgb), 0.22);
+  display: inline-flex; align-items: center; gap: 2px;
+}
+
+.pill-coin-icon {
+  font-size: 11px; width: 11px; height: 11px; line-height: 11px;
+}
+
+.inline-coin-icon {
+  font-size: 13px; width: 13px; height: 13px; line-height: 13px;
+  vertical-align: middle;
 }
 
 .verify-actions {
@@ -583,7 +593,10 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .redeem-meta strong { color: var(--text); font-weight: 600; }
-.redeem-cost { color: var(--warning); }
+.redeem-cost {
+  display: inline-flex; align-items: center; gap: 2px;
+  color: var(--warning);
+}
 
 .status-pill {
   display: inline-flex; align-items: center; flex-shrink: 0;
