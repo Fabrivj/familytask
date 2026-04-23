@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { MemberItem } from '@core/models/member.model';
 
 /**
@@ -11,6 +12,7 @@ import { MemberItem } from '@core/models/member.model';
 @Component({
   selector: 'app-child-stats',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatIconModule],
   template: `
     <div class="stats-card">
       <div class="level-badge">
@@ -30,7 +32,7 @@ import { MemberItem } from '@core/models/member.model';
       </div>
 
       <div class="coins-section">
-        <span class="coins-icon">◈</span>
+        <mat-icon class="coins-icon" aria-hidden="true">monetization_on</mat-icon>
         <span class="coins-value">{{ member().totalCoins ?? 0 }}</span>
         <span class="coins-label">monedas</span>
       </div>
@@ -130,9 +132,10 @@ import { MemberItem } from '@core/models/member.model';
     }
 
     .coins-icon {
-      font-size: 16px;
-      color: var(--primary);
-      line-height: 1;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: var(--warning);
     }
 
     .coins-value {

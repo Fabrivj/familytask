@@ -12,6 +12,9 @@
         [userRole]="userRole()"
         [showLogout]="true"
         [logoutLoading]="logoutLoading()"
+        [childLevel]="childStats()?.currentLevel ?? null"
+        [childCoins]="childStats()?.totalCoins ?? null"
+        [childXpPercent]="childXpPercent()"
         (logout)="onLogout()"
       />
 

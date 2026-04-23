@@ -348,8 +348,8 @@ export class ChildDashboardComponent implements OnInit {
     const level = this.myStats()?.currentLevel ?? 1;
     const noCoins = coins < reward.cost;
     const noLevel = !!reward.minLevel && level < reward.minLevel;
-    if (noCoins && noLevel) return `◈ ${reward.cost} · Nivel ${reward.minLevel}`;
-    if (noCoins) return `Necesitas ◈ ${reward.cost}`;
+    if (noCoins && noLevel) return `🪙 ${reward.cost} · Nivel ${reward.minLevel}`;
+    if (noCoins) return `Necesitas 🪙 ${reward.cost}`;
     if (noLevel) return `Requiere Nivel ${reward.minLevel}`;
     return null;
   }

@@ -37,7 +37,12 @@
 
             <div class="rank-info">
               <span class="rank-name">{{ member.name }}</span>
-              <span class="rank-meta">{{ member.totalXp ?? 0 }} XP · {{ member.totalCoins ?? 0 }} monedas</span>
+              <span class="rank-meta">
+                <span class="rank-meta-xp">{{ member.totalXp ?? 0 }} XP</span>
+                <span class="rank-meta-sep"> · </span>
+                <mat-icon class="rank-meta-coin-icon" aria-hidden="true">monetization_on</mat-icon>
+                <span class="rank-meta-coins">{{ member.totalCoins ?? 0 }}</span>
+              </span>
             </div>
 
             <div class="rank-xp" [attr.aria-label]="'Nivel ' + (member.currentLevel ?? 1)">

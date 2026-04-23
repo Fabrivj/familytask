@@ -26,4 +26,6 @@ public class UpdateRewardRequest {
 
     @Min(value = 1, message = "El nivel mínimo debe ser mayor a 0.")
     private Integer minLevel;         // null = no minimum (clear in DB)
+
+    private Boolean isEnabled;        // null = no change
 }

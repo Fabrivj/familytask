@@ -83,8 +83,32 @@
 .rank-meta {
   font-family: 'Share Tech Mono', monospace;
   font-size: 12px;
-  color: var(--text-sub);
   letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.rank-meta-xp {
+  color: var(--primary);
+}
+
+.rank-meta-sep {
+  color: var(--text-sub);
+}
+
+.rank-meta-coin-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  color: var(--warning);
+  vertical-align: middle;
+}
+
+.rank-meta-coins {
+  color: var(--warning);
+  margin-left: 2px;
 }
 
 /* ── XP badge ── */

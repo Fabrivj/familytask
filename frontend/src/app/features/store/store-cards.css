@@ -4,72 +4,153 @@
   position: relative;
   border: 1.5px solid transparent;
   border-radius: 20px;
-  padding: 24px 20px 18px;
+  padding: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  text-align: center;
   background:
     linear-gradient(var(--bg), var(--bg)) padding-box,
-    linear-gradient(120deg, rgba(255,46,190,0.35) 0%, rgba(155,64,255,0.35) 50%, rgba(0,207,255,0.35) 100%) border-box;
-  transition: background 0.2s, transform 0.18s, box-shadow 0.18s;
+    linear-gradient(160deg, rgba(255,46,190,0.5) 0%, rgba(155,64,255,0.4) 50%, rgba(0,207,255,0.5) 100%) border-box;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
 
 .reward-card:hover {
-  background:
-    linear-gradient(var(--bg), var(--bg)) padding-box,
-    linear-gradient(120deg, #FF2EBE 0%, #9B40FF 50%, #00CFFF 100%) border-box;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(255,46,190,0.2), 0 0 20px rgba(0,207,255,0.1);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(255,46,190,0.18);
 }
 
-/* ── Premium card variant ────────────────────────────────────────────── */
+/* ── Premium variant ─────────────────────────────────────────────────── */
 .reward-card--premium {
   background:
-    linear-gradient(160deg, rgba(255,200,30,0.06) 0%, rgba(255,140,0,0.04) 100%) padding-box,
-    linear-gradient(120deg, #FFC300 0%, #FF8C00 50%, #FFE066 100%) border-box;
-  box-shadow: 0 0 18px rgba(255,195,0,0.2);
+    linear-gradient(var(--bg), var(--bg)) padding-box,
+    linear-gradient(160deg, #FFC300 0%, #FF8C00 50%, #FFE066 100%) border-box;
+  box-shadow: 0 0 24px rgba(255,195,0,0.25);
   animation: premium-glow 2.8s ease-in-out infinite;
 }
 
 .reward-card--premium:hover {
-  background:
-    linear-gradient(160deg, rgba(255,200,30,0.10) 0%, rgba(255,140,0,0.06) 100%) padding-box,
-    linear-gradient(120deg, #FFC300 0%, #FF8C00 50%, #FFE066 100%) border-box;
-  box-shadow: 0 0 30px rgba(255,195,0,0.4), 0 8px 32px rgba(255,140,0,0.2);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 40px rgba(255,195,0,0.45);
 }
 
-
 @keyframes premium-glow {
-  0%, 100% { box-shadow: 0 0 14px rgba(255,195,0,0.2); }
-  50%       { box-shadow: 0 0 26px rgba(255,195,0,0.45); }
+  0%, 100% { box-shadow: 0 0 16px rgba(255,195,0,0.22); }
+  50%       { box-shadow: 0 0 34px rgba(255,195,0,0.52); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reward-card--premium { animation: none; }
+  .card-hero-glow        { animation: none; }
 }
 
-/* Hero emoji */
+/* ── Inactive variant (parent view only) ─────────────────────────────── */
+.reward-card--inactive {
+  opacity: 0.55;
+  filter: grayscale(0.3);
+  transition: opacity 0.2s, filter 0.2s, transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.reward-card--inactive:hover {
+  opacity: 0.8;
+  filter: grayscale(0.1);
+}
+
+/* ── Hero zone: banda de color full-bleed ────────────────────────────── */
+.card-hero-zone {
+  position: relative;
+  width: 100%;
+  height: 155px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Soft inner glow behind the emoji */
+.card-hero-glow {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 68%);
+  animation: hero-breathe 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hero-breathe {
+  0%, 100% { transform: scale(1);    opacity: 0.7; }
+  50%       { transform: scale(1.15); opacity: 1; }
+}
+
 .card-hero {
-  font-size: 52px;
+  font-size: 72px;
   line-height: 1;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5));
+  transition: transform 0.3s ease;
+  user-select: none;
 }
 
-/* Text body */
+.reward-card:hover .card-hero {
+  transform: scale(1.12) translateY(-5px);
+}
+
+/* ── Lock overlay on hero (child + blocked) ──────────────────────────── */
+.card-hero-lock {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 0, 25, 0.68);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.card-hero-lock-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-hero-lock-badge mat-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ── Card content zone ───────────────────────────────────────────────── */
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px 20px;
+  text-align: center;
+  flex: 1;
+}
+
+/* ── Text body ───────────────────────────────────────────────────────── */
 .card-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   width: 100%;
 }
 
 .card-name {
   font-family: 'Rajdhani', sans-serif;
-  font-size: var(--text-h3);
+  font-size: 20px;
   font-weight: 700;
-  color: var(--text);
+  color: #fff;
   line-height: 1.2;
   margin: 0;
 }
@@ -82,9 +163,10 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin: 0;
+  line-height: 1.5;
 }
 
-/* Price row */
+/* ── Price row ───────────────────────────────────────────────────────── */
 .card-price-row {
   display: flex;
   align-items: center;
@@ -97,11 +179,12 @@
 .card-cost {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 14px;
+  gap: 6px;
+  padding: 6px 16px;
   border-radius: 50px;
-  background: rgba(255, 195, 0, 0.12);
-  border: 1.5px solid rgba(255, 195, 0, 0.45);
+  background: rgba(255,195,0,0.14);
+  border: 1.5px solid rgba(255,195,0,0.55);
+  box-shadow: 0 0 14px rgba(255,195,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 .badge-icon {
@@ -113,11 +196,10 @@
 }
 
 .cost-icon { color: #FFC300; }
-.level-icon { color: #00EFFF; }
 
 .cost-value {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: #FFC300;
 }
@@ -125,56 +207,50 @@
 .card-level {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 14px;
+  padding: 6px 16px;
   border-radius: 50px;
-  background: rgba(0, 239, 255, 0.08);
-  border: 1.5px solid rgba(0, 239, 255, 0.35);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: #00EFFF;
-  flex-wrap: wrap;
+  background: rgba(0,239,255,0.09);
+  border: 1.5px solid rgba(0,239,255,0.42);
+  box-shadow: 0 0 12px rgba(0,239,255,0.12), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 .level-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #00EFFF;
   white-space: nowrap;
 }
 
-.level-stars {
-  display: inline-flex;
-  align-items: center;
-  gap: 1px;
-}
-
-.star-icon {
-  font-size: 10px !important;
-  width: 10px !important;
-  height: 10px !important;
-  color: #00EFFF;
-}
-
 .reward-card--premium .card-level {
-  background: rgba(255, 195, 0, 0.10);
-  border-color: rgba(255, 195, 0, 0.45);
-  color: #FFC300;
+  background: rgba(255,195,0,0.12);
+  border-color: rgba(255,195,0,0.52);
+  box-shadow: 0 0 12px rgba(255,195,0,0.14);
 }
-
-.reward-card--premium .star-icon {
-  color: #FFC300;
-}
+.reward-card--premium .level-text { color: #FFC300; }
 
 .card-level-all {
-  background: rgba(var(--border-rgb), 0.06);
-  border-color: rgba(var(--border-rgb), 0.15);
+  background: rgba(var(--border-rgb), 0.05);
+  border-color: rgba(var(--border-rgb), 0.14);
+  box-shadow: none;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
   color: var(--text-sub);
 }
 
-/* Child CTA */
+/* ── Claim wrapper ───────────────────────────────────────────────────── */
+.claim-wrapper {
+  width: 100%;
+  margin-top: auto;
+}
+
+/* ── RECLAMAR button ─────────────────────────────────────────────────── */
 .btn-claim {
   position: relative;
   overflow: hidden;
   width: 100%;
-  padding: 13px 0;
+  padding: 14px 0;
   border: none;
   border-radius: 50px;
   display: flex;
@@ -182,187 +258,58 @@
   justify-content: center;
   gap: 8px;
   background: linear-gradient(120deg, #FF2EBE 0%, #9B40FF 50%, #00CFFF 100%);
-  background-size: 200% 100%;
   color: #fff;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: 0 4px 22px rgba(255, 46, 190, 0.45);
+  box-shadow: 0 4px 24px rgba(255,46,190,0.5);
   animation: claim-glow 3s ease-in-out infinite;
   transition: transform 0.15s, box-shadow 0.2s;
-  margin-top: auto;
 }
 
-/* Shimmer sweep */
 .btn-claim::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: -80%;
-  width: 50%;
-  height: 100%;
+  top: 0; left: -80%;
+  width: 50%; height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
   animation: claim-shimmer 2.8s ease-in-out infinite;
   pointer-events: none;
 }
 
-.btn-claim:hover {
-  transform: translateY(-2px) scale(1.02);
-  animation: sonar-pulse 1s ease-out infinite;
-}
-
-.btn-claim:hover mat-icon {
-  animation: rocket-bounce 0.7s ease-in-out infinite;
-}
-
+.btn-claim:hover { transform: translateY(-2px) scale(1.02); animation: sonar-pulse 1s ease-out infinite; }
+.btn-claim:hover mat-icon { animation: rocket-bounce 0.7s ease-in-out infinite; }
 .btn-claim:active { transform: scale(0.97); }
 
 .btn-claim mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  line-height: 18px;
+  font-size: 18px; width: 18px; height: 18px; line-height: 18px;
   transition: transform 0.2s;
 }
 
-@keyframes sonar-pulse {
-  0% {
-    box-shadow: 0 8px 28px rgba(255, 46, 190, 0.55),
-                0 0 18px rgba(0, 207, 255, 0.3),
-                0 0 0 0px rgba(255, 46, 190, 0.55);
-  }
-  70% {
-    box-shadow: 0 8px 28px rgba(255, 46, 190, 0.55),
-                0 0 18px rgba(0, 207, 255, 0.3),
-                0 0 0 18px rgba(255, 46, 190, 0);
-  }
-  100% {
-    box-shadow: 0 8px 28px rgba(255, 46, 190, 0.55),
-                0 0 18px rgba(0, 207, 255, 0.3),
-                0 0 0 0px rgba(255, 46, 190, 0);
-  }
-}
-
-@keyframes rocket-bounce {
-  0%, 100% { transform: translateY(0)    rotate(0deg);   }
-  35%       { transform: translateY(-6px) rotate(-15deg); }
-  65%       { transform: translateY(-3px) rotate(-8deg);  }
-}
-
-/* ── Claim wrapper (handles tooltip show/hide) ───────────────────────── */
-.claim-wrapper {
-  position: relative;
-  display: block;
-  width: 100%;
-  margin-top: auto;
-}
-
-.claim-wrapper .btn-claim {
-  margin-top: 0;
-}
-
-/* ── Accessible tooltip ──────────────────────────────────────────────── */
-.claim-tooltip {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: 240px;
-  padding: 10px 14px;
-  border-radius: 10px;
-
-  /* High-contrast surface — passes WCAG AA (7:1+ against white text) */
-  background: #0f0f1a;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: center;
-
-  /* Hidden by default */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  transform: translateX(-50%) translateY(-4px);
-
-  z-index: 20;
-}
-
-/* Arrow pointing up toward the button */
-.claim-tooltip__arrow {
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 10px;
-  height: 6px;
-  overflow: hidden;
-}
-
-.claim-tooltip__arrow::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
-  width: 8px;
-  height: 8px;
-  background: #0f0f1a;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-/* Show on hover OR keyboard focus — WCAG 2.1 SC 1.4.13 */
-.claim-wrapper--locked:hover .claim-tooltip,
-.claim-wrapper--locked:focus-within .claim-tooltip {
-  opacity: 1;
-  pointer-events: auto;       /* hoverable: user can move cursor onto tooltip */
-  transform: translateX(-50%) translateY(0);
-}
-
-/* Keyboard-focused button highlight (replaces :focus-visible which disabled blocks) */
-.claim-wrapper--locked .btn-claim--locked:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: 3px;
-}
-
-/* Generic disabled state (redeeming in progress) */
 .btn-claim:disabled {
   background: rgba(var(--border-rgb), 0.14);
   color: var(--text-sub);
-  box-shadow: none;
-  animation: none;
-  cursor: not-allowed;
-  opacity: 0.45;
+  box-shadow: none; animation: none; cursor: not-allowed; opacity: 0.45;
 }
-
 .btn-claim:disabled::before { display: none; }
 
-/* Locked state (aria-disabled) — replaces gradient with muted grey */
-.btn-claim--locked {
-  background: rgba(var(--border-rgb), 0.10) !important;
-  color: var(--text-sub) !important;
-  border: 1.5px solid rgba(var(--border-rgb), 0.22) !important;
-  box-shadow: none !important;
-  animation: none !important;
-  cursor: not-allowed;
+@keyframes sonar-pulse {
+  0%   { box-shadow: 0 8px 28px rgba(255,46,190,0.55), 0 0 0 0px rgba(255,46,190,0.55); }
+  70%  { box-shadow: 0 8px 28px rgba(255,46,190,0.55), 0 0 0 18px rgba(255,46,190,0); }
+  100% { box-shadow: 0 8px 28px rgba(255,46,190,0.55), 0 0 0 0px rgba(255,46,190,0); }
 }
-
-.btn-claim--locked::before { display: none !important; }
-.btn-claim--locked mat-icon { animation: none !important; }
-
+@keyframes rocket-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  35%       { transform: translateY(-6px) rotate(-15deg); }
+  65%       { transform: translateY(-3px) rotate(-8deg); }
+}
 @keyframes claim-glow {
-  0%, 100% { box-shadow: 0 4px 22px rgba(255, 46, 190, 0.45); }
-  50%       { box-shadow: 0 4px 32px rgba(0, 207, 255, 0.55), 0 0 18px rgba(155, 64, 255, 0.4); }
+  0%, 100% { box-shadow: 0 4px 24px rgba(255,46,190,0.5); }
+  50%       { box-shadow: 0 4px 34px rgba(0,207,255,0.6), 0 0 20px rgba(155,64,255,0.45); }
 }
-
 @keyframes claim-shimmer {
   0%   { left: -80%; opacity: 0; }
   20%  { opacity: 1; }
@@ -370,87 +317,123 @@
   100% { left: 140%; opacity: 0; }
 }
 
-/* Parent management row */
-.card-bottom {
+/* ── Lock gate ───────────────────────────────────────────────────────── */
+.lock-gate {
+  width: 100%;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 14px 16px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  margin-top: auto;
+  gap: 12px;
+}
+
+.lock-gate-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.lock-gate-icon {
+  font-size: 13px; width: 13px; height: 13px; line-height: 13px;
+  color: var(--text-sub); opacity: 0.5;
+}
+
+.lock-gate-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-sub);
+  opacity: 0.5;
+}
+
+.lock-gate-reqs { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── Unlock rows ─────────────────────────────────────────────────────── */
+.unlock-row { display: flex; align-items: center; gap: 8px; }
+
+.unlock-icon { font-size: 15px; width: 15px; height: 15px; line-height: 15px; flex-shrink: 0; }
+.unlock-icon--coins { color: #FFC300; }
+.unlock-icon--level { color: var(--border); }
+
+.unlock-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  color: var(--text-sub);
+  opacity: 0.7;
+  flex-shrink: 0;
+  width: 48px;
+}
+
+.unlock-fraction {
+  flex: 1;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.4);
+  text-align: right;
+}
+.unlock-fraction b { color: #fff; font-weight: 700; }
+
+/* ── Parent bottom ───────────────────────────────────────────────────── */
+.card-bottom {
+  display: flex; flex-direction: column; gap: 8px;
+  width: 100%; margin-top: auto;
 }
 
 .card-meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
+  display: flex; align-items: center; justify-content: space-between; font-size: 11px;
 }
 
 .card-active-badge {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: var(--success);
+  font-size: 10px; letter-spacing: 0.1em; color: var(--success);
+  transition: color 0.2s;
 }
 
-.card-claims {
-  font-size: 11px;
-  color: var(--text-sub);
+.card-active-badge--inactive {
+  color: rgba(255, 180, 0, 0.75);
 }
+
+.card-claims { font-size: 11px; color: var(--text-sub); }
 
 .card-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
   border-top: 1px solid rgba(var(--border-rgb), 0.12);
   padding-top: 8px;
 }
 
 .btn-icon-danger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
   border: 1px solid rgba(var(--border-rgb), 0.15);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-sub);
-  cursor: pointer;
-  flex-shrink: 0;
+  border-radius: 8px; background: transparent;
+  color: var(--text-sub); cursor: pointer; flex-shrink: 0;
   transition: border-color 0.2s, color 0.2s;
 }
-
-.btn-icon-danger:hover {
-  border-color: rgba(var(--error-rgb), 0.4);
-  color: var(--error);
-}
-
+.btn-icon-danger:hover { border-color: rgba(var(--error-rgb), 0.4); color: var(--error); }
 .btn-icon-danger mat-icon { font-size: 15px; width: 15px; height: 15px; line-height: 15px; }
 
 .btn-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  display: inline-flex; align-items: center; gap: 4px;
   padding: 6px 14px;
   border: 1px solid rgba(var(--border-rgb), 0.18);
-  border-radius: 8px;
-  background: transparent;
+  border-radius: 8px; background: transparent;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-sub);
-  cursor: pointer;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-sub); cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
 }
-
 .btn-action mat-icon { font-size: 13px; width: 13px; height: 13px; line-height: 13px; }
 .btn-action:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
 .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
 
+/* ── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
   .content { padding: 16px 14px 80px; }
   .header-row { flex-direction: column; gap: 12px; margin-bottom: 20px; }
@@ -460,54 +443,14 @@
   .tab-btn { flex: 1; justify-content: center; font-size: 12px; padding: 7px 10px; gap: 4px; }
   .history-panel { min-height: clamp(26rem, calc(100vh - 20rem), 38rem); }
   .history-filters-toggle { display: flex; }
-  .history-filters-shell--collapsed {
-    grid-template-rows: 0fr;
-    opacity: 0;
-  }
+  .history-filters-shell--collapsed { grid-template-rows: 0fr; opacity: 0; }
 
-  /* ── Tooltip: inline on mobile so it never overlaps adjacent cards ── */
-  .claim-tooltip {
-    position: static;
-    transform: none !important;
-    width: 100%;
-    max-width: 100%;
-    max-height: 0;
-    overflow: hidden;
-    padding: 0 12px;
-    margin-top: 0;
-    opacity: 0;
-    transition: max-height 0.2s ease, padding 0.2s ease, opacity 0.15s ease, margin-top 0.2s ease;
-    border-radius: 8px;
-    font-size: 11px;
-    box-shadow: none;
-    pointer-events: none;
-    z-index: auto;
-  }
-
-  .claim-tooltip__arrow { display: none; }
-
-  .claim-wrapper--locked:focus-within .claim-tooltip {
-    max-height: 80px;
-    padding: 8px 12px;
-    margin-top: 8px;
-    opacity: 1;
-    pointer-events: auto;
-    transform: none !important;
-  }
-
-  /* Remove hover trigger on touch — only focus-within matters */
-  .claim-wrapper--locked:hover .claim-tooltip {
-    max-height: 0;
-    padding: 0 12px;
-    margin-top: 0;
-    opacity: 0;
-  }
-  .claim-wrapper--locked:focus-within:hover .claim-tooltip {
-    max-height: 80px;
-    padding: 8px 12px;
-    margin-top: 8px;
-    opacity: 1;
-  }
+  .card-hero-zone { height: 130px; }
+  .card-hero { font-size: 58px; }
+  .card-content { padding: 14px 16px 16px; gap: 12px; }
+  .card-name { font-size: 18px; }
+  .lock-gate { padding: 11px 12px 13px; }
+  .unlock-fraction { font-size: 14px; }
 }
 
 @media (max-width: 480px) {
@@ -515,8 +458,8 @@
   .rewards-grid { grid-template-columns: 1fr; }
   .tab-btn mat-icon { display: none; }
   .tab-btn { font-size: 11px; padding: 7px 8px; }
-  .card-hero { font-size: 40px; }
-  .reward-card { padding: 18px 14px 14px; }
+  .card-hero-zone { height: 140px; }
+  .card-hero { font-size: 66px; }
 }
 
 @media (max-width: 360px) {

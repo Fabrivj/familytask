@@ -41,7 +41,7 @@
             {{ totalPending() === 1 ? 'misión pendiente' : 'misiones pendientes' }}</strong>
             &mdash; completa todas y gana
             <span class="reward-hint">+{{ bonusXp() }} XP</span>
-            <span class="reward-hint coins-hint">◈{{ bonusCoins() }} extra</span>.
+            <span class="reward-hint coins-hint"><mat-icon class="hint-coin-icon" aria-hidden="true">monetization_on</mat-icon>{{ bonusCoins() }} extra</span>.
           </p>
         } @else {
           <p class="challenge-sub">¡Sin misiones pendientes hoy! Sigue así. 🎉</p>
@@ -81,7 +81,7 @@
       </div>
 
       <div class="stat-card stat-card-coins" tabindex="0">
-        <span class="stat-icon stat-coin-sym" aria-hidden="true">◈</span>
+        <mat-icon class="stat-icon stat-coin-sym" aria-hidden="true">monetization_on</mat-icon>
         <div class="stat-body">
           <span class="stat-value">{{ myStats()?.totalCoins ?? 0 }}</span>
           <span class="stat-label">MONEDAS DISPONIBLES</span>
@@ -197,7 +197,7 @@
                     <div class="task-rewards"
                          [attr.aria-label]="'+' + task.xpReward + ' XP y ' + task.coinsReward + ' monedas de recompensa'">
                       <span class="reward-pill reward-xp" aria-hidden="true">+{{ task.xpReward }} XP</span>
-                      <span class="reward-pill reward-coins" aria-hidden="true">◈ {{ task.coinsReward }}</span>
+                      <span class="reward-pill reward-coins" aria-hidden="true"><mat-icon class="pill-coin-icon" aria-hidden="true">monetization_on</mat-icon> {{ task.coinsReward }}</span>
                     </div>
                   </div>
 
@@ -285,7 +285,7 @@
                     <div class="task-rewards"
                          [attr.aria-label]="'+' + habit.xpReward + ' XP y ' + habit.coinsReward + ' monedas de recompensa'">
                       <span class="reward-pill reward-xp" aria-hidden="true">+{{ habit.xpReward }} XP</span>
-                      <span class="reward-pill reward-coins" aria-hidden="true">◈ {{ habit.coinsReward }}</span>
+                      <span class="reward-pill reward-coins" aria-hidden="true"><mat-icon class="pill-coin-icon" aria-hidden="true">monetization_on</mat-icon> {{ habit.coinsReward }}</span>
                     </div>
                   </div>
 
@@ -385,7 +385,7 @@
                     <span class="reward-icon" aria-hidden="true">{{ reward.icon ?? '🎁' }}</span>
                     <div class="reward-info">
                       <span class="reward-name">{{ reward.name }}</span>
-                      <span class="reward-cost" aria-hidden="true">◈ {{ reward.cost }}</span>
+                      <span class="reward-cost" aria-hidden="true"><mat-icon class="inline-coin-icon" aria-hidden="true">monetization_on</mat-icon> {{ reward.cost }}</span>
                     </div>
                     <button
                       class="btn-redeem"
@@ -434,7 +434,7 @@
   [open]="showClaimDialog()"
   title="Canjear recompensa"
   [message]="rewardToClaim()
-    ? '¿Quieres canjear «' + rewardToClaim()!.name + '» por ◈ ' + rewardToClaim()!.cost + ' monedas?'
+    ? '¿Quieres canjear «' + rewardToClaim()!.name + '» por ' + rewardToClaim()!.cost + ' monedas?'
     : ''"
   confirmLabel="CANJEAR"
   cancelLabel="CANCELAR"

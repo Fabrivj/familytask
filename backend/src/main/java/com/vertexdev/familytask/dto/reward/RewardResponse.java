@@ -22,4 +22,5 @@ public class RewardResponse {
     private Long familyId;
     private LocalDateTime createdAt;
     private int pendingCount;
+    private Boolean isEnabled;
 }

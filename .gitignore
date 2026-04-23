@@ -49,4 +49,7 @@ build/
 
 ### Presentation output ###
 presentation/*.pptx
+
+### JMeter results (generados localmente, no versionar) ###
+performance-tests/results/
 SETUP-LOCAL.md

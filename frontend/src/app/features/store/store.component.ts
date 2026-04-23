@@ -66,7 +66,13 @@ export class StoreComponent {
   readonly rewards = signal<RewardResponse[]>([]);
   readonly activeTab = signal<'rewards' | 'history'>('rewards');
   readonly rewardsSubtitle = computed(() => {
-    const n = this.rewards().length;
+    const all = this.rewards();
+    if (this.isParent()) {
+      const active = all.filter(r => r.isEnabled).length;
+      const total = all.length;
+      return `${active} activa${active !== 1 ? 's' : ''} · ${total} total`;
+    }
+    const n = all.length;
     return `${n} recompensa${n !== 1 ? 's' : ''} activa${n !== 1 ? 's' : ''}`;
   });
 
@@ -113,6 +119,7 @@ export class StoreComponent {
   readonly minLevelCtrl = new FormControl<number | null>(null, {
     validators: [Validators.min(1), Validators.pattern(/^\d+$/)],
   });
+  readonly isEnabledCtrl = new FormControl<boolean>(true, { nonNullable: true });
 
   constructor() {
     effect(() => {
@@ -135,19 +142,22 @@ export class StoreComponent {
     const avg = this.avgLevel();
     const coins = this.myStats()?.totalCoins ?? 0;
     const level = this.myStats()?.currentLevel ?? 1;
-    const map = new Map<number, { premium: boolean; stars: number[]; gradient: string; blockReason: string | null }>();
+    const map = new Map<number, { premium: boolean; heroGradient: string; blockReason: string | null; missingCoins: number | null; missingLevels: number | null; coinPercent: number; levelPercent: number }>();
 
     for (const r of this.rewards()) {
       const premium = !!r.minLevel && r.minLevel > avg;
-      const stars: number[] = r.minLevel ? Array.from({ length: Math.min(r.minLevel, 10) }, (_, i) => i) : [];
-      const gradient = this.cardGradient(r.icon);
+      const heroGradient = this.heroGradient(r.icon, premium);
       const noCoins = coins < r.cost;
       const noLevel = !!r.minLevel && level < r.minLevel;
+      const missingCoins = noCoins ? r.cost - coins : null;
+      const missingLevels = noLevel ? r.minLevel! - level : null;
+      const coinPercent = Math.min(100, Math.round((coins / r.cost) * 100));
+      const levelPercent = r.minLevel ? Math.min(100, Math.round((level / r.minLevel) * 100)) : 100;
       let blockReason: string | null = null;
-      if (noCoins && noLevel) blockReason = 'No tienes monedas suficientes y no alcanzas el nivel minimo requerido para esta recompensa.';
-      else if (noCoins) blockReason = 'No tienes monedas suficientes para canjear esta recompensa.';
-      else if (noLevel) blockReason = 'No alcanzas el nivel minimo requerido para esta recompensa.';
-      map.set(r.id, { premium, stars, gradient, blockReason });
+      if (noCoins && noLevel) blockReason = `Te faltan ${missingCoins} monedas y ${missingLevels} nivel${missingLevels === 1 ? '' : 'es'}.`;
+      else if (noCoins) blockReason = `Te faltan ${missingCoins} monedas para esta recompensa.`;
+      else if (noLevel) blockReason = `Te falta${missingLevels === 1 ? '' : 'n'} ${missingLevels} nivel${missingLevels === 1 ? '' : 'es'} para esta recompensa.`;
+      map.set(r.id, { premium, heroGradient, blockReason, missingCoins, missingLevels, coinPercent, levelPercent });
     }
     return map;
   });
@@ -183,6 +193,7 @@ export class StoreComponent {
     this.costCtrl.setValue(reward.cost);
     this.minLevelCtrl.setValue(reward.minLevel ?? null);
     this.selectedIcon.set(reward.icon ?? '\u{1F381}');
+    this.isEnabledCtrl.setValue(reward.isEnabled);
     this.showCreatePanel.set(true);
   }
 
@@ -193,15 +204,16 @@ export class StoreComponent {
     setTimeout(() => this.newRewardBtn?.nativeElement?.focus());
   }
 
-  cardGradient(icon: string | null): string {
+  heroGradient(icon: string | null, premium: boolean): string {
+    if (premium) return 'linear-gradient(160deg, rgba(200,130,0,0.70) 0%, rgba(140,60,0,0.55) 100%)';
     const warm = new Set(['\u{1F355}', '\u{1F366}', '\u{1F382}', '\u{1F354}']);
     const cool = new Set(['\u{1F3AE}', '\u{1F3AC}', '\u{1F3A1}', '\u{26BD}', '\u{1F4DA}', '\u{1F3D6}\u{FE0F}', '\u{1F3CA}']);
     const gold = new Set(['\u{1F3C6}', '\u{1F389}', '\u{1F381}', '\u{2708}\u{FE0F}', '\u{1F4B5}']);
     const i = icon ?? '';
-    if (warm.has(i)) return 'linear-gradient(145deg, rgba(255,100,50,0.10) 0%, rgba(255,180,30,0.07) 100%)';
-    if (cool.has(i)) return 'linear-gradient(145deg, rgba(60,100,255,0.10) 0%, rgba(120,60,255,0.07) 100%)';
-    if (gold.has(i)) return 'linear-gradient(145deg, rgba(255,200,30,0.10) 0%, rgba(255,140,30,0.07) 100%)';
-    return 'linear-gradient(145deg, rgba(var(--primary-rgb),0.09) 0%, rgba(var(--primary-rgb),0.03) 100%)';
+    if (warm.has(i)) return 'linear-gradient(160deg, rgba(210,60,10,0.60) 0%, rgba(160,40,0,0.45) 100%)';
+    if (cool.has(i)) return 'linear-gradient(160deg, rgba(20,60,220,0.60) 0%, rgba(80,10,200,0.45) 100%)';
+    if (gold.has(i)) return 'linear-gradient(160deg, rgba(190,130,0,0.60) 0%, rgba(140,70,0,0.45) 100%)';
+    return 'linear-gradient(160deg, rgba(180,20,150,0.55) 0%, rgba(0,130,200,0.38) 100%)';
   }
 
   selectIcon(icon: string): void {
@@ -284,6 +296,7 @@ export class StoreComponent {
           icon: this.selectedIcon(),
           cost: this.costCtrl.value!,
           minLevel: this.minLevelCtrl.value ?? null,
+          isEnabled: this.isEnabledCtrl.value,
         })
       : this.rewardService.create({
           familyId,
@@ -361,6 +374,7 @@ export class StoreComponent {
     this.costCtrl.reset(null);
     this.minLevelCtrl.reset(null);
     this.selectedIcon.set('\u{1F381}');
+    this.isEnabledCtrl.reset(true);
     this.createError.set('');
   }
 
