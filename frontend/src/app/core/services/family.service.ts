@@ -14,6 +14,16 @@ export interface FamilyResponse {
   rankingEnabled?: boolean;
 }
 
+export interface FamilyActivityResponse {
+  id: number;
+  action: string;
+  performedByName: string;
+  performedByPictureUrl: string;
+  targetUserName: string | null;
+  details: string;
+  createdAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class FamilyService {
   private readonly http = inject(HttpClient);
@@ -39,6 +49,13 @@ export class FamilyService {
     );
   }
 
+  updateMemberAdmin(familyId: number, userId: number, isAdmin: boolean): Observable<{ message: string }> {
+    return this.http.patch<{ message: string }>(
+      `${environment.apiUrl}/families/${familyId}/members/${userId}/admin`,
+      { isAdmin }
+    );
+  }
+
   removeMember(familyId: number, userId: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(
       `${environment.apiUrl}/families/${familyId}/members/${userId}`
@@ -55,6 +72,13 @@ export class FamilyService {
     return this.http.patch<FamilyResponse>(
       `${environment.apiUrl}/families/${familyId}/settings`,
       { rankingEnabled }
+    );
+  }
+
+  getActivityLog(familyId: number, page = 0, size = 20): Observable<FamilyActivityResponse[]> {
+    return this.http.get<FamilyActivityResponse[]>(
+      `${environment.apiUrl}/families/${familyId}/activity`,
+      { params: { page: page.toString(), size: size.toString() } }
     );
   }
 }

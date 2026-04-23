@@ -18,4 +18,6 @@ public class CreateInviteRequest {
 
     @NotNull(message = "El ID de familia es requerido")
     private Long familyId;
+
+    private Boolean isAdmin = false;
 }

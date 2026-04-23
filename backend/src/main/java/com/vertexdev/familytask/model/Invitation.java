@@ -44,6 +44,10 @@ public class Invitation {
 
     @Column(nullable = false)
     @Builder.Default
+    private Boolean isAdmin = false;
+
+    @Column(nullable = false)
+    @Builder.Default
     private Boolean isUsed = false;
 
     @CreationTimestamp

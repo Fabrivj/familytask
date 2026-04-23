@@ -1,18 +1,18 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 /**
  * Inline pill badge showing a family role.
  * Standardizes label text and color across all views.
  *
  * Usage:
- *   <app-role-badge [role]="familia.role" />
+ *   <app-role-badge [role]="member.role" [isAdmin]="member.isAdmin" />
  */
 @Component({
   selector: 'app-role-badge',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <span class="badge" [class.parent]="role() === 'PARENT'">
-      {{ role() === 'PARENT' ? 'Padre / Tutor' : 'Hijo / a' }}
+    <span class="badge" [class.parent]="role() === 'PARENT'" [class.admin]="isAdmin()">
+      {{ label() }}
     </span>
   `,
   styles: [`
@@ -34,8 +34,20 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       color: var(--primary);
       background: rgba(var(--primary-rgb), 0.05);
     }
+
+    .badge.admin {
+      border-color: rgba(var(--warn-rgb, 255, 165, 0), 0.45);
+      color: var(--warn, #f59e0b);
+      background: rgba(var(--warn-rgb, 255, 165, 0), 0.08);
+    }
   `],
 })
 export class RoleBadgeComponent {
   readonly role = input.required<'PARENT' | 'CHILD'>();
+  readonly isAdmin = input<boolean>(false);
+
+  readonly label = computed(() => {
+    if (this.isAdmin()) return 'Administrador';
+    return this.role() === 'PARENT' ? 'Padre / Tutor' : 'Hijo / a';
+  });
 }

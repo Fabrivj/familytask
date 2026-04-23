@@ -5,9 +5,11 @@
       title="Miembros"
       [subtitle]="pageSubtitle()"
     >
-      <button class="btn-icon-invite" type="button" (click)="inviteMember()" aria-label="Invitar miembro">
-        <mat-icon>person_add</mat-icon>
-      </button>
+      @if (permissions.isAdmin()) {
+        <button class="btn-icon-invite" type="button" (click)="inviteMember()" aria-label="Invitar miembro">
+          <mat-icon>person_add</mat-icon>
+        </button>
+      }
     </app-page-header>
 
     @if (isLoading()) {
@@ -41,7 +43,7 @@
                 <div class="card-identity">
                   <span class="card-name">{{ member.name }}</span>
                   <span class="card-email">{{ member.email }}</span>
-                  <app-role-badge [role]="member.role" />
+                  <app-role-badge [role]="member.role" [isAdmin]="member.isAdmin" />
                 </div>
               </div>
 
@@ -79,24 +81,33 @@
                 @if (memberMeta().get(member.id)?.isCurrent) {
                   <span class="you-badge">TÚ</span>
                 } @else {
-                  @if (memberMeta().get(member.id)?.canEdit) {
+                  @if (memberMeta().get(member.id)?.canEdit || memberMeta().get(member.id)?.canChangeAdmin) {
                     <div class="role-dropdown-wrap">
                       <button class="role-select" type="button"
-                              [attr.aria-label]="'Cambiar rol: ' + roleDropdownLabel(member.role)"
+                              [attr.aria-label]="'Cambiar rol: ' + memberRoleLabel(member)"
                               [attr.aria-expanded]="openDropdownId() === member.id"
                               (click)="toggleDropdown(member.id)"
                               [disabled]="changingRoleId() === member.id">
-                        {{ roleDropdownLabel(member.role) }}
+                        {{ memberRoleLabel(member) }}
                         <mat-icon class="role-chevron" aria-hidden="true">expand_more</mat-icon>
                       </button>
                       @if (openDropdownId() === member.id) {
                         <ul class="role-menu" role="listbox" [attr.aria-label]="'Rol de ' + member.name">
-                          <li role="option" [attr.aria-selected]="member.role === 'PARENT'"
-                              [class.active]="member.role === 'PARENT'"
-                              (click)="selectRole(member, 'PARENT')">Tutor</li>
-                          <li role="option" [attr.aria-selected]="member.role === 'CHILD'"
-                              [class.active]="member.role === 'CHILD'"
-                              (click)="selectRole(member, 'CHILD')">Hijo/a</li>
+                          @if (memberMeta().get(member.id)?.canChangeAdmin && !member.isAdmin) {
+                            <li role="option" [attr.aria-selected]="false"
+                                (click)="selectRole(member, 'ADMIN')">Administrador</li>
+                          }
+                          @if (memberMeta().get(member.id)?.canEdit || (memberMeta().get(member.id)?.canChangeAdmin && member.isAdmin)) {
+                            <li role="option"
+                                [attr.aria-selected]="member.role === 'PARENT' && !member.isAdmin"
+                                [class.active]="member.role === 'PARENT' && !member.isAdmin"
+                                (click)="selectRole(member, 'PARENT')">Tutor</li>
+                          }
+                          @if (memberMeta().get(member.id)?.canEdit) {
+                            <li role="option" [attr.aria-selected]="member.role === 'CHILD'"
+                                [class.active]="member.role === 'CHILD'"
+                                (click)="selectRole(member, 'CHILD')">Hijo/a</li>
+                          }
                         </ul>
                       }
                     </div>
@@ -129,7 +140,7 @@
                 <div class="invite-info">
                   <span class="invite-email">{{ inv.email }}</span>
                   <span class="invite-meta">
-                    Invitada como <strong>{{ roleDropdownLabel(inv.role) }}</strong>
+                    Invitada como <strong>{{ displayRoleLabel(inv.role === 'PARENT' ? 'PARENT' : 'CHILD') }}</strong>
                     &nbsp;·&nbsp;Enviada hace {{ invitationMeta().get(inv.token)?.daysAgo ?? 0 }} día{{ invitationMeta().get(inv.token)?.daysAgo !== 1 ? 's' : '' }}
                     &nbsp;·&nbsp;Expira en {{ invitationMeta().get(inv.token)?.daysUntil ?? 0 }} día{{ invitationMeta().get(inv.token)?.daysUntil !== 1 ? 's' : '' }}
                   </span>

@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '@core/services/auth.service';
+import { PermissionsService } from '@core/services/permissions.service';
 import { InvitationService } from '@core/services/invitation.service';
 import { PageLayoutComponent } from '@shared/components/page-layout/page-layout.component';
 import { NeonCardComponent } from '@shared/components/neon-card/neon-card.component';
@@ -20,6 +21,8 @@ import { TopBarComponent } from '@shared/components/top-bar/top-bar.component';
 import { HelpChipComponent } from '@shared/components/help-chip/help-chip.component';
 import { RoleBadgeComponent } from '@shared/components/role-badge/role-badge.component';
 import { fieldError } from '@core/utils/form-errors';
+
+type InviteDisplayRole = 'ADMIN' | 'PARENT' | 'CHILD';
 
 @Component({
   selector: 'app-create-invitation',
@@ -44,6 +47,7 @@ export class CreateInvitationComponent {
   private readonly authService = inject(AuthService);
   private readonly invitationService = inject(InvitationService);
   private readonly router = inject(Router);
+  readonly permissions = inject(PermissionsService);
 
   // ─── User info ─────────────────────────────────────────────────────────────
   readonly shortName = this.authService.shortName;
@@ -62,7 +66,7 @@ export class CreateInvitationComponent {
     nonNullable: true,
     validators: [Validators.required, Validators.email],
   });
-  readonly roleCtrl = new FormControl<'PARENT' | 'CHILD'>('CHILD', { nonNullable: true });
+  readonly displayRoleCtrl = new FormControl<InviteDisplayRole>('CHILD', { nonNullable: true });
 
   // ─── State signals ─────────────────────────────────────────────────────────
   readonly isLoading = signal(false);
@@ -94,11 +98,16 @@ export class CreateInvitationComponent {
     this.linkCopied.set(false);
     this.emailCtrl.disable();
 
+    const displayRole = this.displayRoleCtrl.value;
+    const role = displayRole === 'CHILD' ? 'CHILD' : 'PARENT';
+    const isAdmin = displayRole === 'ADMIN';
+
     this.invitationService
       .create({
         invitedEmail: email,
-        role: this.roleCtrl.value,
+        role,
         familyId,
+        isAdmin,
       })
       .subscribe({
         next: (response) => {
@@ -130,7 +139,7 @@ export class CreateInvitationComponent {
 
   inviteAnother(): void {
     this.emailCtrl.reset();
-    this.roleCtrl.reset('CHILD');
+    this.displayRoleCtrl.reset('CHILD');
     this.error.set('');
     this.generatedLink.set('');
     this.successMessage.set('');
