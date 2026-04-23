@@ -43,12 +43,8 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
     <!-- Left: logo -->
     <span class="logo" aria-label="FamilyTask">FamilyTask</span>
 
-    <!-- Center: desktop shows HUD for child, family chip for parent.
-         Mobile always shows family chip (stats go to the strip below). -->
-    <div class="center" [class.has-hud]="childLevel() !== null">
-      @if (familyName()) {
-        <span class="center-family" aria-label="Familia activa">{{ familyName() }}</span>
-      }
+    <!-- Center: child gets gaming HUD, parent gets family HUD. -->
+    <div class="center">
       @if (childLevel() !== null) {
         <div class="hud-bar" aria-label="Tu estado de juego">
           <div class="hud-lvl-badge" aria-label="Nivel {{ childLevel() }}">
@@ -65,6 +61,14 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
             {{ childCoins() ?? 0 }}
           </span>
         </div>
+      } @else if (familyName()) {
+        <div class="hud-bar" aria-label="Familia activa">
+          <span class="hud-family">{{ familyName() }}</span>
+          @if (userRole()) {
+            <span class="hud-rule" aria-hidden="true"></span>
+            <span class="hud-parent-role" aria-label="{{ userRole() }}">{{ userRole() }}</span>
+          }
+        </div>
       }
     </div>
 
@@ -72,7 +76,7 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
     <div class="right">
       <app-user-chip
         [name]="userName()"
-        [email]="userRole() || userEmail()"
+        [email]="childLevel() !== null ? (userRole() || userEmail()) : userEmail()"
         [pictureUrl]="userPictureUrl()"
         [avatarSize]="36"
       />
@@ -147,21 +151,7 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
     .btn-logout:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-logout:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-    /* ── Family name — same style for parent and child ── */
-    .center-family {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      color: #ffffff;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    /* On desktop, hide plain family name when HUD is present (HUD renders it inline) */
-    .has-hud .center-family { display: none; }
-
-    /* ── Child HUD bar (desktop only) ── */
+    /* ── HUD bar (shared layout for child and parent) ── */
     .hud-bar {
       display: flex;
       align-items: center;
@@ -237,6 +227,18 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
       line-height: 18px;
     }
 
+    /* ── Parent HUD role ── */
+    .hud-parent-role {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      text-shadow: 0 0 8px rgba(var(--primary-rgb), 0.4);
+    }
+
     /* ── Mobile: double row layout ── */
     @media (max-width: 767px) {
       :host {
@@ -286,9 +288,8 @@ import { UserChipComponent } from '../user-chip/user-chip.component';
       .hud-coins { font-size: 15px; gap: 4px; }
       .hud-coin-icon { font-size: 16px; width: 16px; height: 16px; line-height: 16px; }
 
-      /* Parent family name in row 2 */
-      .center-family { font-size: 14px; }
-      .has-hud .center-family { display: none; }
+      /* Parent HUD in row 2 */
+      .hud-parent-role { font-size: 13px; }
     }
   `],
 })

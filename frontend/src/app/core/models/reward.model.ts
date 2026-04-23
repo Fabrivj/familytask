@@ -11,6 +11,7 @@ export interface RewardResponse {
   familyId: number;
   createdAt: string;
   pendingCount: number;
+  isEnabled: boolean;
 }
 
 export interface CreateRewardRequest {
@@ -28,4 +29,5 @@ export interface UpdateRewardRequest {
   icon: string | null;
   cost: number;
   minLevel: number | null;
+  isEnabled?: boolean;
 }

@@ -74,10 +74,12 @@ public class RewardService {
         FamilyGroup familyGroup = familyGroupRepository.findById(familyId)
                 .orElseThrow(() -> new RewardException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
 
-        familyMemberRepository
+        FamilyMember member = familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
                 .filter(FamilyMember::getIsActive)
                 .orElseThrow(() -> new RewardException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+
+        boolean isParent = familyPermissions.isActiveParent(member);
 
         try {
             Map<Long, Integer> pendingCounts = redemptionRepository
@@ -88,8 +90,11 @@ public class RewardService {
                             row -> ((Long) row[1]).intValue()
                     ));
 
-            return rewardRepository.findByFamilyGroupIdAndIsActiveTrueOrderByCreatedAtDesc(familyGroup.getId())
-                    .stream()
+            List<Reward> rewards = isParent
+                    ? rewardRepository.findByFamilyGroupIdAndIsActiveTrueOrderByIsEnabledDescCreatedAtDesc(familyGroup.getId())
+                    : rewardRepository.findByFamilyGroupIdAndIsActiveTrueAndIsEnabledTrueOrderByCreatedAtDesc(familyGroup.getId());
+
+            return rewards.stream()
                     .map(r -> toResponse(r, pendingCounts.getOrDefault(r.getId(), 0)))
                     .toList();
         } catch (Exception e) {
@@ -133,6 +138,7 @@ public class RewardService {
             reward.setCost(request.getCost());
             reward.setMinLevel(request.getMinLevel());
             reward.setApprovalRule(ApprovalRule.MANUAL);
+            if (request.getIsEnabled() != null) reward.setIsEnabled(request.getIsEnabled());
 
             Reward saved = rewardRepository.save(reward);
             log.info("Reward '{}' updated by user {}", saved.getName(), requester.getEmail());
@@ -163,6 +169,7 @@ public class RewardService {
                 .familyId(reward.getFamilyGroup().getId())
                 .createdAt(reward.getCreatedAt())
                 .pendingCount(pendingCount)
+                .isEnabled(Boolean.TRUE.equals(reward.getIsEnabled()))
                 .build();
     }
 }

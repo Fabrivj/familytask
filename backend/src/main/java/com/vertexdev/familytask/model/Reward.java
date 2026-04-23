@@ -52,6 +52,10 @@ public class Reward {
     @Builder.Default
     private Boolean isActive = true;
 
+    @Column(name = "is_enabled", nullable = false)
+    @Builder.Default
+    private Boolean isEnabled = true;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

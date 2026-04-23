@@ -54,33 +54,47 @@ interface CardState {
         <section class="filters-card">
           <div class="filters-grid">
             <label class="field">
-              <span class="field-label">Categoría</span>
-              <select
-                class="field-control"
-                [value]="selectedCategory()"
-                (change)="onCategoryChange($event)"
-              >
-                <option value="">Selecciona una categoría</option>
-                @for (category of categoryOptions; track category.value) {
-                  <option [value]="category.value">{{ category.label }}</option>
-                }
-              </select>
+              <span class="field-label">
+                <mat-icon class="field-icon" aria-hidden="true">category</mat-icon>
+                Categoría
+              </span>
+              <div class="field-select-wrap">
+                <select
+                  class="field-control"
+                  [value]="selectedCategory()"
+                  (change)="onCategoryChange($event)"
+                >
+                  <option value="">Selecciona una categoría</option>
+                  @for (category of categoryOptions; track category.value) {
+                    <option [value]="category.value">{{ category.label }}</option>
+                  }
+                </select>
+                <mat-icon class="field-select-icon" aria-hidden="true">expand_more</mat-icon>
+              </div>
             </label>
 
             <label class="field">
-              <span class="field-label">Miembro seleccionado</span>
-              <select
-                class="field-control"
-                [value]="selectedMemberUserId() ?? ''"
-                (change)="onMemberChange($event)"
-              >
-                <option value="">Selecciona un miembro</option>
-                @for (member of selectableMembers(); track member.id) {
-                  <option [value]="member.id">{{ member.name }}</option>
-                }
-              </select>
+              <span class="field-label">
+                <mat-icon class="field-icon" aria-hidden="true">person</mat-icon>
+                Miembro
+              </span>
+              <div class="field-select-wrap">
+                <select
+                  class="field-control"
+                  [value]="selectedMemberUserId() ?? ''"
+                  (change)="onMemberChange($event)"
+                >
+                  <option value="">Selecciona un miembro</option>
+                  @for (member of selectableMembers(); track member.id) {
+                    <option [value]="member.id">{{ member.name }}</option>
+                  }
+                </select>
+                <mat-icon class="field-select-icon" aria-hidden="true">expand_more</mat-icon>
+              </div>
             </label>
           </div>
+
+          <div class="generate-divider"></div>
 
           <button class="btn-generate" type="button" (click)="generateSuggestions()" [disabled]="isLoading()">
             <mat-icon aria-hidden="true">auto_awesome</mat-icon>
@@ -325,23 +339,26 @@ interface CardState {
       background: rgba(12, 18, 40, 0.65);
       border: 1px solid rgba(0, 239, 255, 0.2);
       border-radius: 14px;
-      padding: 16px;
+      padding: 20px;
       margin-bottom: 16px;
     }
 
     .filters-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 14px;
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
     }
 
     .field-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
       font-family: 'Share Tech Mono', monospace;
       font-size: 11px;
       letter-spacing: 0.14em;
@@ -349,23 +366,37 @@ interface CardState {
       color: var(--text-sub);
     }
 
+    .field-icon {
+      font-size: 13px !important;
+      height: 13px !important;
+      width: 13px !important;
+      opacity: 0.65;
+    }
+
+    .field-select-wrap {
+      position: relative;
+    }
+
     .field-control {
-      background: rgba(var(--border-rgb), 0.03);
-      border: 1.5px solid rgba(var(--border-rgb), 0.18);
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(var(--border-rgb), 0.04);
+      border: 1.5px solid rgba(var(--border-rgb), 0.2);
       border-radius: var(--radius);
       color: var(--text);
-      padding: 0 12px;
+      padding: 0 36px 0 12px;
       font-size: 14px;
+      font-family: 'Nunito', sans-serif;
       outline: none;
-      height: 40px;
+      height: 44px;
       width: 100%;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
       cursor: pointer;
     }
 
     .field-control:focus {
-      border-color: var(--border);
-      box-shadow: 0 0 0 2px rgba(var(--border-rgb), 0.12);
+      border-color: rgba(0, 239, 255, 0.5);
+      box-shadow: 0 0 0 3px rgba(0, 239, 255, 0.08);
     }
 
     .field-control option {
@@ -373,25 +404,54 @@ interface CardState {
       color: var(--text);
     }
 
+    .field-select-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px !important;
+      height: 18px !important;
+      width: 18px !important;
+      color: var(--text-sub);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .generate-divider {
+      margin-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
     .btn-generate {
-      margin-top: 12px;
-      display: inline-flex;
+      margin-top: 16px;
+      width: 100%;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      border: 1px solid rgba(0, 239, 255, 0.35);
-      background: rgba(0, 239, 255, 0.08);
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, rgba(0, 239, 255, 0.12) 0%, rgba(0, 239, 255, 0.04) 100%);
+      border: 1.5px solid rgba(0, 239, 255, 0.4);
       color: var(--text);
-      padding: 10px 14px;
-      border-radius: 10px;
+      padding: 14px 20px;
+      border-radius: 12px;
       cursor: pointer;
       font-family: 'Rajdhani', sans-serif;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      font-size: 15px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, color 0.25s;
+    }
+
+    .btn-generate:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(0, 239, 255, 0.2) 0%, rgba(0, 239, 255, 0.07) 100%);
+      border-color: rgba(0, 239, 255, 0.7);
+      box-shadow: 0 0 18px rgba(0, 239, 255, 0.18), 0 0 36px rgba(0, 239, 255, 0.07);
+      color: #fff;
     }
 
     .btn-generate:disabled {
-      opacity: 0.6;
+      opacity: 0.45;
       cursor: not-allowed;
     }
 
@@ -808,11 +868,6 @@ interface CardState {
 
       .filters-grid {
         grid-template-columns: 1fr;
-      }
-
-      .btn-generate {
-        width: 100%;
-        justify-content: center;
       }
     }
   `],

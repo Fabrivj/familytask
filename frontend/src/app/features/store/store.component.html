@@ -60,94 +60,123 @@
     @for (reward of rewards(); track reward.id) {
       <article class="reward-card"
         [class.reward-card--premium]="rewardMeta().get(reward.id)?.premium"
-        [attr.aria-labelledby]="'reward-name-' + reward.id"
-        [style.background]="rewardMeta().get(reward.id)?.gradient">
+        [class.reward-card--locked]="!isParent() && !!rewardMeta().get(reward.id)?.blockReason"
+        [class.reward-card--inactive]="isParent() && !reward.isEnabled"
+        [attr.aria-labelledby]="'reward-name-' + reward.id">
 
-        <div class="card-hero" aria-hidden="true">{{ reward.icon || '🎁' }}</div>
-
-        <div class="card-body">
-          <h3 class="card-name" [id]="'reward-name-' + reward.id">{{ reward.name }}</h3>
-          @if (reward.description) {
-            <p class="card-desc">{{ reward.description }}</p>
-          }
-        </div>
-
-        <div class="card-price-row" role="group" aria-label="Precio y requisitos">
-          <div class="card-cost">
-            <mat-icon class="badge-icon cost-icon" aria-hidden="true">monetization_on</mat-icon>
-            <span class="sr-only">Costo en monedas:</span>
-            <span class="cost-value">{{ reward.cost }}</span>
-          </div>
-          @if (reward.minLevel) {
-            <div class="card-level" [attr.aria-label]="'Nivel minimo ' + reward.minLevel">
-              <span class="sr-only">Nivel minimo requerido: {{ reward.minLevel }}</span>
-              <span class="level-stars" aria-hidden="true">
-                @for (s of rewardMeta().get(reward.id)?.stars ?? []; track s) {
-                  <mat-icon class="star-icon">star</mat-icon>
-                }
-              </span>
-            </div>
-          } @else {
-            <div class="card-level card-level-all">
-              <span>Todos los niveles</span>
+        <!-- Hero zone: banda de color full-bleed con el emoji grande -->
+        <div class="card-hero-zone"
+             [style.background]="rewardMeta().get(reward.id)?.heroGradient"
+             aria-hidden="true">
+          <div class="card-hero-glow"></div>
+          <span class="card-hero">{{ reward.icon || '🎁' }}</span>
+          @if (!isParent() && !!rewardMeta().get(reward.id)?.blockReason) {
+            <div class="card-hero-lock">
+              <div class="card-hero-lock-badge">
+                <mat-icon>lock</mat-icon>
+              </div>
             </div>
           }
         </div>
 
-        @if (!isParent()) {
-          <span class="claim-wrapper" [class.claim-wrapper--locked]="!!rewardMeta().get(reward.id)?.blockReason">
-            <button
-              class="btn-claim"
-              [class.btn-claim--locked]="!!rewardMeta().get(reward.id)?.blockReason"
-              type="button"
-              [attr.aria-disabled]="!!rewardMeta().get(reward.id)?.blockReason || isRedeeming()"
-              [attr.aria-busy]="isRedeeming()"
-              [attr.aria-describedby]="rewardMeta().get(reward.id)?.blockReason ? 'tip-' + reward.id : null"
-              [attr.aria-label]="rewardMeta().get(reward.id)?.blockReason ? (reward.name + ': bloqueado') : ('Reclamar ' + reward.name + ' - ' + reward.cost + ' monedas')"
-              (click)="!!rewardMeta().get(reward.id)?.blockReason || isRedeeming() ? null : openClaimDialog(reward)"
-              (keydown.enter)="!!rewardMeta().get(reward.id)?.blockReason || isRedeeming() ? null : openClaimDialog(reward)"
-              (keydown.space)="!!rewardMeta().get(reward.id)?.blockReason || isRedeeming() ? $event.preventDefault() : openClaimDialog(reward)"
-            >
-              <mat-icon aria-hidden="true">{{ rewardMeta().get(reward.id)?.blockReason ? 'lock' : 'rocket_launch' }}</mat-icon>
-              <span aria-live="polite">
-                {{ isRedeeming() ? 'Procesando...' : (rewardMeta().get(reward.id)?.blockReason ? 'BLOQUEADO' : 'RECLAMAR') }}
-              </span>
-            </button>
-
-            @if (rewardMeta().get(reward.id)?.blockReason) {
-              <span
-                [id]="'tip-' + reward.id"
-                class="claim-tooltip"
-                role="tooltip"
-              >
-                <span class="claim-tooltip__arrow" aria-hidden="true"></span>
-                {{ rewardMeta().get(reward.id)?.blockReason }}
-              </span>
+        <!-- Contenido -->
+        <div class="card-content">
+          <div class="card-body">
+            <h3 class="card-name" [id]="'reward-name-' + reward.id">{{ reward.name }}</h3>
+            @if (reward.description) {
+              <p class="card-desc">{{ reward.description }}</p>
             }
-          </span>
-        }
-
-        @if (isParent()) {
-          <div class="card-bottom" role="group" [attr.aria-label]="'Gestion de ' + reward.name + ': ' + reward.pendingCount + (reward.pendingCount === 1 ? ' canje pendiente' : ' canjes pendientes')">
-            <div class="card-meta-row" aria-hidden="true">
-              <span class="card-active-badge"><span aria-hidden="true">•</span> ACTIVA</span>
-              <span class="card-claims"><span aria-hidden="true">📦</span> {{ reward.pendingCount }} {{ reward.pendingCount === 1 ? 'canje' : 'canjes' }}</span>
-            </div>
-            <div class="card-actions">
-              <button class="btn-action btn-edit" type="button"
-                [attr.aria-label]="'Editar ' + reward.name"
-                (click)="openEditPanel(reward)">
-                <mat-icon aria-hidden="true">edit</mat-icon> EDITAR
-              </button>
-              <button class="btn-icon-danger" type="button"
-                [attr.aria-label]="'Eliminar ' + reward.name"
-                (click)="openDeleteModal(reward)">
-                <mat-icon aria-hidden="true">delete</mat-icon>
-              </button>
-            </div>
           </div>
-        }
 
+          <div class="card-price-row" role="group" aria-label="Precio y requisitos">
+            <div class="card-cost">
+              <mat-icon class="badge-icon cost-icon" aria-hidden="true">monetization_on</mat-icon>
+              <span class="sr-only">Costo:</span>
+              <span class="cost-value">{{ reward.cost }}</span>
+            </div>
+            @if (reward.minLevel) {
+              <div class="card-level" [attr.aria-label]="'Nivel mínimo ' + reward.minLevel">
+                <span class="sr-only">Nivel mínimo:</span>
+                <span class="level-text">NIV {{ reward.minLevel }}</span>
+              </div>
+            } @else {
+              <div class="card-level card-level-all">
+                <span>Todos</span>
+              </div>
+            }
+          </div>
+
+          @if (!isParent()) {
+            <div class="claim-wrapper">
+              @if (!rewardMeta().get(reward.id)?.blockReason) {
+                <button
+                  class="btn-claim"
+                  type="button"
+                  [attr.aria-disabled]="isRedeeming()"
+                  [attr.aria-busy]="isRedeeming()"
+                  [attr.aria-label]="'Reclamar ' + reward.name + ' — ' + reward.cost + ' monedas'"
+                  (click)="isRedeeming() ? null : openClaimDialog(reward)"
+                  (keydown.enter)="isRedeeming() ? null : openClaimDialog(reward)"
+                  (keydown.space)="isRedeeming() ? $event.preventDefault() : openClaimDialog(reward)"
+                >
+                  <mat-icon aria-hidden="true">{{ isRedeeming() ? 'hourglass_empty' : 'rocket_launch' }}</mat-icon>
+                  <span aria-live="polite">{{ isRedeeming() ? 'Procesando...' : 'RECLAMAR' }}</span>
+                </button>
+              } @else {
+                <div class="lock-gate" [id]="'tip-' + reward.id" [attr.aria-label]="rewardMeta().get(reward.id)?.blockReason">
+                  <div class="lock-gate-header">
+                    <mat-icon class="lock-gate-icon" aria-hidden="true">lock</mat-icon>
+                    <span class="lock-gate-title">BLOQUEADO</span>
+                  </div>
+                  <div class="lock-gate-reqs">
+                    @if (rewardMeta().get(reward.id)?.missingCoins != null) {
+                      <div class="unlock-row">
+                        <mat-icon class="unlock-icon unlock-icon--coins" aria-hidden="true">monetization_on</mat-icon>
+                        <span class="unlock-label">MONEDAS</span>
+                        <span class="unlock-fraction">
+                          <b>{{ myStats()?.totalCoins ?? 0 }}</b> / {{ reward.cost }}
+                        </span>
+                      </div>
+                    }
+                    @if (rewardMeta().get(reward.id)?.missingLevels != null) {
+                      <div class="unlock-row">
+                        <mat-icon class="unlock-icon unlock-icon--level" aria-hidden="true">workspace_premium</mat-icon>
+                        <span class="unlock-label">NIVEL</span>
+                        <span class="unlock-fraction">
+                          <b>{{ myStats()?.currentLevel ?? 1 }}</b> / {{ reward.minLevel }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          @if (isParent()) {
+            <div class="card-bottom" role="group" [attr.aria-label]="'Gestion de ' + reward.name + ': ' + reward.pendingCount + (reward.pendingCount === 1 ? ' canje pendiente' : ' canjes pendientes')">
+              <div class="card-meta-row" aria-hidden="true">
+                <span class="card-active-badge" [class.card-active-badge--inactive]="!reward.isEnabled">
+                  <span aria-hidden="true">•</span> {{ reward.isEnabled ? 'ACTIVA' : 'INACTIVA' }}
+                </span>
+                <span class="card-claims"><span aria-hidden="true">📦</span> {{ reward.pendingCount }} {{ reward.pendingCount === 1 ? 'canje' : 'canjes' }}</span>
+              </div>
+              <div class="card-actions">
+                <button class="btn-action btn-edit" type="button"
+                  [attr.aria-label]="'Editar ' + reward.name"
+                  (click)="openEditPanel(reward)">
+                  <mat-icon aria-hidden="true">edit</mat-icon> EDITAR
+                </button>
+                <button class="btn-icon-danger" type="button"
+                  [attr.aria-label]="'Eliminar ' + reward.name"
+                  (click)="openDeleteModal(reward)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+
+        </div><!-- /card-content -->
       </article>
     }
   </div>
@@ -270,6 +299,24 @@
           @if (minLevelCtrl.invalid && minLevelCtrl.touched) {
             <span id="r-level-error" class="field-error" role="alert">{{ getMinLevelError() }}</span>
           }
+        </div>
+      </div>
+
+      <div class="field toggle-field">
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <span class="field-label">ESTADO</span>
+            <span class="field-hint">Las recompensas inactivas no aparecen en la tienda de los hijos</span>
+          </div>
+          <label class="toggle-switch" [attr.aria-label]="isEnabledCtrl.value ? 'Recompensa activa, click para desactivar' : 'Recompensa inactiva, click para activar'">
+            <input type="checkbox" [formControl]="isEnabledCtrl" />
+            <span class="toggle-track">
+              <span class="toggle-thumb"></span>
+            </span>
+            <span class="toggle-label-text" [class.toggle-label-text--active]="isEnabledCtrl.value">
+              {{ isEnabledCtrl.value ? 'ACTIVA' : 'INACTIVA' }}
+            </span>
+          </label>
         </div>
       </div>
 

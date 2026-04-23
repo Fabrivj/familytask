@@ -6,5 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface RewardRepository extends JpaRepository<Reward, Long> {
-    List<Reward> findByFamilyGroupIdAndIsActiveTrueOrderByCreatedAtDesc(Long familyGroupId);
+    // Children: only active + enabled
+    List<Reward> findByFamilyGroupIdAndIsActiveTrueAndIsEnabledTrueOrderByCreatedAtDesc(Long familyGroupId);
+    // Parents: all non-deleted (enabled first, then disabled, newest first within each group)
+    List<Reward> findByFamilyGroupIdAndIsActiveTrueOrderByIsEnabledDescCreatedAtDesc(Long familyGroupId);
 }
