@@ -2,9 +2,11 @@ package com.vertexdev.familytask.controller;
 
 import com.vertexdev.familytask.dto.MessageResponse;
 import com.vertexdev.familytask.dto.family.CreateFamilyRequest;
+import com.vertexdev.familytask.dto.family.FamilyActivityResponse;
 import com.vertexdev.familytask.dto.family.FamilyMembersResponse;
 import com.vertexdev.familytask.dto.family.FamilyResponse;
 import com.vertexdev.familytask.dto.family.MemberItemResponse;
+import com.vertexdev.familytask.dto.family.UpdateAdminRequest;
 import com.vertexdev.familytask.dto.family.UpdateFamilySettingsRequest;
 import com.vertexdev.familytask.dto.family.UpdateRoleRequest;
 import com.vertexdev.familytask.model.User;
@@ -80,6 +82,28 @@ public class FamilyController {
             @AuthenticationPrincipal User authenticatedUser) {
 
         MessageResponse response = familyGroupService.updateMemberRole(familyId, userId, request, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{familyId}/members/{userId}/admin")
+    public ResponseEntity<MessageResponse> updateMemberAdmin(
+            @PathVariable Long familyId,
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateAdminRequest request,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        MessageResponse response = familyGroupService.updateAdminStatus(familyId, userId, request, authenticatedUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{familyId}/activity")
+    public ResponseEntity<List<FamilyActivityResponse>> getActivityLog(
+            @PathVariable Long familyId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal User authenticatedUser) {
+
+        List<FamilyActivityResponse> response = familyGroupService.getActivityLog(familyId, authenticatedUser, page, size);
         return ResponseEntity.ok(response);
     }
 

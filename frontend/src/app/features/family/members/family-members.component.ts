@@ -25,6 +25,8 @@ import { injectLoadingState } from '@core/utils/loading-state';
 
 const POLL_INTERVAL_MS = 15_000;
 
+type DisplayRole = 'ADMIN' | 'PARENT' | 'CHILD';
+
 @Component({
   selector: 'app-family-members',
   imports: [MatIconModule, AppShellComponent, PageHeaderComponent, RoleBadgeComponent, UserAvatarComponent, ConfirmDialogComponent],
@@ -72,14 +74,14 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   readonly changingRoleId = signal(0);
   readonly openDropdownId = signal(0);
   readonly confirmDialogOpen = signal(false);
-  readonly pendingRoleChange = signal<{ member: MemberItem; newRole: 'PARENT' | 'CHILD' } | null>(null);
+  readonly pendingRoleChange = signal<{ member: MemberItem; newDisplayRole: DisplayRole } | null>(null);
 
   readonly confirmTitle = computed(() => 'Cambiar rol');
   readonly confirmMessage = computed(() => {
     const pending = this.pendingRoleChange();
     if (!pending) return '';
-    const newRoleLabel = pending.newRole === 'PARENT' ? 'Padre/Tutor' : 'Hijo/a';
-    return `¿Estás seguro de cambiar el rol de ${pending.member.name} a ${newRoleLabel}?`;
+    const label = this.displayRoleLabel(pending.newDisplayRole);
+    return `¿Estás seguro de cambiar el rol de ${pending.member.name} a ${label}?`;
   });
 
   readonly removeDialogOpen = signal(false);
@@ -143,6 +145,8 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
       next: (data) => {
         this.members.set(data.members);
         this.pendingInvitations.set(data.pendingInvitations);
+        // Refresh session so the current user's role/admin status stays in sync
+        this.authService.refreshSession().subscribe();
       },
     });
   }
@@ -156,15 +160,26 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   // ─── Precomputed member / invitation meta (avoids per-CD-tick method calls) ─
   readonly memberMeta = computed(() => {
     const email = this.currentEmail();
-    const map = new Map<number, { isCurrent: boolean; canEdit: boolean; canRemove: boolean; xpPercent: number; xpInLevel: number; xpNeeded: number }>();
+    const map = new Map<number, {
+      isCurrent: boolean;
+      displayRole: DisplayRole;
+      canEdit: boolean;
+      canChangeAdmin: boolean;
+      canRemove: boolean;
+      xpPercent: number;
+      xpInLevel: number;
+      xpNeeded: number;
+    }>();
     for (const m of this.members()) {
       const isCurrent = m.email === email;
+      const displayRole: DisplayRole = m.isAdmin ? 'ADMIN' : m.role === 'PARENT' ? 'PARENT' : 'CHILD';
       const canEdit = this.permissions.canEditMemberRole(m);
+      const canChangeAdmin = this.permissions.canChangeAdminStatus(m);
       const canRemove = this.permissions.canRemoveMember(m);
       const xpNeeded = 100 * ((m.currentLevel ?? 0) + 1);
       const xpIn = xpNeeded - (m.xpToNextLevel ?? 0);
       const xpPct = Math.min(100, Math.max(0, (xpIn / xpNeeded) * 100));
-      map.set(m.id, { isCurrent, canEdit, canRemove, xpPercent: xpPct, xpInLevel: xpIn, xpNeeded });
+      map.set(m.id, { isCurrent, displayRole, canEdit, canChangeAdmin, canRemove, xpPercent: xpPct, xpInLevel: xpIn, xpNeeded });
     }
     return map;
   });
@@ -200,9 +215,12 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
         this.snackBar.open('Miembro removido exitosamente.', 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
         this.pollMembers(familyId);
       },
-      error: () => {
+      error: (err) => {
         this.isRemoving.set(false);
-        this.snackBar.open('No se pudo remover el miembro. Intenta de nuevo.', 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+        const message = err?.status === 409
+          ? (err?.error?.message ?? 'Debe existir al menos un administrador en la familia.')
+          : 'No se pudo remover el miembro. Intenta de nuevo.';
+        this.snackBar.open(message, 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
       },
     });
   }
@@ -212,8 +230,16 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     this.pendingRemove.set(null);
   }
 
-  roleDropdownLabel(role: 'PARENT' | 'CHILD'): string {
-    return role === 'PARENT' ? 'Tutor' : 'Hijo/a';
+  displayRoleLabel(displayRole: DisplayRole): string {
+    if (displayRole === 'ADMIN') return 'Administrador';
+    if (displayRole === 'PARENT') return 'Tutor';
+    return 'Hijo/a';
+  }
+
+  /** Label shown on role dropdown button for a member. */
+  memberRoleLabel(member: MemberItem): string {
+    const displayRole: DisplayRole = member.isAdmin ? 'ADMIN' : member.role === 'PARENT' ? 'PARENT' : 'CHILD';
+    return this.displayRoleLabel(displayRole);
   }
 
   inviteMember(): void {
@@ -242,10 +268,11 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     this.openDropdownId.set(this.openDropdownId() === memberId ? 0 : memberId);
   }
 
-  selectRole(member: MemberItem, newRole: 'PARENT' | 'CHILD'): void {
+  selectRole(member: MemberItem, newDisplayRole: DisplayRole): void {
     this.openDropdownId.set(0);
-    if (member.role === newRole) return;
-    this.pendingRoleChange.set({ member, newRole });
+    const currentDisplayRole: DisplayRole = member.isAdmin ? 'ADMIN' : member.role === 'PARENT' ? 'PARENT' : 'CHILD';
+    if (currentDisplayRole === newDisplayRole) return;
+    this.pendingRoleChange.set({ member, newDisplayRole });
     this.confirmDialogOpen.set(true);
   }
 
@@ -260,22 +287,45 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
 
     this.changingRoleId.set(pending.member.id);
 
-    this.familyService.updateMemberRole(familyId, pending.member.id, pending.newRole).subscribe({
-      next: () => {
-        this.snackBar.open('Rol actualizado exitosamente.', 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
-        this.pollMembers(familyId);
-        this.changingRoleId.set(0);
-      },
-      error: (err) => {
-        const message = err?.status === 403
-          ? 'No tienes permisos para cambiar roles en esta familia.'
-          : err?.status === 409
-            ? 'Debe existir al menos un Padre/Tutor en la familia.'
-            : 'No se pudo actualizar el rol. Intenta nuevamente.';
-        this.snackBar.open(message, 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
-        this.changingRoleId.set(0);
-      },
-    });
+    const { member, newDisplayRole } = pending;
+
+    if (newDisplayRole === 'ADMIN') {
+      // Promote to admin (keep PARENT role, set isAdmin=true)
+      this.familyService.updateMemberAdmin(familyId, member.id, true).subscribe({
+        next: () => this.onRoleChangeSuccess(familyId),
+        error: (err) => this.onRoleChangeError(err),
+      });
+    } else if (newDisplayRole === 'PARENT' && member.isAdmin) {
+      // Demote from admin (keep PARENT role, set isAdmin=false)
+      this.familyService.updateMemberAdmin(familyId, member.id, false).subscribe({
+        next: () => this.onRoleChangeSuccess(familyId),
+        error: (err) => this.onRoleChangeError(err),
+      });
+    } else {
+      // Change role between PARENT and CHILD
+      const newRole = newDisplayRole === 'PARENT' ? 'PARENT' : 'CHILD';
+      this.familyService.updateMemberRole(familyId, member.id, newRole).subscribe({
+        next: () => this.onRoleChangeSuccess(familyId),
+        error: (err) => this.onRoleChangeError(err),
+      });
+    }
+  }
+
+  private onRoleChangeSuccess(familyId: number): void {
+    this.snackBar.open('Rol actualizado exitosamente.', 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
+    this.authService.refreshSession().subscribe();
+    this.pollMembers(familyId);
+    this.changingRoleId.set(0);
+  }
+
+  private onRoleChangeError(err: any): void {
+    const message = err?.status === 403
+      ? 'No tienes permisos para cambiar roles en esta familia.'
+      : err?.status === 409
+        ? (err?.error?.message ?? 'Debe existir al menos un Padre/Tutor en la familia.')
+        : 'No se pudo actualizar el rol. Intenta nuevamente.';
+    this.snackBar.open(message, 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+    this.changingRoleId.set(0);
   }
 
   onCancelRoleChange(): void {

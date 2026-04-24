@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  *
  * Current permission model:
  * - PARENT (any): create tasks, invite members, view members, update family name
- * - PARENT (admin only): edit member roles, remove members
+ * - PARENT (admin only): edit member roles, remove members, promote/demote admins
  * - CHILD: view own assigned tasks only
  *
  * When business rules change, update only this class.
@@ -23,28 +23,6 @@ public class FamilyPermissions {
         return member.getIsActive() && member.getRole() == Role.PARENT;
     }
 
-    /**
-     * Whether {@code requester} can change the role of {@code target}.
-     * <p>Rules:
-     * <ul>
-     *   <li>Requester must be an active PARENT.</li>
-     *   <li>If target is the family admin, only another admin can modify them.</li>
-     * </ul>
-     */
-    public boolean canEditMemberRole(FamilyMember requester, FamilyMember target) {
-        if (!isActiveParent(requester)) return false;
-        if (Boolean.TRUE.equals(target.getIsAdmin()) && !Boolean.TRUE.equals(requester.getIsAdmin())) return false;
-        return true;
-    }
-
-    /**
-     * Whether {@code requester} can remove {@code target} from the family.
-     * <p>Rules:
-     * <ul>
-     *   <li>Requester must be the family admin.</li>
-     *   <li>The admin cannot remove themselves.</li>
-     * </ul>
-     */
     /** Any active CHILD in the family. Used for child-only features like badges. */
     public boolean isActiveChild(FamilyMember member) {
         return member.getIsActive() && member.getRole() == Role.CHILD;
@@ -57,9 +35,49 @@ public class FamilyPermissions {
                 && member.getFamilyGroup().getId().equals(familyId);
     }
 
+    /**
+     * Whether {@code requester} can change the role (PARENT/CHILD) of {@code target}.
+     * <p>Rules:
+     * <ul>
+     *   <li>Requester must be an active PARENT.</li>
+     *   <li>If target is the family admin, only another admin can modify them.</li>
+     *   <li>An admin cannot change their own role.</li>
+     * </ul>
+     */
+    public boolean canEditMemberRole(FamilyMember requester, FamilyMember target) {
+        if (!isActiveParent(requester)) return false;
+        if (requester.getUser().getId().equals(target.getUser().getId())) return false;
+        if (Boolean.TRUE.equals(target.getIsAdmin()) && !Boolean.TRUE.equals(requester.getIsAdmin())) return false;
+        return true;
+    }
+
+    /**
+     * Whether {@code requester} can change the admin status of {@code target}.
+     * <p>Rules:
+     * <ul>
+     *   <li>Requester must be the family admin.</li>
+     *   <li>Target must be an active PARENT.</li>
+     *   <li>An admin cannot change their own admin status.</li>
+     * </ul>
+     */
+    public boolean canChangeAdminStatus(FamilyMember requester, FamilyMember target) {
+        if (!Boolean.TRUE.equals(requester.getIsAdmin()) || !isActiveParent(requester)) return false;
+        if (requester.getUser().getId().equals(target.getUser().getId())) return false;
+        if (!isActiveParent(target)) return false;
+        return true;
+    }
+
+    /**
+     * Whether {@code requester} can remove {@code target} from the family.
+     * <p>Rules:
+     * <ul>
+     *   <li>Requester must be the family admin.</li>
+     *   <li>The admin cannot remove themselves.</li>
+     *   <li>Whether removing another admin leaves the family without admins is checked in the service.</li>
+     * </ul>
+     */
     public boolean canRemoveMember(FamilyMember requester, FamilyMember target) {
         if (!Boolean.TRUE.equals(requester.getIsAdmin()) || !isActiveParent(requester)) return false;
-        if (Boolean.TRUE.equals(target.getIsAdmin())) return false;
         return true;
     }
 }
