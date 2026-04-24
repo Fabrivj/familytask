@@ -8,6 +8,7 @@ export interface FamilySummary {
 }
 
 export interface AuthResponse {
+  userId: number;
   token: string;
   email: string;
   name: string;
@@ -16,6 +17,7 @@ export interface AuthResponse {
 }
 
 export interface UserSession {
+  userId: number;
   token: string;
   email: string;
   name: string;

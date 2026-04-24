@@ -1,0 +1,9 @@
+/* Ensures the projected feature content fills the remaining vertical space
+   between the top-bar and the bottom nav (mobile) / bottom of viewport (desktop). */
+.shell-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}

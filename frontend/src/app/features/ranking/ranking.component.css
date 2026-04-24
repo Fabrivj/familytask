@@ -1,0 +1,139 @@
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 36px 40px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Ranking List ── */
+.ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 640px;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--panel);
+  border: 1.5px solid rgba(var(--border-rgb), 0.14);
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+
+.rank-row:hover {
+  border-color: rgba(var(--border-rgb), 0.28);
+}
+
+/* ── Podium highlights ── */
+.rank-gold {
+  border-color: rgba(255, 215, 0, 0.45);
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.06), var(--panel));
+}
+
+.rank-silver {
+  border-color: rgba(192, 192, 192, 0.4);
+  background: linear-gradient(90deg, rgba(192, 192, 192, 0.05), var(--panel));
+}
+
+.rank-bronze {
+  border-color: rgba(205, 127, 50, 0.4);
+  background: linear-gradient(90deg, rgba(205, 127, 50, 0.05), var(--panel));
+}
+
+/* ── Position ── */
+.rank-pos {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  color: var(--text-sub);
+  width: 28px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.rank-gold .rank-pos { color: #FFD700; }
+.rank-silver .rank-pos { color: #C0C0C0; }
+.rank-bronze .rank-pos { color: #CD7F32; }
+
+/* ── Info ── */
+.rank-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rank-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rank-meta {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.rank-meta-xp {
+  color: var(--primary);
+}
+
+.rank-meta-sep {
+  color: var(--text-sub);
+}
+
+.rank-meta-coin-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  color: var(--warning);
+  vertical-align: middle;
+}
+
+.rank-meta-coins {
+  color: var(--warning);
+  margin-left: 2px;
+}
+
+/* ── XP badge ── */
+.rank-xp {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.rank-xp-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 767px) {
+  .content {
+    padding: 20px 16px 80px;
+  }
+
+  .ranking-list {
+    max-width: 100%;
+  }
+}

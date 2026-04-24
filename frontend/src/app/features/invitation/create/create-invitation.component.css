@@ -106,6 +106,9 @@
 
 .btn-copy {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 5px 14px;
   background: var(--secondary);
   border: none;
@@ -118,6 +121,13 @@
   color: #fff;
   cursor: pointer;
   transition: opacity 0.2s;
+}
+
+.btn-copy mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  line-height: 1;
 }
 
 .btn-copy:hover {
@@ -146,6 +156,30 @@
 .link-info strong {
   color: var(--border);
   font-weight: 600;
+}
+
+/* ── Admin Note ── */
+.admin-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--warn, #f59e0b);
+  opacity: 0.85;
+  background: rgba(245, 158, 11, 0.07);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: -4px;
+  line-height: 1.5;
+}
+
+.admin-note mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+  flex-shrink: 0;
 }
 
 /* ── Button icons ── */

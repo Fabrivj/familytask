@@ -7,11 +7,12 @@ import {
   effect,
   viewChild,
 } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-confirm-dialog',
-  imports: [MatIconModule],
+  imports: [A11yModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(keydown.escape)': 'onCancel()',
@@ -20,7 +21,8 @@ import { MatIconModule } from '@angular/material/icon';
     @if (open()) {
       <div class="backdrop" (click)="onCancel()"></div>
       <div class="dialog" role="alertdialog" aria-modal="true"
-        aria-labelledby="confirm-title" aria-describedby="confirm-msg">
+        aria-labelledby="confirm-title" aria-describedby="confirm-msg"
+        cdkTrapFocus>
         @if (variant() === 'danger') {
           <mat-icon class="warning-icon" aria-hidden="true">warning</mat-icon>
         }
@@ -157,6 +159,26 @@ import { MatIconModule } from '@angular/material/icon';
     .btn-confirm:focus-visible {
       outline: 2px solid var(--border);
       outline-offset: 2px;
+    }
+
+    @media (max-width: 767px) {
+      .dialog {
+        padding: 24px 20px 18px;
+        width: calc(100vw - 32px);
+      }
+
+      .actions {
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
+
+      .btn-cancel,
+      .btn-confirm {
+        width: 100%;
+        padding: 13px;
+        font-size: 14px;
+        text-align: center;
+      }
     }
 
     @keyframes fadeIn {

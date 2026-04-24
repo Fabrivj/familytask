@@ -6,11 +6,14 @@ import com.vertexdev.familytask.dto.invite.InviteResponse;
 import com.vertexdev.familytask.dto.invite.ProcessInviteRequest;
 import com.vertexdev.familytask.exception.InvitationException;
 import com.vertexdev.familytask.mapper.InviteMapper;
+import com.vertexdev.familytask.model.FamilyActivity;
 import com.vertexdev.familytask.model.FamilyGroup;
 import com.vertexdev.familytask.model.FamilyMember;
 import com.vertexdev.familytask.model.Invitation;
 import com.vertexdev.familytask.model.User;
+import com.vertexdev.familytask.model.enums.ActivityAction;
 import com.vertexdev.familytask.model.enums.Role;
+import com.vertexdev.familytask.repository.FamilyActivityRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.util.FamilyPermissions;
 import com.vertexdev.familytask.repository.FamilyGroupRepository;
@@ -39,6 +42,7 @@ public class InvitationService {
     private final InvitationRepository invitationRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
+    private final FamilyActivityRepository familyActivityRepository;
     private final InviteMapper invitationMapper;
     private final UserRepository userRepository;
     private final FamilyPermissions familyPermissions;
@@ -52,11 +56,25 @@ public class InvitationService {
                 .orElseThrow(() -> new InvitationException("FAMILY_NOT_FOUND", "Familia no encontrada.", 404));
 
         // Verify that the requester is PARENT in this family
-        familyMemberRepository
+        FamilyMember requesterMember = familyMemberRepository
                 .findByFamilyGroupIdAndUserId(familyGroup.getId(), requester.getId())
                 .filter(familyPermissions::isActiveParent)
                 .orElseThrow(() -> new InvitationException("ACCESS_DENIED",
                         "No tienes permisos para invitar miembros a esta familia.", 403));
+
+        // Only admins can invite someone as admin
+        boolean inviteAsAdmin = Boolean.TRUE.equals(request.getIsAdmin());
+        if (inviteAsAdmin) {
+            if (!Boolean.TRUE.equals(requesterMember.getIsAdmin())) {
+                throw new InvitationException("ACCESS_DENIED",
+                        "Solo un administrador puede invitar a otro administrador.", 403);
+            }
+            // Admin invitation requires role = PARENT
+            if (request.getRole() != Role.PARENT) {
+                throw new InvitationException("INVALID_ROLE",
+                        "Solo los Padres/Tutores pueden ser administradores.", 400);
+            }
+        }
 
         // Validate that the email is not already an active member or has a pending invitation
         boolean alreadyMember = userRepository.findByEmail(request.getInvitedEmail())
@@ -82,6 +100,7 @@ public class InvitationService {
                 .token(invitationCode)
                 .invitedEmail(request.getInvitedEmail())
                 .role(request.getRole())
+                .isAdmin(inviteAsAdmin)
                 .familyGroup(familyGroup)
                 .expirationDate(expirationDate)
                 .isUsed(false)
@@ -89,7 +108,14 @@ public class InvitationService {
                 .build();
 
         invitationRepository.save(invitation);
-        log.info("Invitation created for {} in family {}", request.getInvitedEmail(), familyGroup.getName());
+
+        logActivity(familyGroup, requester, null,
+                ActivityAction.MEMBER_INVITED,
+                "Invitación enviada a " + request.getInvitedEmail() + " como " +
+                        (inviteAsAdmin ? "Administrador" : request.getRole().name()) + ".");
+
+        log.info("Invitation created for {} in family {} (isAdmin={})",
+                request.getInvitedEmail(), familyGroup.getName(), inviteAsAdmin);
 
         // Build the response with the link
         InviteResponse response = invitationMapper.toResponse(invitation);
@@ -108,11 +134,13 @@ public class InvitationService {
                 ? invitation.getCreatedBy().getName()
                 : null;
 
+        String displayRole = Boolean.TRUE.equals(invitation.getIsAdmin()) ? "ADMIN" : invitation.getRole().name();
+
         return InvitePreviewResponse.builder()
                 .familyName(invitation.getFamilyGroup().getName())
                 .invitedByName(invitedByName)
                 .invitedEmail(invitation.getInvitedEmail())
-                .role(invitation.getRole().name())
+                .role(displayRole)
                 .expirationDate(invitation.getExpirationDate())
                 .build();
     }
@@ -146,7 +174,7 @@ public class InvitationService {
 
             member.setRole(invitation.getRole());
             member.setIsActive(true);
-            member.setIsAdmin(false);
+            member.setIsAdmin(Boolean.TRUE.equals(invitation.getIsAdmin()));
 
             familyMemberRepository.save(member);
 
@@ -162,10 +190,11 @@ public class InvitationService {
                     "No se pudo completar la incorporación. Intenta de nuevo.", 500);
         }
 
-        log.info("User {} added to family {} with role {}",
+        log.info("User {} added to family {} with role {} (isAdmin={})",
                 authenticatedUser.getEmail(),
                 invitation.getFamilyGroup().getName(),
-                invitation.getRole());
+                invitation.getRole(),
+                invitation.getIsAdmin());
     }
 
     /**
@@ -188,6 +217,10 @@ public class InvitationService {
                 .filter(familyPermissions::isActiveParent)
                 .orElseThrow(() -> new InvitationException("ACCESS_DENIED",
                         "No tienes permisos para cancelar esta invitación.", 403));
+
+        logActivity(invitation.getFamilyGroup(), requester, null,
+                ActivityAction.INVITATION_CANCELLED,
+                "Invitación a " + invitation.getInvitedEmail() + " cancelada.");
 
         invitationRepository.delete(invitation);
         log.info("Invitation for {} cancelled by {}", invitation.getInvitedEmail(), requester.getEmail());
@@ -217,5 +250,17 @@ public class InvitationService {
         }
 
         return invitation;
+    }
+
+    private void logActivity(FamilyGroup familyGroup, User performedBy, User targetUser,
+                              ActivityAction action, String details) {
+        FamilyActivity activity = FamilyActivity.builder()
+                .familyGroup(familyGroup)
+                .performedBy(performedBy)
+                .targetUser(targetUser)
+                .action(action)
+                .details(details)
+                .build();
+        familyActivityRepository.save(activity);
     }
 }

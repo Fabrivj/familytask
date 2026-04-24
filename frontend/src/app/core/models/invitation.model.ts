@@ -4,6 +4,7 @@ export interface CreateInviteRequest {
   invitedEmail: string;
   role: InvitationRole;
   familyId: number;
+  isAdmin?: boolean;
 }
 
 export interface InviteResponse {

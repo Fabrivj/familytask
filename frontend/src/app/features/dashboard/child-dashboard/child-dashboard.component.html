@@ -1,0 +1,442 @@
+<main class="child-content" aria-label="Panel de misiones">
+
+  <!-- ══════════════════════ LOADING STATE ══════════════════════ -->
+  @if (isLoading()) {
+    <div class="loading-state" role="status" aria-live="polite" aria-label="Cargando tu panel de misiones">
+      <mat-spinner diameter="44" />
+      <span class="loading-text">Cargando tu panel...</span>
+    </div>
+  }
+
+  <!-- ══════════════════════ ERROR STATE ══════════════════════ -->
+  @if (dashboardError()) {
+    <div class="error-state" role="alert">
+      <mat-icon aria-hidden="true" class="error-icon">error_outline</mat-icon>
+      <p class="error-msg">{{ dashboardError() }}</p>
+      <button class="btn-pill btn-retry" type="button" (click)="loadData()"
+              aria-label="Reintentar cargar el dashboard">
+        <mat-icon aria-hidden="true">refresh</mat-icon>
+        REINTENTAR
+      </button>
+    </div>
+  }
+
+  <!-- ══════════════════════ DASHBOARD CONTENT ══════════════════════ -->
+  @if (!isLoading() && !dashboardError()) {
+
+    <!-- ── CHALLENGE BANNER ── -->
+    <section class="challenge-banner" aria-labelledby="challenge-title">
+      <div class="banner-scanlines" aria-hidden="true"></div>
+
+      <div class="challenge-left">
+        <p class="challenge-date" aria-hidden="true">// {{ todayLabel() }}</p>
+
+        <h1 class="challenge-title" id="challenge-title">
+          ¿Todo listo para el desafío de hoy? 🚀
+        </h1>
+
+        @if (totalPending() > 0) {
+          <p class="challenge-sub">
+            Tienes <strong>{{ totalPending() }}
+            {{ totalPending() === 1 ? 'misión pendiente' : 'misiones pendientes' }}</strong>
+            &mdash; completa todas y gana
+            <span class="reward-hint">+{{ bonusXp() }} XP</span>
+            <span class="reward-hint coins-hint"><mat-icon class="hint-coin-icon" aria-hidden="true">monetization_on</mat-icon>{{ bonusCoins() }} extra</span>.
+          </p>
+        } @else {
+          <p class="challenge-sub">¡Sin misiones pendientes hoy! Sigue así. 🎉</p>
+        }
+
+        <!-- XP Progress Bar -->
+        <div class="xp-progress-wrap"
+             role="progressbar"
+             [attr.aria-valuenow]="xpInLevel()"
+             [attr.aria-valuemin]="0"
+             [attr.aria-valuemax]="xpNeededInLevel()"
+             [attr.aria-label]="xpInLevel() + ' de ' + xpNeededInLevel() + ' XP para Nivel ' + ((myStats()?.currentLevel ?? 0) + 1)">
+          <div class="xp-bar-track">
+            <div class="xp-bar-fill" [style.width.%]="progressPercent()"></div>
+          </div>
+          <span class="xp-bar-label" aria-hidden="true">
+            {{ xpInLevel() }} / {{ xpNeededInLevel() }} XP &nbsp;·&nbsp; Nivel {{ (myStats()?.currentLevel ?? 0) + 1 }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Level orb -->
+      <div class="level-orb" aria-label="Nivel actual: {{ myStats()?.currentLevel ?? 1 }}">
+        <span class="level-orb-label" aria-hidden="true">NIVEL</span>
+        <span class="level-orb-num" aria-hidden="true">{{ myStats()?.currentLevel ?? 1 }}</span>
+      </div>
+    </section>
+
+    <!-- ── STATS ROW ── -->
+    <section class="stats-row" aria-label="Resumen de estadísticas">
+      <div class="stat-card" tabindex="0">
+        <mat-icon aria-hidden="true" class="stat-icon">assignment</mat-icon>
+        <div class="stat-body">
+          <span class="stat-value">{{ myPendingTasks().length + pendingHabits().length }}</span>
+          <span class="stat-label">MISIONES PENDIENTES</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card-coins" tabindex="0">
+        <mat-icon class="stat-icon stat-coin-sym" aria-hidden="true">monetization_on</mat-icon>
+        <div class="stat-body">
+          <span class="stat-value">{{ myStats()?.totalCoins ?? 0 }}</span>
+          <span class="stat-label">MONEDAS DISPONIBLES</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card-done" tabindex="0">
+        <mat-icon aria-hidden="true" class="stat-icon stat-done-icon">verified</mat-icon>
+        <div class="stat-body">
+          <span class="stat-value">{{ myCompletedTaskCount() }}</span>
+          <span class="stat-label">COMPLETADAS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MAIN LAYOUT ── -->
+    <div class="main-layout">
+
+      <!-- ════════════ LEFT COLUMN ════════════ -->
+      <div class="col-main">
+
+        <!-- ── TASKS SECTION ── -->
+        <section class="panel-section" aria-labelledby="tasks-heading">
+          <div class="section-header">
+            <h2 class="section-title" id="tasks-heading">
+              <mat-icon aria-hidden="true" class="section-icon">rocket_launch</mat-icon>
+              MIS TAREAS DE HOY
+              @if (myPendingTasks().length > 0) {
+                <span class="section-badge"
+                      aria-label="{{ myPendingTasks().length }} tareas pendientes">
+                  {{ myPendingTasks().length }}
+                </span>
+              }
+            </h2>
+            <a routerLink="/tasks"
+               class="section-link"
+               aria-label="Ver todas las tareas">
+              VER TODAS
+              <mat-icon aria-hidden="true">chevron_right</mat-icon>
+            </a>
+          </div>
+
+          <!-- No tasks empty state -->
+          @if (myPendingTasks().length === 0 && myHabits().length === 0) {
+            <div class="empty-state" role="status">
+              <mat-icon aria-hidden="true" class="empty-icon">rocket_launch</mat-icon>
+              <p class="empty-msg">
+                Aún no tienes misiones. Pide a tu tutor que te asigne una.
+              </p>
+            </div>
+          }
+
+          <!-- Task list -->
+          @if (myPendingTasks().length > 0) {
+            <ul class="task-list" role="list" aria-label="Lista de tareas pendientes">
+              @for (task of myPendingTasks(); track task.id) {
+                <li class="task-item"
+                    [class.task-in-review]="task.status === 'IN_REVIEW'"
+                    [attr.aria-label]="task.title + ', estado: ' + statusLabel(task.status)">
+
+                  <!-- TOP ROW: dot · title · action -->
+                  <div class="task-row-top">
+                    <div class="task-status-dot"
+                         [class.dot-pending]="task.status === 'PENDING'"
+                         [class.dot-progress]="task.status === 'IN_PROGRESS'"
+                         [class.dot-review]="task.status === 'IN_REVIEW'"
+                         aria-hidden="true"></div>
+
+                    <span class="task-title">{{ task.title }}</span>
+
+                    @if (task.status === 'IN_REVIEW') {
+                      <span class="task-review-label" role="status"
+                            [attr.aria-label]="'En revisión: ' + task.title">
+                        <mat-icon aria-hidden="true" class="review-label-icon">rate_review</mat-icon>
+                        <span class="review-label-text">En revisión</span>
+                      </span>
+                    } @else {
+                      <div class="task-actions">
+                        @for (next of availableNextStatuses(task); track next) {
+                          <button
+                            class="btn-task btn-task-{{ next | lowercase }}"
+                            type="button"
+                            (click)="doTaskAction(task, next)"
+                            [disabled]="updatingTaskId() === task.id"
+                            [attr.aria-label]="statusLabel(next) + ': ' + task.title"
+                            [attr.aria-busy]="updatingTaskId() === task.id">
+                            @if (updatingTaskId() === task.id) {
+                              <mat-spinner diameter="14" aria-hidden="true" />
+                            } @else {
+                              <mat-icon aria-hidden="true">{{ statusIcon(next) }}</mat-icon>
+                            }
+                            <span class="btn-label">{{ statusLabel(next) }}</span>
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <!-- BOTTOM ROW: meta · rewards -->
+                  <div class="task-row-bottom">
+                    <div class="task-meta">
+                      <span class="task-space">
+                        <mat-icon aria-hidden="true" class="meta-icon">home</mat-icon>
+                        {{ task.homeSpaceName }}
+                      </span>
+                      @if (task.dueDate) {
+                        <span class="task-due">
+                          <mat-icon aria-hidden="true" class="meta-icon">schedule</mat-icon>
+                          {{ formatDate(task.dueDate) }}
+                        </span>
+                      }
+                    </div>
+                    <div class="task-rewards"
+                         [attr.aria-label]="'+' + task.xpReward + ' XP y ' + task.coinsReward + ' monedas de recompensa'">
+                      <span class="reward-pill reward-xp" aria-hidden="true">+{{ task.xpReward }} XP</span>
+                      <span class="reward-pill reward-coins" aria-hidden="true"><mat-icon class="pill-coin-icon" aria-hidden="true">monetization_on</mat-icon> {{ task.coinsReward }}</span>
+                    </div>
+                  </div>
+
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <!-- ── HABITS SECTION ── -->
+        @if (myHabits().length > 0) {
+          <section class="panel-section" aria-labelledby="habits-heading">
+            <div class="section-header">
+              <h2 class="section-title" id="habits-heading">
+                <mat-icon aria-hidden="true" class="section-icon">loop</mat-icon>
+                MIS HÁBITOS
+                @if (pendingHabits().length > 0) {
+                  <span class="section-badge"
+                        aria-label="{{ pendingHabits().length }} hábitos pendientes">
+                    {{ pendingHabits().length }}
+                  </span>
+                }
+              </h2>
+              <a routerLink="/tasks"
+                 class="section-link"
+                 aria-label="Ver todos los hábitos">
+                VER TODOS
+                <mat-icon aria-hidden="true">chevron_right</mat-icon>
+              </a>
+            </div>
+
+            <ul class="task-list" role="list" aria-label="Lista de hábitos">
+              @for (habit of myHabits(); track habit.id) {
+                <li class="task-item"
+                    [class.task-done]="habit.completedInCurrentPeriod"
+                    [attr.aria-label]="habit.title + (habit.completedInCurrentPeriod ? ', completado hoy' : ', pendiente')">
+
+                  <!-- TOP ROW: dot · title · action -->
+                  <div class="task-row-top">
+                    <div class="task-status-dot"
+                         [class.dot-done]="habit.completedInCurrentPeriod"
+                         [class.dot-pending]="!habit.completedInCurrentPeriod"
+                         aria-hidden="true"></div>
+
+                    <span class="task-title">{{ habit.title }}</span>
+
+                    @if (habit.completedInCurrentPeriod) {
+                      <span class="btn-complete btn-complete-done" role="status"
+                            [attr.aria-label]="'Hábito completado: ' + habit.title">
+                        <mat-icon aria-hidden="true">check_circle</mat-icon>
+                        <span class="btn-label">COMPLETADO</span>
+                      </span>
+                    } @else {
+                      <button
+                        class="btn-complete"
+                        type="button"
+                        (click)="completeHabit(habit)"
+                        [disabled]="completingHabitId() === habit.id"
+                        [attr.aria-label]="'Completar hábito: ' + habit.title"
+                        [attr.aria-busy]="completingHabitId() === habit.id">
+                        @if (completingHabitId() === habit.id) {
+                          <mat-spinner diameter="14" aria-hidden="true" />
+                        } @else {
+                          <mat-icon aria-hidden="true">check</mat-icon>
+                        }
+                        <span class="btn-label">COMPLETAR</span>
+                      </button>
+                    }
+                  </div>
+
+                  <!-- BOTTOM ROW: meta · rewards -->
+                  <div class="task-row-bottom">
+                    <div class="task-meta">
+                      <span class="task-space">
+                        <mat-icon aria-hidden="true" class="meta-icon">loop</mat-icon>
+                        {{ habitFrequencyLabel(habit.frequency) }}
+                      </span>
+                      @if ((habit.currentStreak ?? 0) > 0) {
+                        <span class="streak-badge"
+                              [attr.aria-label]="'Racha de ' + habit.currentStreak + ' días'">
+                          🔥 {{ habit.currentStreak }}
+                        </span>
+                      }
+                    </div>
+                    <div class="task-rewards"
+                         [attr.aria-label]="'+' + habit.xpReward + ' XP y ' + habit.coinsReward + ' monedas de recompensa'">
+                      <span class="reward-pill reward-xp" aria-hidden="true">+{{ habit.xpReward }} XP</span>
+                      <span class="reward-pill reward-coins" aria-hidden="true"><mat-icon class="pill-coin-icon" aria-hidden="true">monetization_on</mat-icon> {{ habit.coinsReward }}</span>
+                    </div>
+                  </div>
+
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        <!-- ── BADGES SECTION ── -->
+        <section class="panel-section" aria-labelledby="badges-heading">
+          <div class="section-header">
+            <h2 class="section-title" id="badges-heading">
+              <mat-icon aria-hidden="true" class="section-icon">emoji_events</mat-icon>
+              MIS INSIGNIAS
+              @if (earnedBadges().length > 0) {
+                <span class="section-badge"
+                      aria-label="{{ earnedBadges().length }} insignias ganadas">
+                  {{ earnedBadges().length }}
+                </span>
+              }
+            </h2>
+            <a routerLink="/badges"
+               class="section-link"
+               aria-label="Ver todas las insignias">
+              VER TODAS
+              <mat-icon aria-hidden="true">chevron_right</mat-icon>
+            </a>
+          </div>
+
+          @if (earnedBadges().length === 0 && lockedBadgesPreview().length === 0) {
+            <p class="empty-sub">Completa misiones para desbloquear insignias.</p>
+          } @else {
+            <div class="badges-grid" role="list" aria-label="Insignias">
+              <!-- Earned badges -->
+              @for (badge of earnedBadges(); track badge.id) {
+                <div class="badge-item badge-earned"
+                     role="listitem"
+                     tabindex="0"
+                     [title]="badge.name + ': ' + badge.description"
+                     [attr.aria-label]="'Insignia obtenida: ' + badge.name + '. ' + badge.description">
+                  <mat-icon class="badge-icon" aria-hidden="true">{{ badge.icon }}</mat-icon>
+                  <span class="badge-name">{{ badge.name }}</span>
+                </div>
+              }
+              <!-- Locked badges (in-progress) -->
+              @for (badge of lockedBadgesPreview(); track badge.id) {
+                <div class="badge-item badge-locked"
+                     role="listitem"
+                     tabindex="0"
+                     [attr.aria-label]="'Insignia bloqueada: ' + badge.name + '. Progreso: ' + badge.currentProgress + ' de ' + badge.conditionValue">
+                  <mat-icon class="badge-icon locked-icon" aria-hidden="true">{{ badge.icon }}</mat-icon>
+                  <div class="badge-prog-track"
+                       role="progressbar"
+                       [attr.aria-valuenow]="badge.currentProgress"
+                       [attr.aria-valuemin]="0"
+                       [attr.aria-valuemax]="badge.conditionValue"
+                       [attr.aria-label]="badge.name + ': ' + badge.currentProgress + ' de ' + badge.conditionValue"
+                       aria-hidden="true">
+                    <div class="badge-prog-fill"
+                         [style.width.%]="getProgressPercent(badge)"></div>
+                  </div>
+                  <span class="badge-name">{{ badge.name }}</span>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+      </div><!-- /col-main -->
+
+      <!-- ════════════ RIGHT SIDEBAR ════════════ -->
+      <aside class="col-sidebar" aria-label="Recompensas destacadas de la tienda">
+        <section class="panel-section sidebar-panel" aria-labelledby="store-heading">
+          <div class="section-header">
+            <h2 class="section-title" id="store-heading">
+              <mat-icon aria-hidden="true" class="section-icon">storefront</mat-icon>
+              TIENDA &mdash; DESTACADOS
+            </h2>
+            <a routerLink="/store"
+               class="section-link"
+               aria-label="Ir a la tienda de recompensas">
+              VER TIENDA
+              <mat-icon aria-hidden="true">chevron_right</mat-icon>
+            </a>
+          </div>
+
+          @if (allRewards().length === 0) {
+            <p class="empty-sub">No hay recompensas disponibles.</p>
+          } @else {
+            <!-- Available -->
+            @if (availableRewards().length > 0) {
+              <p class="store-cat-label">DISPONIBLE PARA TI</p>
+              <ul class="reward-list" role="list" aria-label="Recompensas disponibles">
+                @for (reward of availableRewards(); track reward.id) {
+                  <li class="reward-item">
+                    <span class="reward-icon" aria-hidden="true">{{ reward.icon ?? '🎁' }}</span>
+                    <div class="reward-info">
+                      <span class="reward-name">{{ reward.name }}</span>
+                      <span class="reward-cost" aria-hidden="true"><mat-icon class="inline-coin-icon" aria-hidden="true">monetization_on</mat-icon> {{ reward.cost }}</span>
+                    </div>
+                    <button
+                      class="btn-redeem"
+                      type="button"
+                      (click)="openClaimDialog(reward)"
+                      [disabled]="isRedeeming()"
+                      [attr.aria-label]="'Canjear ' + reward.name + ' por ' + reward.cost + ' monedas'">
+                      CANJEAR
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <!-- Locked -->
+            @if (lockedRewards().length > 0) {
+              <p class="store-cat-label store-cat-blocked">BLOQUEADAS</p>
+              <ul class="reward-list" role="list" aria-label="Recompensas bloqueadas">
+                @for (reward of lockedRewards(); track reward.id) {
+                  <li class="reward-item reward-blocked"
+                      [attr.aria-label]="reward.name + ': bloqueada. ' + rewardBlockReason(reward)">
+                    <span class="reward-icon reward-icon-locked" aria-hidden="true">{{ reward.icon ?? '🎁' }}</span>
+                    <div class="reward-info">
+                      <span class="reward-name">{{ reward.name }}</span>
+                      <span class="reward-block-reason">{{ rewardBlockReason(reward) }}</span>
+                    </div>
+                    <span class="reward-lock-icon" aria-hidden="true">
+                      <mat-icon>lock</mat-icon>
+                    </span>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </section>
+      </aside>
+
+    </div><!-- /main-layout -->
+
+  }<!-- /!isLoading && !error -->
+
+</main>
+
+<!-- ── CONFIRM CLAIM DIALOG ── -->
+<app-confirm-dialog
+  [open]="showClaimDialog()"
+  title="Canjear recompensa"
+  [message]="rewardToClaim()
+    ? '¿Quieres canjear «' + rewardToClaim()!.name + '» por ' + rewardToClaim()!.cost + ' monedas?'
+    : ''"
+  confirmLabel="CANJEAR"
+  cancelLabel="CANCELAR"
+  (confirmed)="confirmClaim()"
+  (cancelled)="closeClaimDialog()" />

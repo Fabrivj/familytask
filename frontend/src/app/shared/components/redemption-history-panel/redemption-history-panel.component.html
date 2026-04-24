@@ -1,0 +1,174 @@
+<section class="history-panel" aria-label="Historial de canjes">
+  @if (collapsibleFilters()) {
+    <button
+      class="history-filters-toggle"
+      type="button"
+      [attr.aria-expanded]="filtersExpanded()"
+      [attr.aria-controls]="filtersExpanded() ? 'history-filters-panel' : null"
+      (click)="toggleFilters()"
+    >
+      <span class="history-filters-toggle__label">
+        <mat-icon aria-hidden="true">tune</mat-icon>
+        Filtros
+      </span>
+      <span class="history-filters-toggle__summary">{{ filterSummary() }}</span>
+      <mat-icon class="history-filters-toggle__chevron" [class.is-open]="filtersExpanded()" aria-hidden="true">expand_more</mat-icon>
+    </button>
+  }
+
+  @if (!collapsibleFilters() || filtersExpanded()) {
+    <div [id]="collapsibleFilters() ? 'history-filters-panel' : null" class="history-filters-shell">
+      <div class="history-filters-shell__inner">
+        <section class="filters-bar" aria-label="Filtros de historial">
+          @if (isParent()) {
+            <div class="filter-group">
+              <label for="member-filter" class="filter-label">Miembro del grupo</label>
+              <select
+                id="member-filter"
+                class="filter-select"
+                [ngModel]="selectedMemberId()"
+                (ngModelChange)="selectedMemberId.set($event ? +$event : null)"
+              >
+                <option [ngValue]="null">Todos</option>
+                @for (member of members(); track member.id) {
+                  <option [ngValue]="member.id">{{ member.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <div class="filter-group">
+            <label for="status-filter" class="filter-label">Estado del canje</label>
+            <select
+              id="status-filter"
+              class="filter-select"
+              [ngModel]="selectedStatus()"
+              (ngModelChange)="selectedStatus.set($event)"
+            >
+              <option value="">Todos</option>
+              <option value="PENDING">Pendiente</option>
+              <option value="DELIVERED">Entregado</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="date-from" class="filter-label">Desde</label>
+            <div class="date-input-wrap">
+              <input
+                id="date-from"
+                class="filter-input date-input"
+                [matDatepicker]="pickerFrom"
+                [formControl]="dateFromCtrl"
+                placeholder="dd/mm/aaaa"
+                (dateChange)="onDateFromChange($event)"
+                readonly
+              />
+              <mat-datepicker-toggle class="date-toggle" [for]="pickerFrom" aria-label="Abrir calendario" />
+              <mat-datepicker #pickerFrom />
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label for="date-to" class="filter-label">Hasta</label>
+            <div class="date-input-wrap">
+              <input
+                id="date-to"
+                class="filter-input date-input"
+                [matDatepicker]="pickerTo"
+                [formControl]="dateToCtrl"
+                placeholder="dd/mm/aaaa"
+                (dateChange)="onDateToChange($event)"
+                readonly
+              />
+              <mat-datepicker-toggle class="date-toggle" [for]="pickerTo" aria-label="Abrir calendario" />
+              <mat-datepicker #pickerTo />
+            </div>
+          </div>
+
+          <div class="filter-actions">
+            <button class="btn-apply" (click)="applyFilters()" type="button">
+              <mat-icon aria-hidden="true">search</mat-icon>
+              Ver historial
+            </button>
+            <button class="btn-clear" (click)="clearFilters()" type="button">
+              Limpiar
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+
+  <div class="history-scroll" tabindex="0" aria-label="Lista de historial desplazable">
+    @if (isLoading()) {
+      <div class="state-center" role="status" aria-live="polite">
+        <mat-spinner diameter="40" />
+      </div>
+    } @else if (error()) {
+      <div class="state-error" role="alert">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <p>{{ error() }}</p>
+      </div>
+    } @else if (redemptions().length === 0) {
+      <div class="state-empty" role="status">
+        <mat-icon aria-hidden="true">inbox</mat-icon>
+        <p>Aún no hay canjes registrados.</p>
+      </div>
+    } @else {
+      <ul class="redemption-list" aria-label="Historial de canjes">
+        @for (item of redemptions(); track item.id) {
+          <li
+            class="redemption-card"
+            [class.redemption-card--pending]="item.status === 'PENDING'"
+            [class.redemption-card--delivered]="item.status === 'DELIVERED'"
+          >
+            <div class="redemption-icon-wrap" aria-hidden="true">
+              {{ item.rewardIcon ?? '🎁' }}
+            </div>
+            <div class="redemption-main">
+              <div class="redemption-top">
+                <p class="redemption-name">{{ item.rewardName }}</p>
+                <span class="redemption-cost">
+                  <mat-icon class="coin-icon" aria-hidden="true">monetization_on</mat-icon>
+                  {{ item.rewardCost }}
+                </span>
+              </div>
+              <div class="redemption-meta">
+                <app-user-chip [name]="item.redeemedByName" [avatarSize]="18" />
+                <time class="redemption-date" [attr.datetime]="item.redeemedAt">
+                  {{ item.redeemedAt | date:'dd/MM/yyyy' }}
+                </time>
+              </div>
+              <div class="redemption-footer">
+                <span
+                  class="redemption-badge"
+                  [class.badge-pending]="item.status === 'PENDING'"
+                  [class.badge-delivered]="item.status === 'DELIVERED'"
+                >
+                  {{ statusLabel(item.status) }}
+                </span>
+                @if (isParent() && item.status === 'PENDING') {
+                  <button
+                    class="btn-deliver"
+                    type="button"
+                    [disabled]="updatingId() === item.id"
+                    [attr.aria-busy]="updatingId() === item.id"
+                    [attr.aria-label]="(updatingId() === item.id ? 'Entregando ' : 'Marcar como entregado: ') + item.rewardName"
+                    (click)="markAsDelivered(item)"
+                  >
+                    @if (updatingId() === item.id) {
+                      <mat-spinner diameter="13" aria-hidden="true" />
+                    } @else {
+                      <mat-icon aria-hidden="true">redeem</mat-icon>
+                    }
+                    Entregar
+                  </button>
+                }
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

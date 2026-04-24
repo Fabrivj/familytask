@@ -46,4 +46,16 @@ public class FamilyMember {
     @CreationTimestamp
     @Column(name = "joined_at", updatable = false)
     private LocalDateTime joinedAt;
+
+    @Column(name = "total_xp", nullable = false)
+    @Builder.Default
+    private Integer totalXp = 0;
+
+    @Column(name = "current_level", nullable = false)
+    @Builder.Default
+    private Integer currentLevel = 0;
+
+    @Column(name = "total_coins", nullable = false)
+    @Builder.Default
+    private Integer totalCoins = 0;
 }

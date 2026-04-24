@@ -1,5 +1,7 @@
+import { EarnedBadge } from './badge.model';
+
 export type TaskPriority = 'HIGH' | 'MEDIUM' | 'LOW';
-export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'IN_REVIEW' | 'COMPLETED';
 
 export interface TaskResponse {
   id: number;
@@ -41,4 +43,20 @@ export interface UpdateTaskRequest {
   coinsReward: number;
   dueDate?: string | null;
   assignedToId?: number | null;
+}
+
+export interface CompleteTaskResponse {
+  taskId: number;
+  taskTitle: string;
+  assignedToName: string;
+  xpReward: number;
+  coinsReward: number;
+  completedAt: string;
+  newTotalXp: number;
+  newTotalCoins: number;
+  newLevel: number;
+  previousLevel: number;
+  leveledUp: boolean;
+  xpToNextLevel: number;
+  earnedBadges: EarnedBadge[];
 }

@@ -18,6 +18,7 @@ import com.vertexdev.familytask.repository.FamilyGroupRepository;
 import com.vertexdev.familytask.repository.FamilyMemberRepository;
 import com.vertexdev.familytask.repository.SpaceRepository;
 import com.vertexdev.familytask.repository.TaskAssignmentRepository;
+import com.vertexdev.familytask.repository.TaskCompletionRepository;
 import com.vertexdev.familytask.repository.TaskRepository;
 import com.vertexdev.familytask.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vertexdev.familytask.dto.task.CompleteTaskResponse;
 import com.vertexdev.familytask.dto.task.UpdateTaskRequest;
 import com.vertexdev.familytask.dto.task.UpdateTaskStatusRequest;
+import com.vertexdev.familytask.model.TaskCompletion;
 import com.vertexdev.familytask.model.enums.TaskStatus;
 
 import java.time.LocalDate;
@@ -41,12 +44,15 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final TaskAssignmentRepository taskAssignmentRepository;
+    private final TaskCompletionRepository taskCompletionRepository;
     private final FamilyGroupRepository familyGroupRepository;
     private final FamilyMemberRepository familyMemberRepository;
     private final SpaceRepository spaceRepository;
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
     private final FamilyPermissions familyPermissions;
+    private final ExperienceService experienceService;
+    private final BadgeService badgeService;
 
     public TaskResponse createTask(CreateTaskRequest request, User creator) {
         FamilyGroup familyGroup = familyGroupRepository.findById(request.getFamilyId())
@@ -227,7 +233,7 @@ public class TaskService {
                 .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
 
         TaskAssignment assignment = taskAssignmentRepository.findByTaskId(taskId)
-                .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403));
+                .orElseThrow(() -> new TaskException("TASK_NOT_ASSIGNED", "La tarea no tiene un miembro asignado.", 400));
 
         if (member.getRole() == Role.CHILD && !assignment.getUser().getId().equals(requester.getId())) {
             throw new TaskException("ACCESS_DENIED", "Acceso no autorizado.", 403);
@@ -239,6 +245,8 @@ public class TaskService {
         } catch (IllegalArgumentException e) {
             throw new TaskException("INVALID_STATUS", "Estado inválido.", 400);
         }
+
+        validateTransition(assignment.getStatus(), newStatus, member.getRole());
 
         try {
             assignment.setStatus(newStatus);
@@ -253,6 +261,104 @@ public class TaskService {
             log.error("Failed to update status of task {} for user {}: {}", taskId, requester.getEmail(), e.getMessage());
             throw new TaskException("TASK_UPDATE_FAILED",
                     "Ocurrió un error al actualizar la tarea. Por favor, intente nuevamente.", 500);
+        }
+    }
+
+    public CompleteTaskResponse completeTask(Long taskId, User requester) {
+        Task task = taskRepository.findById(taskId)
+                .filter(t -> t.getDeletedAt() == null)
+                .orElseThrow(() -> new TaskException("TASK_NOT_FOUND", "La tarea no existe.", 404));
+
+        familyMemberRepository
+                .findByFamilyGroupIdAndUserId(task.getFamilyGroup().getId(), requester.getId())
+                .filter(familyPermissions::isActiveParent)
+                .orElseThrow(() -> new TaskException("ACCESS_DENIED", "Solo un padre puede completar una tarea.", 403));
+
+        TaskAssignment assignment = taskAssignmentRepository.findByTaskId(taskId)
+                .orElseThrow(() -> new TaskException("TASK_NOT_ASSIGNED", "La tarea no tiene un miembro asignado.", 400));
+
+        if (assignment.getStatus() != TaskStatus.IN_REVIEW) {
+            throw new TaskException("INVALID_STATUS",
+                    "Solo se puede completar una tarea que está en revisión.", 400);
+        }
+
+        if (taskCompletionRepository.existsByTaskAssignmentId(assignment.getId())) {
+            throw new TaskException("ALREADY_COMPLETED", "Esta tarea ya fue completada.", 400);
+        }
+
+        try {
+            LocalDateTime now = LocalDateTime.now();
+
+            assignment.setStatus(TaskStatus.COMPLETED);
+            taskAssignmentRepository.save(assignment);
+
+            TaskCompletion completion = TaskCompletion.builder()
+                    .taskAssignment(assignment)
+                    .verifiedBy(requester)
+                    .verifiedAt(now)
+                    .build();
+            taskCompletionRepository.save(completion);
+
+            FamilyMember childMember = familyMemberRepository
+                    .findByFamilyGroupIdAndUserId(task.getFamilyGroup().getId(), assignment.getUser().getId())
+                    .orElseThrow(() -> new TaskException("MEMBER_NOT_FOUND",
+                            "No se encontró el perfil del hijo en esta familia.", 404));
+
+            ExperienceService.AwardResult award = experienceService.awardXpAndCoins(
+                    childMember,
+                    task.getXpReward() != null ? task.getXpReward() : 0,
+                    task.getCoinsReward() != null ? task.getCoinsReward() : 0
+            );
+
+            log.info("Task '{}' completed by parent {} — assigned to {} | +{}XP +{}coins → level {}{}",
+                    task.getTitle(), requester.getEmail(), assignment.getUser().getEmail(),
+                    task.getXpReward(), task.getCoinsReward(), award.newLevel(),
+                    award.leveledUp() ? " (LEVEL UP!)" : "");
+
+            var earnedBadges = badgeService.evaluateAndAwardBadges(
+                    assignment.getUser(), task.getFamilyGroup().getId());
+
+            return CompleteTaskResponse.builder()
+                    .taskId(task.getId())
+                    .taskTitle(task.getTitle())
+                    .assignedToName(assignment.getUser().getName())
+                    .xpReward(task.getXpReward())
+                    .coinsReward(task.getCoinsReward())
+                    .completedAt(completion.getCompletedAt())
+                    .newTotalXp(award.newTotalXp())
+                    .newTotalCoins(award.newTotalCoins())
+                    .newLevel(award.newLevel())
+                    .previousLevel(award.previousLevel())
+                    .leveledUp(award.leveledUp())
+                    .xpToNextLevel(award.xpToNextLevel())
+                    .earnedBadges(earnedBadges)
+                    .build();
+        } catch (TaskException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to complete task {} for user {}: {}", taskId, requester.getEmail(), e.getMessage());
+            throw new TaskException("TASK_UPDATE_FAILED",
+                    "Ocurrió un error al completar la tarea. Por favor, intente nuevamente.", 500);
+        }
+    }
+
+    private void validateTransition(TaskStatus current, TaskStatus next, Role role) {
+        if (current == TaskStatus.COMPLETED) {
+            throw new TaskException("INVALID_TRANSITION", "Una tarea completada no puede cambiar de estado.", 400);
+        }
+
+        boolean valid = switch (role) {
+            case CHILD -> (current == TaskStatus.PENDING && next == TaskStatus.IN_PROGRESS) ||
+                          (current == TaskStatus.IN_PROGRESS && next == TaskStatus.IN_REVIEW) ||
+                          (current == TaskStatus.IN_REVIEW && next == TaskStatus.IN_PROGRESS) ||
+                          (current == TaskStatus.IN_REVIEW && next == TaskStatus.PENDING);
+            case PARENT -> (current == TaskStatus.IN_REVIEW && next == TaskStatus.IN_PROGRESS) ||
+                           (current == TaskStatus.IN_REVIEW && next == TaskStatus.PENDING);
+        };
+
+        if (!valid) {
+            throw new TaskException("INVALID_TRANSITION",
+                    "Transición de estado no permitida.", 400);
         }
     }
 

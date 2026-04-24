@@ -1,3 +1,5 @@
+<a href="#main-content" class="a11y-skip-link">Saltar al contenido principal</a>
+
 <app-page-layout variant="full">
   <div class="app-body">
     <app-sidebar />
@@ -10,10 +12,17 @@
         [userRole]="userRole()"
         [showLogout]="true"
         [logoutLoading]="logoutLoading()"
+        [childLevel]="childStats()?.currentLevel ?? null"
+        [childCoins]="childStats()?.totalCoins ?? null"
+        [childXpPercent]="childXpPercent()"
         (logout)="onLogout()"
       />
 
-      <ng-content />
+      <div id="main-content" class="shell-content" tabindex="-1">
+        <ng-content />
+      </div>
+
+      <app-bottom-nav />
     </div>
   </div>
 </app-page-layout>

@@ -1,0 +1,96 @@
+<app-shell>
+  <main class="content">
+
+    <app-page-header tag="LOGROS" title="Insignias" />
+
+    @if (isLoading()) {
+      <div class="state-center">
+        <div class="spinner"></div>
+      </div>
+    } @else if (error()) {
+      <div class="state-center">
+        <mat-icon class="error-icon" aria-hidden="true">error_outline</mat-icon>
+        <p class="error-text">{{ error() }}</p>
+        <button class="btn-retry" (click)="loadBadges()">Reintentar</button>
+      </div>
+    } @else {
+
+      <!-- ── Proximo logro (direccion clara) ──────────────────── -->
+      @if (nextBadge(); as next) {
+        <section class="next-badge-section">
+          <div class="next-badge-card">
+            <div class="next-badge-icon-wrap">
+              <mat-icon class="next-badge-icon" aria-hidden="true">{{ next.icon }}</mat-icon>
+            </div>
+            <div class="next-badge-info">
+              <span class="next-badge-label">PROXIMO LOGRO</span>
+              <span class="next-badge-name">{{ next.name }}</span>
+              <p class="next-badge-desc">{{ next.description }}</p>
+              <div class="next-badge-progress">
+                <div class="next-progress-bar">
+                  <div class="next-progress-fill" [style.width.%]="getProgressPercent(next)"></div>
+                </div>
+                <span class="next-progress-text">{{ next.currentProgress }} / {{ next.conditionValue }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ── Logros ganados ──────────────────────────────────── -->
+      @if (earnedBadges().length > 0) {
+        <section class="badges-section">
+          <h2 class="section-title">
+            <mat-icon class="section-icon" aria-hidden="true">emoji_events</mat-icon>
+            Tus logros
+          </h2>
+          <div class="badges-grid">
+            @for (badge of earnedBadges(); track badge.id) {
+              <div class="badge-card earned">
+                <div class="badge-glow"></div>
+                <mat-icon class="badge-icon" aria-hidden="true">{{ badge.icon }}</mat-icon>
+                <p class="badge-name">{{ badge.name }}</p>
+                <p class="badge-desc">{{ badge.description }}</p>
+                <span class="badge-date">{{ badge.earnedAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ── Por desbloquear ─────────────────────────────────── -->
+      @if (lockedBadges().length > 0) {
+        <section class="badges-section">
+          <h2 class="section-title">
+            <mat-icon class="section-icon" aria-hidden="true">lock_outline</mat-icon>
+            Por desbloquear
+          </h2>
+          <div class="badges-grid">
+            @for (badge of lockedBadges(); track badge.id) {
+              <div class="badge-card locked">
+                <mat-icon class="badge-icon" aria-hidden="true">{{ badge.icon }}</mat-icon>
+                <p class="badge-name">{{ badge.name }}</p>
+                <p class="badge-desc">{{ badge.description }}</p>
+                <div class="badge-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="getProgressPercent(badge)"></div>
+                  </div>
+                  <span class="progress-text">{{ badge.currentProgress }} / {{ badge.conditionValue }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ── Sin badges ──────────────────────────────────────── -->
+      @if (earnedBadges().length === 0 && lockedBadges().length === 0) {
+        <div class="state-center">
+          <mat-icon class="empty-icon" aria-hidden="true">emoji_events</mat-icon>
+          <p class="empty-text">Aun no hay insignias disponibles.</p>
+        </div>
+      }
+    }
+
+  </main>
+</app-shell>

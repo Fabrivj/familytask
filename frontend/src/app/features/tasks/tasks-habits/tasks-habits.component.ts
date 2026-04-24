@@ -1,77 +1,95 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
-import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { TasksListComponent } from '../list/tasks-list.component';
 import { HabitsListComponent } from '../habits/habits-list.component';
+import { PermissionsService } from '@core/services/permissions.service';
 
 @Component({
   selector: 'app-tasks-habits',
-  imports: [MatIconModule, AppShellComponent, TasksListComponent, HabitsListComponent],
+  imports: [MatIconModule, AppShellComponent, PageHeaderComponent, TasksListComponent, HabitsListComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-shell>
       <main class="content">
 
         <div class="header-row">
-          <div class="header-info">
-            <p class="tag">// GESTIÓN DE FAMILIA</p>
-            <h1 class="page-title">Tareas y Hábitos</h1>
+          <app-page-header title="Tareas y Hábitos" [subtitle]="subtitle()" />
+          @if (isParent()) {
+            <button class="btn-pill btn-add" type="button" (click)="openAddPanel()">
+              <mat-icon aria-hidden="true">add</mat-icon>
+              {{ activeTab() === 'tasks' ? 'NUEVA TAREA' : 'NUEVO HÁBITO' }}
+            </button>
+          }
+        </div>
+
+        <div class="tabs-row">
+          <div class="tabs" role="tablist">
+            <button class="tab" [class.tab-active]="activeTab() === 'tasks'"
+                    role="tab" [attr.aria-selected]="activeTab() === 'tasks'"
+                    (click)="switchTab('tasks')">
+              <mat-icon class="tab-icon" aria-hidden="true">task_alt</mat-icon>
+              TAREAS
+            </button>
+            <button class="tab" [class.tab-active]="activeTab() === 'habits'"
+                    role="tab" [attr.aria-selected]="activeTab() === 'habits'"
+                    (click)="switchTab('habits')">
+              <mat-icon class="tab-icon" aria-hidden="true">schedule</mat-icon>
+              HÁBITOS
+            </button>
           </div>
         </div>
 
-        <div class="tabs" role="tablist">
-          <button class="tab" [class.tab-active]="activeTab() === 'tasks'"
-                  role="tab" [attr.aria-selected]="activeTab() === 'tasks'"
-                  (click)="switchTab('tasks')">
-            <mat-icon class="tab-icon" aria-hidden="true">task_alt</mat-icon>
-            TAREAS
-          </button>
-          <button class="tab" [class.tab-active]="activeTab() === 'habits'"
-                  role="tab" [attr.aria-selected]="activeTab() === 'habits'"
-                  (click)="switchTab('habits')">
-            <mat-icon class="tab-icon" aria-hidden="true">schedule</mat-icon>
-            HÁBITOS
-          </button>
-        </div>
-
-        @if (activeTab() === 'tasks') {
-          <app-tasks-list />
-        } @else {
-          <app-habits-list />
-        }
+        <app-tasks-list
+          [style.display]="activeTab() === 'tasks' ? 'block' : 'none'"
+          [openPanelTrigger]="openTaskPanel()"
+          (countChange)="taskCount.set($event)" />
+        <app-habits-list
+          [style.display]="activeTab() === 'habits' ? 'block' : 'none'"
+          [openPanelTrigger]="openHabitPanel()"
+          (countChange)="habitCount.set($event)" />
 
       </main>
     </app-shell>
   `,
   styles: [`
+    :host {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+    }
     .content {
       padding: 24px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      box-sizing: border-box;
+      max-width: 100%;
     }
     .header-row {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 16px;
+      gap: 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-    .tag {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 11px;
-      color: var(--text-sub);
-      margin: 0 0 4px;
-    }
-    .page-title {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin: 0;
+    .tabs-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      min-width: 0;
     }
     .tabs {
       display: flex;
       gap: 4px;
-      margin-bottom: 20px;
+      min-width: 0;
     }
     .tab {
       display: flex;
@@ -89,6 +107,7 @@ import { HabitsListComponent } from '../habits/habits-list.component';
       border-radius: var(--radius);
       cursor: pointer;
       transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
     }
     .tab-active {
       color: var(--primary);
@@ -99,12 +118,74 @@ import { HabitsListComponent } from '../habits/habits-list.component';
       width: 16px;
       height: 16px;
     }
+    .btn-add {
+      flex-shrink: 0;
+    }
+    @media (max-width: 767px) {
+      .content { padding: 16px 14px 80px; }
+      .header-row { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
+      .tabs-row { margin-bottom: 14px; }
+      .tabs { width: 100%; }
+      .tab { flex: 1; justify-content: center; padding: 9px 10px; font-size: 12px; gap: 4px; }
+      .btn-add { width: 100%; justify-content: center; }
+    }
+    @media (max-width: 480px) {
+      .content { padding: 12px 10px 80px; }
+      .tab-icon { display: none; }
+      .tab { font-size: 11px; padding: 9px 6px; }
+    }
+    @media (max-width: 360px) {
+      .content { padding: 10px 8px 80px; }
+    }
   `],
 })
 export class TasksHabitsComponent {
-  readonly activeTab = signal<'tasks' | 'habits'>('tasks');
+  private readonly permissionsService = inject(PermissionsService);
+  private readonly route = inject(ActivatedRoute);
+
+  readonly activeTab        = signal<'tasks' | 'habits'>('tasks');
+  readonly isParent         = this.permissionsService.isParent;
+  readonly taskCount        = signal(0);
+  readonly habitCount       = signal(0);
+  readonly openTaskPanel  = signal(0);
+  readonly openHabitPanel = signal(0);
+  readonly subtitle    = computed(() => {
+    if (this.activeTab() === 'tasks') {
+      const n = this.taskCount();
+      return `${n} tarea${n !== 1 ? 's' : ''} activa${n !== 1 ? 's' : ''}`;
+    }
+    const n = this.habitCount();
+    return `${n} hábito${n !== 1 ? 's' : ''} activo${n !== 1 ? 's' : ''}`;
+  });
+
+  constructor() {
+    // Soporte para deep-links desde el dashboard:
+    //   /tasks?tab=habits       → preselecciona la pestaña de hábitos
+    //   /tasks?tab=tasks&create=1 → abre directamente el panel "Nueva tarea"
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed())
+      .subscribe(params => {
+        const tab = params.get('tab');
+        if (tab === 'habits' || tab === 'tasks') {
+          this.activeTab.set(tab);
+        }
+        if (params.get('create') === '1' && this.isParent()) {
+          // Espera al próximo tick para que `activeTab` ya haya propagado
+          // y el panel correcto reaccione al trigger.
+          queueMicrotask(() => this.openAddPanel());
+        }
+      });
+  }
 
   switchTab(tab: 'tasks' | 'habits'): void {
     this.activeTab.set(tab);
+  }
+
+  openAddPanel(): void {
+    if (this.activeTab() === 'tasks') {
+      this.openTaskPanel.update(v => v + 1);
+    } else {
+      this.openHabitPanel.update(v => v + 1);
+    }
   }
 }

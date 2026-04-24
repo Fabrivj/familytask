@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { FamilyMembersResponse } from '../models/member.model';
+import { environment } from '@env/environment';
+import { FamilyMembersResponse, MemberItem } from '../models/member.model';
 
 // Único punto de contacto con el endpoint de miembros de familia.
 // Tanto FamilyService (gestión) como TaskService (asignaciones) lo usan.
@@ -13,6 +13,20 @@ export class MembersService {
   getMembers(familyId: number): Observable<FamilyMembersResponse> {
     return this.http.get<FamilyMembersResponse>(
       `${environment.apiUrl}/families/${familyId}/members`
+    );
+  }
+
+  /** Accesible para cualquier miembro activo (PARENT o CHILD). */
+  getMyStats(familyId: number): Observable<MemberItem> {
+    return this.http.get<MemberItem>(
+      `${environment.apiUrl}/families/${familyId}/members/me`
+    );
+  }
+
+  /** Ranking de miembros activos ordenados por XP. Accesible para cualquier miembro activo. */
+  getRanking(familyId: number): Observable<MemberItem[]> {
+    return this.http.get<MemberItem[]>(
+      `${environment.apiUrl}/families/${familyId}/ranking`
     );
   }
 }

@@ -1,16 +1,7 @@
-<!-- ── Action row ────────────────────────────────────────────── -->
-@if (isParent()) {
-  <div class="action-row">
-    <button class="btn-cta btn-new-habit" type="button" (click)="openCreatePanel()">
-      + NUEVO HÁBITO
-    </button>
-  </div>
-}
-
 <!-- ── Filters ────────────────────────────────────────────────── -->
 <div class="filters-bar" role="group" aria-label="Filtros de hábitos">
   <span class="filter-label">FRECUENCIA</span>
-  @for (f of ['DAILY', 'WEEKDAYS', 'WEEKENDS', 'WEEKLY', 'MONTHLY']; track f) {
+  @for (f of frequencies; track f) {
     <button
       class="filter-chip"
       [class.filter-active]="filterFrequency() === f"
@@ -54,7 +45,7 @@
           <th>FRECUENCIA</th>
           <th>ASIGNADO A</th>
           <th>RECOMPENSA</th>
-          @if (isParent()) {<th>ACCIONES</th>}
+          <th>ACCIONES</th>
         </tr>
       </thead>
       <tbody>
@@ -62,19 +53,39 @@
           <tr>
             <td class="col-habit">
               <div class="habit-info">
-                <span class="habit-name">{{ habit.title }}</span>
+                <div class="habit-name-row">
+                  <span class="habit-name">{{ habit.title }}</span>
+                  @if (habit.currentStreak) {
+                    <span class="streak-badge" [class.streak-active]="habit.currentStreak > 0">
+                      <mat-icon class="streak-icon" aria-hidden="true">local_fire_department</mat-icon>
+                      {{ habit.currentStreak }}
+                    </span>
+                  }
+                </div>
                 @if (habit.description) {
-                  <span class="habit-desc">{{ habit.description }}</span>
+                  <span class="habit-desc" [title]="habit.description">{{ habit.description }}</span>
                 }
               </div>
             </td>
             <td>
               <span class="freq-badge freq-{{ habit.frequency | lowercase }}">
+                <mat-icon class="freq-badge-icon" aria-hidden="true">{{ frequencyIcon(habit.frequency) }}</mat-icon>
                 {{ frequencyLabel(habit.frequency) }}
               </span>
             </td>
             <td>
-              <span class="text-muted">Sin asignar</span>
+              @if (habit.assignedToName) {
+                <span class="member-chip-inline">
+                  <app-user-avatar
+                    [name]="habit.assignedToName"
+                    [pictureUrl]="habit.assignedToPictureUrl ?? ''"
+                    [size]="24"
+                  />
+                  {{ memberShortName(habit.assignedToName) }}
+                </span>
+              } @else {
+                <span class="text-muted">Sin asignar</span>
+              }
             </td>
             <td>
               <div class="col-reward">
@@ -85,18 +96,40 @@
                 </span>
               </div>
             </td>
-            @if (isParent()) {
-              <td>
-                <div class="col-actions">
-                  <button class="btn-icon" type="button" aria-label="Editar hábito" disabled>
+            <td>
+              <div class="col-actions">
+                @if (isParent()) {
+                  <button class="btn-icon" type="button" aria-label="Editar hábito" (click)="openEditPanel(habit)">
                     <mat-icon aria-hidden="true">edit</mat-icon>
                   </button>
                   <button class="btn-icon btn-icon-danger" type="button" aria-label="Eliminar hábito" (click)="openDeleteModal(habit)">
                     <mat-icon aria-hidden="true">delete</mat-icon>
                   </button>
-                </div>
-              </td>
-            }
+                } @else if (habit.assignedToId === currentUserId()) {
+                  @if (habit.completedInCurrentPeriod) {
+                    <span class="btn-complete btn-complete-done" aria-label="Hábito completado hoy">
+                      <mat-icon aria-hidden="true">check_circle</mat-icon>
+                      COMPLETADO
+                    </span>
+                  } @else {
+                    <button
+                      class="btn-complete"
+                      type="button"
+                      aria-label="Completar hábito"
+                      [disabled]="isCompletingHabit() === habit.id"
+                      (click)="completeHabit(habit)"
+                    >
+                      @if (isCompletingHabit() === habit.id) {
+                        <mat-spinner diameter="14" />
+                      } @else {
+                        <mat-icon aria-hidden="true">check</mat-icon>
+                      }
+                      COMPLETAR
+                    </button>
+                  }
+                }
+              </div>
+            </td>
           </tr>
         }
       </tbody>
@@ -107,24 +140,71 @@
   <div class="cards mobile-only">
     @for (habit of filteredHabits(); track habit.id) {
       <article class="habit-card">
-        <div class="card-row-top">
-          <span class="habit-name">{{ habit.title }}</span>
+
+        <div class="card-body">
+          <div class="card-title-row">
+            <span class="habit-name">{{ habit.title }}</span>
+          </div>
           <span class="freq-badge freq-{{ habit.frequency | lowercase }}">
+            <mat-icon class="freq-badge-icon" aria-hidden="true">{{ frequencyIcon(habit.frequency) }}</mat-icon>
             {{ frequencyLabel(habit.frequency) }}
           </span>
+          @if (habit.description) {
+            <p class="card-desc">{{ habit.description }}</p>
+          }
         </div>
-        @if (habit.description) {
-          <div class="card-row-sub">
-            <span class="habit-desc">{{ habit.description }}</span>
-          </div>
-        }
-        <div class="card-row-meta">
+
+        <div class="card-meta">
+          @if (habit.assignedToName) {
+            <span class="member-chip-inline">
+              <app-user-avatar [name]="habit.assignedToName" [pictureUrl]="habit.assignedToPictureUrl ?? ''" [size]="18" />
+              {{ memberShortName(habit.assignedToName) }}
+            </span>
+          }
           <span class="reward-xp">+{{ habit.xpReward }} XP</span>
           <span class="reward-coins">
             <span class="material-icons-outlined coin-icon" aria-hidden="true">attach_money</span>
             {{ habit.coinsReward }}
           </span>
+          @if (habit.currentStreak) {
+            <span class="streak-badge streak-active">
+              <mat-icon class="streak-icon" aria-hidden="true">local_fire_department</mat-icon>
+              {{ habit.currentStreak }}
+            </span>
+          }
         </div>
+        @if (isParent()) {
+          <div class="card-actions-bar">
+            <button class="card-btn-full" type="button" aria-label="Eliminar hábito" (click)="openDeleteModal(habit)">
+              <mat-icon aria-hidden="true">delete</mat-icon>
+              ELIMINAR
+            </button>
+          </div>
+        } @else if (habit.assignedToId === currentUserId()) {
+          <div class="card-actions-bar">
+            @if (habit.completedInCurrentPeriod) {
+              <span class="card-btn-full card-btn-completed">
+                <mat-icon aria-hidden="true">check_circle</mat-icon>
+                COMPLETADO HOY
+              </span>
+            } @else {
+              <button
+                class="card-btn-full card-btn-complete"
+                type="button"
+                aria-label="Completar hábito"
+                [disabled]="isCompletingHabit() === habit.id"
+                (click)="completeHabit(habit)"
+              >
+                @if (isCompletingHabit() === habit.id) {
+                  <mat-spinner diameter="14" />
+                } @else {
+                  <mat-icon aria-hidden="true">check</mat-icon>
+                }
+                COMPLETAR HOY
+              </button>
+            }
+          </div>
+        }
       </article>
     }
   </div>
@@ -135,10 +215,10 @@
 @if (showCreatePanel()) {
   <div class="overlay" (click)="closeCreatePanel()" aria-hidden="true"></div>
 
-  <aside class="create-panel" role="dialog" aria-label="Crear nuevo hábito">
+  <aside class="create-panel" role="dialog" [attr.aria-label]="isEditMode() ? 'Editar hábito' : 'Crear nuevo hábito'" cdkTrapFocus cdkTrapFocusAutoCapture>
     <div class="panel-header">
       <div class="panel-header-left">
-        <h2 class="panel-title">Nuevo hábito</h2>
+        <h2 class="panel-title">{{ isEditMode() ? 'Editar hábito' : 'Nuevo hábito' }}</h2>
         <span class="panel-badge">HÁBITO</span>
       </div>
       <button class="btn-close" type="button" (click)="closeCreatePanel()" aria-label="Cerrar">
@@ -181,31 +261,31 @@
       </div>
 
       <!-- Frecuencia -->
-      <div class="field">
-        <label class="field-label">FRECUENCIA <span class="req">*</span></label>
+      <fieldset class="field field-fieldset">
+        <legend class="field-label">FRECUENCIA <span class="req">*</span></legend>
         <div class="freq-toggle">
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'DAILY'"
-                  type="button" (click)="selectFrequency('DAILY')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'DAILY'" (click)="selectFrequency('DAILY')">
             <mat-icon aria-hidden="true">wb_sunny</mat-icon> DIARIO
           </button>
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKDAYS'"
-                  type="button" (click)="selectFrequency('WEEKDAYS')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'WEEKDAYS'" (click)="selectFrequency('WEEKDAYS')">
             <mat-icon aria-hidden="true">view_week</mat-icon> LUN–VIE
           </button>
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKENDS'"
-                  type="button" (click)="selectFrequency('WEEKENDS')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'WEEKENDS'" (click)="selectFrequency('WEEKENDS')">
             <mat-icon aria-hidden="true">weekend</mat-icon> FIN DE SEMANA
           </button>
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'WEEKLY'"
-                  type="button" (click)="selectFrequency('WEEKLY')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'WEEKLY'" (click)="selectFrequency('WEEKLY')">
             <mat-icon aria-hidden="true">date_range</mat-icon> SEMANAL
           </button>
           <button class="freq-btn" [class.freq-btn-active]="selectedFrequency() === 'MONTHLY'"
-                  type="button" (click)="selectFrequency('MONTHLY')">
+                  type="button" [attr.aria-pressed]="selectedFrequency() === 'MONTHLY'" (click)="selectFrequency('MONTHLY')">
             <mat-icon aria-hidden="true">calendar_month</mat-icon> MENSUAL
           </button>
         </div>
-      </div>
+      </fieldset>
 
       <!-- XP y Monedas -->
       <div class="field-row">
@@ -243,6 +323,32 @@
         </div>
       </div>
 
+      <!-- Asignar a -->
+      <div class="field">
+        <label class="field-label">ASIGNAR A</label>
+        <div class="assignee-chips">
+          <button
+            class="assignee-chip"
+            [class.assignee-active]="selectedAssignee() === null"
+            type="button"
+            [attr.aria-pressed]="selectedAssignee() === null"
+            (click)="selectedAssignee.set(null)"
+          >Sin asignar</button>
+          @for (m of childMembers(); track m.id) {
+            <button
+              class="assignee-chip"
+              [class.assignee-active]="selectedAssignee() === m.id"
+              type="button"
+              [attr.aria-pressed]="selectedAssignee() === m.id"
+              (click)="selectedAssignee.set(m.id)"
+            >
+              <app-user-avatar [name]="m.name" [pictureUrl]="m.pictureUrl" [size]="22" />
+              {{ memberShortName(m.name) }}
+            </button>
+          }
+        </div>
+      </div>
+
       <!-- Error -->
       @if (createError()) {
         <p class="create-error-msg" role="alert">{{ createError() }}</p>
@@ -253,10 +359,10 @@
         <button class="btn-cta btn-outline btn-cancel" type="button" (click)="closeCreatePanel()">CANCELAR</button>
         <button class="btn-cta btn-create" type="submit" [disabled]="isCreating()">
           @if (isCreating()) {
-            Creando...
+            {{ isEditMode() ? 'Guardando...' : 'Creando...' }}
           } @else {
             <mat-icon aria-hidden="true">check</mat-icon>
-            CREAR HÁBITO
+            {{ isEditMode() ? 'GUARDAR CAMBIOS' : 'CREAR HÁBITO' }}
           }
         </button>
       </div>

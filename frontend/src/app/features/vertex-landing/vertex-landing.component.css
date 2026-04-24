@@ -1,0 +1,27 @@
+:host {
+  --vx-bg: #05060A;
+  --vx-surface: #0B0F1A;
+  --vx-surface-2: #111827;
+  --vx-border: rgba(255, 255, 255, 0.08);
+  --vx-border-strong: rgba(255, 255, 255, 0.14);
+  --vx-accent: #0048FF;
+  --vx-accent-2: #3B82F6;
+  --vx-accent-glow: rgba(0, 72, 255, 0.35);
+  --vx-text: #E5E7EB;
+  --vx-text-dim: #9CA3AF;
+  --vx-text-muted: #6B7280;
+  display: block;
+  background: var(--vx-bg);
+  color: var(--vx-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+.vx-root {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+main {
+  display: block;
+}

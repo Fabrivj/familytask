@@ -6,9 +6,9 @@
     </a>
 
     <ul class="navbar-links">
-      <li><a (click)="scrollTo('features')">Funciones</a></li>
-      <li><a (click)="scrollTo('how')">Cómo funciona</a></li>
-      <li><a (click)="scrollTo('gamification')">Gamificación</a></li>
+      <li><a href="#features" (click)="scrollTo('features')">Funciones</a></li>
+      <li><a href="#how" (click)="scrollTo('how')">Cómo funciona</a></li>
+      <li><a href="#gamification" (click)="scrollTo('gamification')">Gamificación</a></li>
     </ul>
 
     <div class="navbar-cta">
@@ -28,9 +28,9 @@
 
 @if (mobileMenuOpen()) {
   <div class="mobile-menu">
-    <a (click)="scrollTo('features')">Funciones</a>
-    <a (click)="scrollTo('how')">Cómo funciona</a>
-    <a (click)="scrollTo('gamification')">Gamificación</a>
+    <a href="#features" (click)="scrollTo('features')">Funciones</a>
+    <a href="#how" (click)="scrollTo('how')">Cómo funciona</a>
+    <a href="#gamification" (click)="scrollTo('gamification')">Gamificación</a>
     <button class="landing-btn landing-btn-primary" style="align-self: flex-start;" (click)="onCta()">
       Comenzar gratis
     </button>

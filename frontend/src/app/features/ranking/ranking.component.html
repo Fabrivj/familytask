@@ -1,0 +1,59 @@
+<app-shell>
+  <main class="content">
+
+    <app-page-header
+      title="Ranking"
+      subtitle="Clasificación de miembros por puntos de experiencia."
+    />
+
+    @if (isLoading()) {
+      <div class="state-center" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <span class="state-text">Cargando ranking...</span>
+      </div>
+    }
+
+    @else if (error()) {
+      <div class="state-center" role="alert">
+        <mat-icon class="error-icon" aria-hidden="true">{{ isDisabled() ? 'leaderboard' : 'error_outline' }}</mat-icon>
+        <span class="state-text error-text">{{ error() }}</span>
+        @if (!isDisabled()) {
+          <button class="btn-retry" type="button" (click)="retry()">Reintentar</button>
+        }
+      </div>
+    }
+
+    @else {
+      <ol class="ranking-list" aria-label="Ranking familiar">
+        @for (member of members(); track member.id; let i = $index) {
+          <li class="rank-row"
+              [class.rank-gold]="i === 0"
+              [class.rank-silver]="i === 1"
+              [class.rank-bronze]="i === 2">
+
+            <span class="rank-pos" [attr.aria-label]="'Posición ' + (i + 1)">#{{ i + 1 }}</span>
+
+            <app-user-avatar [name]="member.name" [pictureUrl]="member.pictureUrl" [size]="40" />
+
+            <div class="rank-info">
+              <span class="rank-name">{{ member.name }}</span>
+              <span class="rank-meta">
+                <span class="rank-meta-xp">{{ member.totalXp ?? 0 }} XP</span>
+                <span class="rank-meta-sep"> · </span>
+                <mat-icon class="rank-meta-coin-icon" aria-hidden="true">monetization_on</mat-icon>
+                <span class="rank-meta-coins">{{ member.totalCoins ?? 0 }}</span>
+              </span>
+            </div>
+
+            <div class="rank-xp" [attr.aria-label]="'Nivel ' + (member.currentLevel ?? 1)">
+              <span aria-hidden="true" class="rank-xp-label">NVL</span>
+              {{ member.currentLevel ?? 1 }}
+            </div>
+
+          </li>
+        }
+      </ol>
+    }
+
+  </main>
+</app-shell>

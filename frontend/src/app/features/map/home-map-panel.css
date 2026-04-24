@@ -1,0 +1,255 @@
+/* ═════════════════════════════════════════════════════════════════════════
+   CREATE PANEL — overrides & map-specific additions (base in list-shared.css)
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ── Space type grid ──────────────────────────────────────────────────── */
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border: 1.5px solid rgba(var(--border-rgb), 0.18);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.type-btn:hover {
+  transform: translateY(-2px);
+}
+
+.type-btn-active {
+  /* border-color and background driven by inline [style] bindings per space type */
+  transform: translateY(-2px);
+}
+
+.type-btn-active .type-icon {
+  filter: drop-shadow(0 0 6px currentColor);
+  animation: type-icon-pulse 2s ease-in-out infinite;
+}
+
+.type-icon {
+  font-size: 22px !important;
+  width: 22px !important;
+  height: 22px !important;
+  transition: filter 0.2s, transform 0.2s;
+}
+
+.type-btn:hover .type-icon {
+  filter: drop-shadow(0 0 8px currentColor);
+  transform: scale(1.15);
+}
+
+@keyframes type-icon-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px currentColor); }
+  50%       { filter: drop-shadow(0 0 12px currentColor); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .type-btn-active .type-icon { animation: none; }
+}
+
+
+
+.type-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+}
+
+/* type-label color driven by inline [style] binding */
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   MIGRATE MODAL (Modal 2 — task migration)
+   ═════════════════════════════════════════════════════════════════════════ */
+.migrate-overlay { z-index: 200; }
+
+.migrate-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 201;
+  width: 90vw;
+  max-width: 460px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 0 40px rgba(var(--border-rgb), 0.15),
+              0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: scaleIn 0.18s ease;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.migrate-title {
+  margin: 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.migrate-message {
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+
+/* ── Migrate space custom dropdown (matches tasks-list panel-space pattern) */
+.migrate-space-dropdown-wrap {
+  position: relative;
+}
+
+.migrate-space-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-sub);
+}
+
+.migrate-space-trigger.has-value {
+  color: var(--text);
+}
+
+.migrate-space-placeholder {
+  flex: 1;
+  font-style: italic;
+  opacity: 0.5;
+}
+
+.migrate-space-selected-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.migrate-space-chevron {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin-left: auto;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.migrate-space-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: var(--panel, var(--bg));
+  border: 1.5px solid rgba(var(--border-rgb), 0.2);
+  border-radius: 10px;
+  padding: 6px;
+  list-style: none;
+  margin: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.15s ease;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.migrate-space-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.migrate-space-item:hover {
+  background: rgba(var(--border-rgb), 0.08);
+  color: var(--text);
+}
+
+.migrate-space-item.active {
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
+}
+
+.chip-space-icon {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  opacity: 0.7;
+}
+
+.migrate-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.btn-migrate-cancel {
+  padding: 8px 22px;
+  font-size: 13px;
+}
+
+.btn-migrate-confirm {
+  padding: 8px 22px;
+  font-size: 13px;
+}
+
+.btn-migrate-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .content { padding: 20px 16px 80px; }
+
+  /* Tap targets */
+  .btn-icon { width: 44px; height: 44px; }
+
+  .header-row {
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .btn-new-space { width: 100%; }
+
+  .spaces-grid { grid-template-columns: 1fr; }
+
+  .type-grid { grid-template-columns: repeat(2, 1fr); }
+
+}

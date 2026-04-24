@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { childGuard } from './core/guards/child.guard';
 import { parentGuard } from './core/guards/parent.guard';
 
 export const routes: Routes = [
@@ -7,6 +8,13 @@ export const routes: Routes = [
     path: '',
     loadComponent: () =>
       import('./features/landing/landing.component').then(m => m.LandingComponent),
+  },
+  {
+    path: 'equipo',
+    loadComponent: () =>
+      import('./features/vertex-landing/vertex-landing.component').then(
+        m => m.VertexLandingComponent
+      ),
   },
   {
     path: 'auth/login',
@@ -70,16 +78,46 @@ export const routes: Routes = [
       import('./features/settings/settings.component').then(m => m.SettingsComponent),
   },
   {
+    path: 'reports',
+    canActivate: [authGuard, parentGuard],
+    loadComponent: () =>
+      import('./features/reports/reports.component').then(m => m.ReportsComponent),
+  },
+  {
     path: 'map',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/map/home-map.component').then(m => m.HomeMapComponent),
   },
   {
+    path: 'store',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/store/store.component').then(m => m.StoreComponent),
+  },
+  {
     path: 'tasks',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/tasks/tasks-habits/tasks-habits.component').then(m => m.TasksHabitsComponent),
+  },
+  {
+    path: 'ranking',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/ranking/ranking.component').then(m => m.RankingComponent),
+  },
+  {
+    path: 'badges',
+    canActivate: [authGuard, childGuard],
+    loadComponent: () =>
+      import('./features/badges/badges.component').then(m => m.BadgesComponent),
+  },
+  {
+    path: 'ai/suggestions',
+    canActivate: [authGuard, parentGuard],
+    loadComponent: () =>
+      import('./features/suggestions/suggestions.component').then(m => m.SuggestionsComponent),
   },
   {
     path: '**',

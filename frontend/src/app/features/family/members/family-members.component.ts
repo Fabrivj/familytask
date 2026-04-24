@@ -9,26 +9,33 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../../../core/services/auth.service';
-import { PermissionsService } from '../../../core/services/permissions.service';
-import { FamilyService } from '../../../core/services/family.service';
-import { MembersService } from '../../../core/services/members.service';
-import { InvitationService } from '../../../core/services/invitation.service';
-import { MemberItem, PendingInvitation } from '../../../core/models/member.model';
+import { AuthService } from '@core/services/auth.service';
+import { PermissionsService } from '@core/services/permissions.service';
+import { FamilyService } from '@core/services/family.service';
+import { MembersService } from '@core/services/members.service';
+import { InvitationService } from '@core/services/invitation.service';
+import { MemberItem, PendingInvitation } from '@core/models/member.model';
 import { MatIconModule } from '@angular/material/icon';
-import { AppShellComponent } from '../../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { RoleBadgeComponent } from '../../../shared/components/role-badge/role-badge.component';
-import { UserAvatarComponent } from '../../../shared/components/user-avatar/user-avatar.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { RoleBadgeComponent } from '@shared/components/role-badge/role-badge.component';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { injectLoadingState } from '@core/utils/loading-state';
 
 const POLL_INTERVAL_MS = 15_000;
+
+type DisplayRole = 'ADMIN' | 'PARENT' | 'CHILD';
 
 @Component({
   selector: 'app-family-members',
   imports: [MatIconModule, AppShellComponent, PageHeaderComponent, RoleBadgeComponent, UserAvatarComponent, ConfirmDialogComponent],
   templateUrl: './family-members.component.html',
-  styleUrl: './family-members.component.css',
+  styleUrls: [
+    './family-members.component.css',
+    './family-members-invitations.css',
+    './family-members-responsive.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FamilyMembersComponent implements OnInit, OnDestroy {
@@ -58,22 +65,31 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   // ─── Estado ───────────────────────────────────────────────────────────────
   readonly members = signal<MemberItem[]>([]);
   readonly pendingInvitations = signal<PendingInvitation[]>([]);
-  readonly isLoading = signal(true);
-  readonly error = signal('');
+  private readonly ls = injectLoadingState();
+  readonly isLoading = this.ls.isLoading;
+  readonly error = this.ls.error;
   readonly isForbidden = signal(false);
   readonly copiedToken = signal('');
   readonly cancelingToken = signal('');
   readonly changingRoleId = signal(0);
   readonly openDropdownId = signal(0);
   readonly confirmDialogOpen = signal(false);
-  readonly pendingRoleChange = signal<{ member: MemberItem; newRole: 'PARENT' | 'CHILD' } | null>(null);
+  readonly pendingRoleChange = signal<{ member: MemberItem; newDisplayRole: DisplayRole } | null>(null);
 
   readonly confirmTitle = computed(() => 'Cambiar rol');
   readonly confirmMessage = computed(() => {
     const pending = this.pendingRoleChange();
     if (!pending) return '';
-    const newRoleLabel = pending.newRole === 'PARENT' ? 'Padre/Tutor' : 'Hijo/a';
-    return `¿Estás seguro de cambiar el rol de ${pending.member.name} a ${newRoleLabel}?`;
+    const label = this.displayRoleLabel(pending.newDisplayRole);
+    return `¿Estás seguro de cambiar el rol de ${pending.member.name} a ${label}?`;
+  });
+
+  readonly removeDialogOpen = signal(false);
+  readonly pendingRemove = signal<MemberItem | null>(null);
+  readonly isRemoving = signal(false);
+  readonly removeMessage = computed(() => {
+    const m = this.pendingRemove();
+    return m ? `Vas a remover a ${m.name} de la familia.` : '';
   });
 
   readonly removeDialogOpen = signal(false);
@@ -96,7 +112,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.fetchMembers(familyId, true);
+    this.fetchMembers(familyId);
     this.startPolling(familyId);
   }
 
@@ -107,7 +123,7 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   // ─── Polling ──────────────────────────────────────────────────────────────
   private startPolling(familyId: number): void {
     this.pollTimer = setInterval(() => {
-      this.fetchMembers(familyId, false);
+      this.pollMembers(familyId);
     }, POLL_INTERVAL_MS);
   }
 
@@ -119,26 +135,26 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   }
 
   // ─── Carga de datos ───────────────────────────────────────────────────────
-  private fetchMembers(familyId: number, showLoader: boolean): void {
-    if (showLoader) this.isLoading.set(true);
+  private fetchMembers(familyId: number): void {
+    this.ls.run(this.membersService.getMembers(familyId), {
+      next: (data) => {
+        this.members.set(data.members);
+        this.pendingInvitations.set(data.pendingInvitations);
+      },
+      error: (err: any) => {
+        if (err?.status === 403) this.isForbidden.set(true);
+      },
+    });
+  }
 
+  /** Silent background poll — keeps previous data visible on error. */
+  private pollMembers(familyId: number): void {
     this.membersService.getMembers(familyId).subscribe({
       next: (data) => {
         this.members.set(data.members);
         this.pendingInvitations.set(data.pendingInvitations);
-        this.isLoading.set(false);
-        this.error.set('');
-      },
-      error: (err) => {
-        if (showLoader) {
-          const forbidden = err?.status === 403;
-          this.isForbidden.set(forbidden);
-          this.error.set(forbidden
-            ? 'No tienes permisos para ver los miembros de esta familia.'
-            : 'Error al cargar los miembros. Intenta de nuevo.');
-          this.isLoading.set(false);
-        }
-        // En el polling en background dejamos los datos anteriores visibles
+        // Refresh session so the current user's role/admin status stays in sync
+        this.authService.refreshSession().subscribe();
       },
     });
   }
@@ -146,17 +162,45 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
   retry(): void {
     const familyId = this.authService.getActiveFamilyId();
     if (!familyId) return;
-    this.fetchMembers(familyId, true);
+    this.fetchMembers(familyId);
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-  canEdit(member: MemberItem): boolean {
-    return this.permissions.canEditMemberRole(member);
-  }
+  // ─── Precomputed member / invitation meta (avoids per-CD-tick method calls) ─
+  readonly memberMeta = computed(() => {
+    const email = this.currentEmail();
+    const map = new Map<number, {
+      isCurrent: boolean;
+      displayRole: DisplayRole;
+      canEdit: boolean;
+      canChangeAdmin: boolean;
+      canRemove: boolean;
+      xpPercent: number;
+      xpInLevel: number;
+      xpNeeded: number;
+    }>();
+    for (const m of this.members()) {
+      const isCurrent = m.email === email;
+      const displayRole: DisplayRole = m.isAdmin ? 'ADMIN' : m.role === 'PARENT' ? 'PARENT' : 'CHILD';
+      const canEdit = this.permissions.canEditMemberRole(m);
+      const canChangeAdmin = this.permissions.canChangeAdminStatus(m);
+      const canRemove = this.permissions.canRemoveMember(m);
+      const xpNeeded = 100 * ((m.currentLevel ?? 0) + 1);
+      const xpIn = xpNeeded - (m.xpToNextLevel ?? 0);
+      const xpPct = Math.min(100, Math.max(0, (xpIn / xpNeeded) * 100));
+      map.set(m.id, { isCurrent, displayRole, canEdit, canChangeAdmin, canRemove, xpPercent: xpPct, xpInLevel: xpIn, xpNeeded });
+    }
+    return map;
+  });
 
-  canRemove(member: MemberItem): boolean {
-    return this.permissions.canRemoveMember(member);
-  }
+  readonly invitationMeta = computed(() => {
+    const map = new Map<string, { daysAgo: number; daysUntil: number }>();
+    for (const inv of this.pendingInvitations()) {
+      const ago = Math.max(0, Math.floor((Date.now() - new Date(inv.createdAt).getTime()) / 86_400_000));
+      const until = Math.max(0, Math.ceil((new Date(inv.expirationDate).getTime() - Date.now()) / 86_400_000));
+      map.set(inv.token, { daysAgo: ago, daysUntil: until });
+    }
+    return map;
+  });
 
   confirmRemove(member: MemberItem): void {
     this.pendingRemove.set(member);
@@ -177,11 +221,14 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
       next: () => {
         this.isRemoving.set(false);
         this.snackBar.open('Miembro removido exitosamente.', 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
-        this.fetchMembers(familyId, false);
+        this.pollMembers(familyId);
       },
-      error: () => {
+      error: (err) => {
         this.isRemoving.set(false);
-        this.snackBar.open('No se pudo remover el miembro. Intenta de nuevo.', 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+        const message = err?.status === 409
+          ? (err?.error?.message ?? 'Debe existir al menos un administrador en la familia.')
+          : 'No se pudo remover el miembro. Intenta de nuevo.';
+        this.snackBar.open(message, 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
       },
     });
   }
@@ -191,20 +238,16 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     this.pendingRemove.set(null);
   }
 
-  isCurrentUser(member: MemberItem): boolean {
-    return member.email === this.currentEmail();
+  displayRoleLabel(displayRole: DisplayRole): string {
+    if (displayRole === 'ADMIN') return 'Administrador';
+    if (displayRole === 'PARENT') return 'Tutor';
+    return 'Hijo/a';
   }
 
-  roleDropdownLabel(role: 'PARENT' | 'CHILD'): string {
-    return role === 'PARENT' ? 'Tutor' : 'Hijo/a';
-  }
-
-  daysAgo(dateStr: string): number {
-    return Math.max(0, Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000));
-  }
-
-  daysUntil(dateStr: string): number {
-    return Math.max(0, Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86_400_000));
+  /** Label shown on role dropdown button for a member. */
+  memberRoleLabel(member: MemberItem): string {
+    const displayRole: DisplayRole = member.isAdmin ? 'ADMIN' : member.role === 'PARENT' ? 'PARENT' : 'CHILD';
+    return this.displayRoleLabel(displayRole);
   }
 
   inviteMember(): void {
@@ -233,10 +276,11 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
     this.openDropdownId.set(this.openDropdownId() === memberId ? 0 : memberId);
   }
 
-  selectRole(member: MemberItem, newRole: 'PARENT' | 'CHILD'): void {
+  selectRole(member: MemberItem, newDisplayRole: DisplayRole): void {
     this.openDropdownId.set(0);
-    if (member.role === newRole) return;
-    this.pendingRoleChange.set({ member, newRole });
+    const currentDisplayRole: DisplayRole = member.isAdmin ? 'ADMIN' : member.role === 'PARENT' ? 'PARENT' : 'CHILD';
+    if (currentDisplayRole === newDisplayRole) return;
+    this.pendingRoleChange.set({ member, newDisplayRole });
     this.confirmDialogOpen.set(true);
   }
 
@@ -251,22 +295,45 @@ export class FamilyMembersComponent implements OnInit, OnDestroy {
 
     this.changingRoleId.set(pending.member.id);
 
-    this.familyService.updateMemberRole(familyId, pending.member.id, pending.newRole).subscribe({
-      next: () => {
-        this.snackBar.open('Rol actualizado exitosamente.', 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
-        this.fetchMembers(familyId, false);
-        this.changingRoleId.set(0);
-      },
-      error: (err) => {
-        const message = err?.status === 403
-          ? 'No tienes permisos para cambiar roles en esta familia.'
-          : err?.status === 409
-            ? 'Debe existir al menos un Padre/Tutor en la familia.'
-            : 'No se pudo actualizar el rol. Intenta nuevamente.';
-        this.snackBar.open(message, 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
-        this.changingRoleId.set(0);
-      },
-    });
+    const { member, newDisplayRole } = pending;
+
+    if (newDisplayRole === 'ADMIN') {
+      // Promote to admin (keep PARENT role, set isAdmin=true)
+      this.familyService.updateMemberAdmin(familyId, member.id, true).subscribe({
+        next: () => this.onRoleChangeSuccess(familyId),
+        error: (err) => this.onRoleChangeError(err),
+      });
+    } else if (newDisplayRole === 'PARENT' && member.isAdmin) {
+      // Demote from admin (keep PARENT role, set isAdmin=false)
+      this.familyService.updateMemberAdmin(familyId, member.id, false).subscribe({
+        next: () => this.onRoleChangeSuccess(familyId),
+        error: (err) => this.onRoleChangeError(err),
+      });
+    } else {
+      // Change role between PARENT and CHILD
+      const newRole = newDisplayRole === 'PARENT' ? 'PARENT' : 'CHILD';
+      this.familyService.updateMemberRole(familyId, member.id, newRole).subscribe({
+        next: () => this.onRoleChangeSuccess(familyId),
+        error: (err) => this.onRoleChangeError(err),
+      });
+    }
+  }
+
+  private onRoleChangeSuccess(familyId: number): void {
+    this.snackBar.open('Rol actualizado exitosamente.', 'Cerrar', { duration: 3500, panelClass: 'snack-success' });
+    this.authService.refreshSession().subscribe();
+    this.pollMembers(familyId);
+    this.changingRoleId.set(0);
+  }
+
+  private onRoleChangeError(err: any): void {
+    const message = err?.status === 403
+      ? 'No tienes permisos para cambiar roles en esta familia.'
+      : err?.status === 409
+        ? (err?.error?.message ?? 'Debe existir al menos un Padre/Tutor en la familia.')
+        : 'No se pudo actualizar el rol. Intenta nuevamente.';
+    this.snackBar.open(message, 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+    this.changingRoleId.set(0);
   }
 
   onCancelRoleChange(): void {

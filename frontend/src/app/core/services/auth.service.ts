@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { environment } from '../../../environments/environment';
+import { environment } from '@env/environment';
 import { AuthResponse, UserSession, FamilySummary } from '../models/auth.model';
 import { Observable, tap, map } from 'rxjs';
 
@@ -39,6 +39,9 @@ export class AuthService {
 
   /** familyName of the active family. Empty string if no active family. */
   readonly activeFamilyName = computed(() => this.activeFamily()?.familyName ?? '');
+
+  /** ID of the currently authenticated user. */
+  readonly currentUserId = computed(() => this._session()?.userId ?? null);
 
   constructor(private http: HttpClient, private router: Router) {}
 

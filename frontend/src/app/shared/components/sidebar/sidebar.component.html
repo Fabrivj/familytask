@@ -20,8 +20,8 @@
 
     @if (isParent()) {
       <li>
-        <button class="nav-item" type="button" (click)="navigate(null)"
-          [class.active]="isActive('/ai')" aria-label="IA" aria-disabled="true">
+        <button class="nav-item" type="button" (click)="navigate('/ai/suggestions')"
+          [class.active]="isActive('/ai')" aria-label="Sugerencias IA">
           <mat-icon aria-hidden="true">auto_awesome</mat-icon>
           <span class="label">IA</span>
         </button>
@@ -30,8 +30,8 @@
 
     @if (isParent()) {
       <li>
-        <button class="nav-item" type="button" (click)="navigate(null)"
-          [class.active]="isActive('/reports')" aria-label="Reportes" aria-disabled="true">
+        <button class="nav-item" type="button" (click)="navigate('/reports')"
+          [class.active]="isActive('/reports')" aria-label="Reportes">
           <mat-icon aria-hidden="true">bar_chart</mat-icon>
           <span class="label">REPORTES</span>
         </button>
@@ -39,8 +39,8 @@
     }
 
     <li>
-      <button class="nav-item" type="button" (click)="navigate(null)"
-        [class.active]="isActive('/store')" aria-label="Tienda" aria-disabled="true">
+      <button class="nav-item" type="button" (click)="navigate('/store')"
+        [class.active]="isActive('/store')" aria-label="Tienda">
         <mat-icon aria-hidden="true">store</mat-icon>
         <span class="label">TIENDA</span>
       </button>
@@ -53,6 +53,24 @@
         <span class="label">TAREAS</span>
       </button>
     </li>
+
+    <li>
+      <button class="nav-item" type="button" (click)="navigate('/ranking')"
+        [class.active]="isActive('/ranking')" aria-label="Ranking">
+        <mat-icon aria-hidden="true">leaderboard</mat-icon>
+        <span class="label">RANKING</span>
+      </button>
+    </li>
+
+    @if (!isParent()) {
+      <li>
+        <button class="nav-item" type="button" (click)="navigate('/badges')"
+          [class.active]="isActive('/badges')" aria-label="Logros">
+          <mat-icon aria-hidden="true">emoji_events</mat-icon>
+          <span class="label">LOGROS</span>
+        </button>
+      </li>
+    }
 
     @if (isParent()) {
       <li>

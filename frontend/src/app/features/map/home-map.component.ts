@@ -9,43 +9,56 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { A11yModule } from '@angular/cdk/a11y';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
-import { PermissionsService } from '../../core/services/permissions.service';
-import { SpaceService } from '../../core/services/space.service';
-import { TaskService } from '../../core/services/task.service';
+import { AuthService } from '@core/services/auth.service';
+import { PermissionsService } from '@core/services/permissions.service';
+import { SpaceService } from '@core/services/space.service';
+import { TaskService } from '@core/services/task.service';
 import {
   CreateSpaceRequest,
   SPACE_TYPE_OPTIONS,
   SpaceResponse,
   SpaceType,
   UpdateSpaceRequest,
+  spaceTypeColor,
   spaceTypeIcon,
   spaceTypeLabel,
-} from '../../core/models/space.model';
-import { TaskResponse } from '../../core/models/task.model';
-import { priorityLabel } from '../../core/utils/task-labels';
+} from '@core/models/space.model';
+import { TaskResponse } from '@core/models/task.model';
+import { priorityLabel } from '@core/utils/task-labels';
+import { injectLoadingState } from '@core/utils/loading-state';
+import { createFocusRestore } from '@core/utils/focus-restore';
+import { fieldError } from '@core/utils/form-errors';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AppShellComponent } from '../../shared/components/app-shell/app-shell.component';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { AppShellComponent } from '@shared/components/app-shell/app-shell.component';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
 
 @Component({
   selector: 'app-home-map',
   imports: [
+    A11yModule,
     ReactiveFormsModule,
     MatIconModule,
     MatProgressSpinnerModule,
     AppShellComponent,
     PageHeaderComponent,
     ConfirmDialogComponent,
+    UserAvatarComponent,
   ],
   templateUrl: './home-map.component.html',
-  styleUrl: './home-map.component.css',
+  styleUrls: [
+    '../tasks/shared/list-shared.css',
+    './home-map.component.css',
+    './home-map-cards.css',
+    './home-map-panel.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMapComponent {
@@ -63,14 +76,34 @@ export class HomeMapComponent {
   // ─── Helpers expuestos al template ───────────────────────────────────────
   readonly spaceTypeLabel = spaceTypeLabel;
   readonly spaceTypeIcon = spaceTypeIcon;
+  readonly spaceTypeColor = spaceTypeColor;
+
+  /** Pre-computed rgba styles per space type — avoids hex→rgba parsing on every CD tick. */
+  readonly spaceIconStyles = computed(() => {
+    const map = new Map<string, { bg: string; border: string; borderDim: string }>();
+    for (const opt of SPACE_TYPE_OPTIONS) {
+      const hex = spaceTypeColor(opt.value).replace('#', '');
+      const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+      map.set(opt.value, {
+        bg: `rgba(${r},${g},${b},0.12)`,
+        border: `rgba(${r},${g},${b},0.35)`,
+        borderDim: `rgba(${r},${g},${b},0.18)`,
+      });
+    }
+    return map;
+  });
   readonly spaceTypeOptions = SPACE_TYPE_OPTIONS;
   readonly priorityLabel = priorityLabel;
 
   // ─── Datos ────────────────────────────────────────────────────────────────
   readonly spaces = signal<SpaceResponse[]>([]);
-  readonly tasks = signal<TaskResponse[]>([]);
-  readonly isLoading = signal(false);
-  readonly error = signal('');
+  readonly tasks  = signal<TaskResponse[]>([]);
+
+  /** Current user's name from session — used to highlight their assigned tasks. */
+  readonly currentUserName = computed(() => this.authService.session()?.name ?? null);
+  private readonly ls = injectLoadingState();
+  readonly isLoading = this.ls.isLoading;
+  readonly error = this.ls.error;
 
   readonly spacesSubtitle = computed(() => {
     const n = this.spaces().length;
@@ -87,9 +120,22 @@ export class HomeMapComponent {
     return map;
   });
 
-  tasksForSpace(spaceId: number): TaskResponse[] {
-    return this.tasksBySpace().get(spaceId) ?? [];
-  }
+  /** Tasks visible to the current child — assigned to them OR unassigned. */
+  readonly myTasksBySpace = computed(() => {
+    const myName = this.currentUserName();
+    const result = new Map<number, TaskResponse[]>();
+    for (const [spaceId, tasks] of this.tasksBySpace()) {
+      result.set(spaceId, tasks.filter(
+        t => t.assignedToId === null || t.assignedToName === myName
+      ));
+    }
+    return result;
+  });
+
+  /** Pre-resolved map used by the template — parent sees all, child sees theirs. */
+  readonly visibleTasksBySpace = computed(() =>
+    this.isParent() ? this.tasksBySpace() : this.myTasksBySpace()
+  );
 
   // ─── Delete space (two-modal flow) ──────────────────────────────────────
   readonly showDeleteConfirm = signal(false);
@@ -102,7 +148,7 @@ export class HomeMapComponent {
   readonly isMigrating = signal(false);
   readonly availableTargetSpaces = computed(() =>
     this.spaces().filter(s =>
-      s.id !== this.spaceToDelete()?.id && this.tasksForSpace(s.id).length === 0
+      s.id !== this.spaceToDelete()?.id && (this.tasksBySpace().get(s.id)?.length ?? 0) === 0
     )
   );
   readonly hasTargetSpaces = computed(() => this.availableTargetSpaces().length > 0);
@@ -137,31 +183,28 @@ export class HomeMapComponent {
   }
 
   private loadSpaces(familyId: number): void {
-    this.isLoading.set(true);
-    this.error.set('');
     this.spaces.set([]);
     this.tasks.set([]);
 
-    forkJoin({
-      spaces: this.spaceService.getSpaces(familyId),
-      tasks: this.taskService.getTasks(familyId),
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
+    this.ls.run(
+      forkJoin({
+        spaces: this.spaceService.getSpaces(familyId),
+        tasks:  this.taskService.getTasks(familyId),
+      }).pipe(takeUntilDestroyed(this.destroyRef)),
+      {
         next: ({ spaces, tasks }) => {
           this.spaces.set(spaces);
           this.tasks.set(tasks);
-          this.isLoading.set(false);
         },
-        error: (err) => {
-          this.error.set(err.error?.message || 'No se pudo cargar los espacios. Intenta de nuevo.');
-          this.isLoading.set(false);
-        },
-      });
+      },
+    );
   }
 
   // ─── Panel ───────────────────────────────────────────────────────────────
+  private readonly _panelFocus = createFocusRestore();
+
   openCreatePanel(): void {
+    this._panelFocus.save();
     this.resetForm();
     this.showEditPanel.set(false);
     this.showCreatePanel.set(true);
@@ -170,9 +213,11 @@ export class HomeMapComponent {
   closeCreatePanel(): void {
     this.showCreatePanel.set(false);
     this.createError.set('');
+    this._panelFocus.restore();
   }
 
   openEditPanel(space: SpaceResponse): void {
+    this._panelFocus.save();
     this.showCreatePanel.set(false);
     this.spaceToEdit.set(space);
     this.nameCtrl.reset(space.name);
@@ -186,6 +231,7 @@ export class HomeMapComponent {
     this.showEditPanel.set(false);
     this.spaceToEdit.set(null);
     this.editError.set('');
+    this._panelFocus.restore();
   }
 
   submitEdit(): void {
@@ -232,13 +278,7 @@ export class HomeMapComponent {
     this.typeError.set(false);
   }
 
-  getNameError(): string {
-    const c = this.nameCtrl;
-    if (c.hasError('required') || c.hasError('minlength') || c.hasError('maxlength')) {
-      return 'El nombre debe tener entre 2 y 50 caracteres.';
-    }
-    return '';
-  }
+  getNameError = () => fieldError(this.nameCtrl, { required: 'El nombre debe tener entre 2 y 50 caracteres.', minlength: 'El nombre debe tener entre 2 y 50 caracteres.', maxlength: 'El nombre debe tener entre 2 y 50 caracteres.' });
 
   submitCreate(): void {
     this.nameCtrl.markAllAsTouched();

@@ -69,10 +69,59 @@
   background: rgba(var(--success-rgb), 0.05);
 }
 
+/* ── Slide Toggle Override ── */
+:host ::ng-deep .mat-mdc-slide-toggle .mdc-switch__track::before,
+:host ::ng-deep .mat-mdc-slide-toggle .mdc-switch__track::after {
+  background: rgba(var(--border-rgb), 0.12) !important;
+  border-color: rgba(var(--border-rgb), 0.25) !important;
+}
+
+:host ::ng-deep .mat-mdc-slide-toggle .mdc-switch--selected .mdc-switch__track::before,
+:host ::ng-deep .mat-mdc-slide-toggle .mdc-switch--selected .mdc-switch__track::after {
+  background: rgba(var(--border-rgb), 0.3) !important;
+}
+
+:host ::ng-deep .mat-mdc-slide-toggle .mdc-switch--selected .mdc-switch__handle::after {
+  background: var(--border) !important;
+}
+
+:host ::ng-deep .mat-mdc-slide-toggle .mdc-switch--unselected .mdc-switch__handle::after {
+  background: var(--text-sub) !important;
+}
+
+:host ::ng-deep .mat-mdc-slide-toggle .mdc-switch__ripple,
+:host ::ng-deep .mat-mdc-slide-toggle .mdc-switch__shadow {
+  display: none !important;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggle-label-text {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-sub);
+  user-select: none;
+}
+
+.toggle-label-text.is-on {
+  color: var(--border);
+}
+
+/* ── Card spacing ── */
+.config-card + .config-card {
+  margin-top: 24px;
+}
+
 /* ── Responsive ── */
-@media (max-width: 600px) {
+@media (max-width: 767px) {
   .content {
-    padding: 28px 16px 40px;
+    padding: 20px 16px 80px;
   }
 
   .config-card {
