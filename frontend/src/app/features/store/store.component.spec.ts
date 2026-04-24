@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { StoreComponent } from './store.component';
 import { RewardService } from '@core/services/reward.service';
 import { AuthService } from '@core/services/auth.service';
@@ -46,6 +47,7 @@ describe('StoreComponent â€” edit flow', () => {
     await TestBed.configureTestingModule({
       imports: [StoreComponent],
       providers: [
+        provideRouter([]),
         { provide: RewardService, useValue: rewardService },
         { provide: AuthService, useValue: { activeFamily: () => ({ familyId: 10 }) } },
         { provide: PermissionsService, useValue: { isParent: () => true } },
