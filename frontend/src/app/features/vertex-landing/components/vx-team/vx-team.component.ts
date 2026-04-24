@@ -14,10 +14,12 @@ interface Member {
     <section class="vx-section">
       <div class="vx-section-inner">
         <div class="vx-section-head">
-          <span class="vx-eyebrow">EL EQUIPO</span>
-          <h2 class="vx-heading">
-            Las personas detr\u00e1s<br />del <span class="vx-accent">c\u00f3digo</span>
-          </h2>
+          <div class="vx-section-head-title">
+            <span class="vx-eyebrow">EL EQUIPO</span>
+            <h2 class="vx-heading">
+              Las personas detr\u00e1s<br />del <span class="vx-accent">c\u00f3digo</span>
+            </h2>
+          </div>
           <p class="vx-sub">
             Cinco ingenieros con roles especializados, trabajando en conjunto
             para entregar software que funciona.
@@ -31,7 +33,6 @@ interface Member {
               <div class="vx-avatar">{{ m.initials }}</div>
               <h3 class="vx-member-name">{{ m.name }}</h3>
               <span class="vx-member-role">{{ m.role }}</span>
-              <span class="vx-member-sep"></span>
             </article>
           }
         </div>

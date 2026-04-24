@@ -19,14 +19,14 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
             comprometido con cada l\u00ednea de c\u00f3digo.
           </p>
           <div class="vx-hero-ctas">
-            <a href="#equipo" class="vx-btn vx-btn-primary">Conocer el equipo</a>
-            <a href="#nosotros" class="vx-btn vx-btn-ghost">Por qu\u00e9 hacemos</a>
+            <a href="#" class="vx-btn vx-btn-primary" (click)="scroll($event, 'equipo')">Conocer el equipo</a>
+            <a href="#" class="vx-btn vx-btn-ghost" (click)="scroll($event, 'nosotros')">Por qu\u00e9 hacemos</a>
           </div>
         </div>
 
         <div class="vx-hero-visual" aria-hidden="true">
           <div class="vx-orbit">
-            <img src="vertex/logo.png" alt="" class="vx-logo" onerror="this.style.display='none'" />
+             <img class="vx-logo" src="/icons/vertex-logo.png" alt="Logo" />
             <div class="vx-ring"></div>
             <div class="vx-ring vx-ring-2"></div>
             <span class="vx-dot vx-dot-1"></span>
@@ -129,10 +129,10 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       display: flex; align-items: center; justify-content: center;
     }
     .vx-logo {
-      width: 45%; height: 45%;
-      object-fit: contain;
-      filter: drop-shadow(0 0 40px var(--vx-accent-glow));
-      z-index: 2;
+      width: 75%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 40px var(--vx-accent-glow));
+  z-index: 2;
     }
     .vx-ring {
       position: absolute;
@@ -191,4 +191,10 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     }
   `],
 })
-export class VxHeroComponent {}
+export class VxHeroComponent {
+  scroll(e: Event, id: string) {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}

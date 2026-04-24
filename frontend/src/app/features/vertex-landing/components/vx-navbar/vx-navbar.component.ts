@@ -7,20 +7,33 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
   template: `
     <header class="vx-nav">
       <div class="vx-nav-inner">
-        <a class="vx-brand" href="#inicio" (click)="closeMenu()">
-          <img src="vertex/logo.png" alt="Vertex Dev" class="vx-brand-img" onerror="this.style.display='none'" />
+        <a class="vx-brand" href="#" (click)="scroll($event, 'inicio')">
+          <svg class="vx-brand-img" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Vertex Dev">
+            <defs>
+              <linearGradient id="vxL1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#6BA6FF"/>
+                <stop offset="100%" stop-color="#0A2C7A"/>
+              </linearGradient>
+              <linearGradient id="vxL2" x1="1" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2563EB"/>
+                <stop offset="100%" stop-color="#0038CC"/>
+              </linearGradient>
+            </defs>
+            <path d="M6 10 L32 52 L24 26 Z" fill="url(#vxL1)"/>
+            <path d="M32 52 L58 10 L40 26 Z" fill="url(#vxL2)"/>
+            <path d="M24 26 L32 52 L40 26 L32 18 Z" fill="#0048FF"/>
+          </svg>
           <span class="vx-brand-text">VERTEX <span>DEV</span></span>
         </a>
 
         <nav class="vx-links" [class.open]="open()">
-          <a href="#servicios" (click)="closeMenu()">Servicios</a>
-          <a href="#equipo" (click)="closeMenu()">Equipo</a>
-          <a href="#nosotros" (click)="closeMenu()">Nosotros</a>
-          <a href="#roles" (click)="closeMenu()">Roles</a>
-          <a href="#equipo" class="vx-cta-mobile" (click)="closeMenu()">Trabajemos juntos</a>
+          <a href="#" (click)="scroll($event, 'servicios')">Servicios</a>
+          <a href="#" (click)="scroll($event, 'equipo')">Equipo</a>
+          <a href="#" (click)="scroll($event, 'nosotros')">Nosotros</a>
+          <a href="#" class="vx-cta-mobile" (click)="scroll($event, 'equipo')">Trabajemos juntos</a>
         </nav>
 
-        <a href="#equipo" class="vx-cta">Trabajemos juntos</a>
+        <a href="#" class="vx-cta" (click)="scroll($event, 'equipo')">Trabajemos juntos</a>
 
         <button class="vx-burger" (click)="toggle()" aria-label="Men\u00fa" [attr.aria-expanded]="open()">
           <span></span><span></span><span></span>
@@ -125,4 +138,10 @@ export class VxNavbarComponent {
   readonly open = signal(false);
   toggle() { this.open.update(v => !v); }
   closeMenu() { this.open.set(false); }
+  scroll(e: Event, id: string) {
+    e.preventDefault();
+    this.closeMenu();
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }

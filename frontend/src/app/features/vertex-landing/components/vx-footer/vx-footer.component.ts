@@ -7,8 +7,22 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   template: `
     <footer class="vx-footer">
       <div class="vx-footer-inner">
-        <a href="#inicio" class="vx-brand">
-          <img src="vertex/logo.png" alt="Vertex Dev" class="vx-brand-img" onerror="this.style.display='none'" />
+        <a href="#" class="vx-brand" (click)="scrollTop($event)">
+          <svg class="vx-brand-img" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Vertex Dev">
+            <defs>
+              <linearGradient id="vxFL1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#6BA6FF"/>
+                <stop offset="100%" stop-color="#0A2C7A"/>
+              </linearGradient>
+              <linearGradient id="vxFL2" x1="1" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2563EB"/>
+                <stop offset="100%" stop-color="#0038CC"/>
+              </linearGradient>
+            </defs>
+            <path d="M6 10 L32 52 L24 26 Z" fill="url(#vxFL1)"/>
+            <path d="M32 52 L58 10 L40 26 Z" fill="url(#vxFL2)"/>
+            <path d="M24 26 L32 52 L40 26 L32 18 Z" fill="#0048FF"/>
+          </svg>
           <span>VERTEX <span class="vx-accent">DEV</span></span>
         </a>
         <p class="vx-copy">{{ year }} Vertex Dev \u2014 Engineering Team</p>
@@ -50,4 +64,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 })
 export class VxFooterComponent {
   readonly year = new Date().getFullYear();
+  scrollTop(e: Event) {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
