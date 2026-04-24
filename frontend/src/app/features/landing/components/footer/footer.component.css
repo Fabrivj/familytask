@@ -92,3 +92,15 @@
   border-radius: 6px;
   padding: 4px 12px;
 }
+
+.footer-badge-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.footer-badge-link:hover {
+  color: var(--border);
+  border-color: var(--border);
+  background: rgba(0, 239, 255, 0.05);
+}

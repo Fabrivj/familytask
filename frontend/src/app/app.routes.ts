@@ -10,6 +10,13 @@ export const routes: Routes = [
       import('./features/landing/landing.component').then(m => m.LandingComponent),
   },
   {
+    path: 'equipo',
+    loadComponent: () =>
+      import('./features/vertex-landing/vertex-landing.component').then(
+        m => m.VertexLandingComponent
+      ),
+  },
+  {
     path: 'auth/login',
     loadComponent: () =>
       import('./features/auth/login/login.component').then(m => m.LoginComponent),
