@@ -20,6 +20,8 @@ const mockReward: RewardResponse = {
   approvalRule: 'MANUAL',
   familyId: 10,
   createdAt: '2026-01-01T00:00:00',
+  pendingCount: 0,
+  isEnabled: true,
 };
 
 describe('StoreComponent â€” edit flow', () => {
